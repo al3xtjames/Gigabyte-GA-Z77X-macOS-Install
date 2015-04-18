@@ -1,3 +1,9 @@
+# Patch Name:	AMD Radeon R9 280X Aji
+# Patch Date:	Sat Apr 18 8:42:16 UTC 2015
+# Patch Author:	RampageDev (modified by TheRacerMaster)
+# Patch Notes:	Apply after using GA-Z77X-UD5H Main patch.
+
+# Add the GFX0 method
 into device label PEG0 insert begin
 Device (GFX0)\n
 {\n
@@ -26,6 +32,7 @@ Device (GFX0)\n
 }\n
 end;
 
+# Add the HDAU method (HDMI audio)
 into device label PEG0 insert begin
 Device (HDAU)\n
 {\n
