@@ -1,6 +1,7 @@
-# GA-Z77X-UD5H DSDT Patch (4/18/2015)
-# Based off patch by PJALM, special thanks to him
-# Modified with some minor edits by TheRacerMaster
+# Patch Name:	GA-Z77X-UD5H Main
+# Patch Date:	Sat Apr 18 8:30:04 UTC 2015
+# Patch Author:	PJALM (modified by TheRacerMaster)
+# Patch Notes:	After using this patch, apply a graphics patch. Special thanks to PJALM for the original patches.
 
 # Add the DTGP method (used by other patches)
 into method label DTGP remove_entry;
