@@ -177,7 +177,7 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 # Fix the Atheros AR8151 Gigabit Ethernet
-into device Label PXSX parent_label RP07 replace_content begin
+into device label PXSX parent_label RP07 replace_content begin
 Name (_ADR, Zero)\n
 Name (_PRW, Package (0x02) {0x09,0x04})\n
 Method (_DSM, 4, NotSerialized)\n
