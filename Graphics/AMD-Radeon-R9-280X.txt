@@ -1,0 +1,42 @@
+into device label PEG0 insert begin
+Device (GFX0)\n
+{\n
+	Name (_ADR, Zero)\n
+	Name (_SUN, One)\n
+	Method (_DSM, 4, NotSerialized)\n
+	{\n
+		Store (Package (0x1A) {\n
+			"AAPL,slot-name", "Slot-1",\n
+			"name", "Display Controller",\n 
+			"device-id", Buffer (0x04) {0x98, 0x67, 0x00, 0x00},\n 
+			"@0,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n 
+			"@1,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
+			"@2,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
+			"@3,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n 
+			"@0,name", Buffer (0x0F) {"ATY,Aji"},\n
+			"@1,name", Buffer (0x0F) {"ATY,Aji"},\n
+			"@2,name", Buffer (0x0F) {"ATY,Aji"},\n
+			"@3,name", Buffer (0x0F) {"ATY,Aji"},\n
+			"model", Buffer (0x13) {"AMD Radeon R9 280X"},\n
+			"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
+		}, Local0)\n
+	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
+	Return (Local0)\n
+	}\n
+}\n
+end;
+
+into device label PEG0 insert begin
+Device (HDAU)\n
+{\n
+	Name (_ADR, One)\n
+	Method (_DSM, 4, NotSerialized)\n
+	{\n
+		Store (Package (0x02) {\n
+			"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
+		}, Local0)\n
+	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
+	Return (Local0)\n
+	}\n
+}\n
+end;
