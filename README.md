@@ -1,4 +1,6 @@
 # Gigabyte-GA-Z77X-UD5H DSDT Patches
 DSDT Patches for the Gigabyte GA-Z77X-UD5H motherboard on OS X.
 
-Thanks to [PJALM](http://www.pjalm.com/forums/) for the original patches. These patches are based off his work. They have been modified slightly to work better with later BIOS versions (tested with F16g beta BIOS).
+Before applying any of these patches, apply PJALM's all-in-one patch from his [MaciASL repo](http://maciasl.sourceforge.net/pjalm/gigabyte/). The GA-Z77X-UD5H Cosmetic patch is dependent on that.
+
+Special thanks to toleda for the audio edits and PJALM for the Atheros LAN edits.
