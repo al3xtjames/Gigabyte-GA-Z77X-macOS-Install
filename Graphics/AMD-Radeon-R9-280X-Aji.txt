@@ -4,26 +4,24 @@
 # Patch Notes:	Apply after using PJALM GA-Z77X-UD5H patch and GA-Z77X-UD5H Cosmetic patch. For Sapphire Dual-X / Vapor-X, the Aji framebuffer needs to be patched:
 sudo perl -pi -e 's|\x00\x04\x00\x00\x04\x03\x00\x00\x00\x01\x01\x01\x12\x04\x04\x01\x00\x04\x00\x00\x04\x03\x00\x00\x00\x01\x02\x01\x22\x05\x05\x02\x04\x00\x00\x00\x14\x02\x00\x00\x00\x01\x03\x00\x00\x00\x06\x06\x00\x08\x00\x00\x04\x02\x00\x00\x00\x01\x04\x00\x11\x02\x01\x03|\x04\x00\x00\x00\x14\x02\x00\x00\x00\x01\x00\x00\x11\x02\x05\x05\x00\x08\x00\x00\x04\x02\x00\x00\x00\x01\x00\x00\x22\x05\x02\x03\x00\x04\x00\x00\x04\x03\x00\x00\x00\x01\x00\x00\x12\x04\x01\x01\x00\x02\x00\x00\x04\x02\x00\x00\x00\x01\x00\x00\x10\x00\x03\x06|g' /System/Library/Extensions/AMD7000Controller.kext/Contents/MacOS/AMD7000Controller
 
-# Add the GFX0 method
+# Add the GFX0 method (edits thanks to RampageDev)
 into device label PEG0 insert begin
 Device (GFX0)\n
 {\n
 	Name (_ADR, Zero)\n
-	Name (_SUN, One)\n
 	Method (_DSM, 4, NotSerialized)\n
 	{\n
-		Store (Package (0x1A) {\n
-			"AAPL,slot-name", "Slot-1",\n
-			"name", "Display Controller",\n 
-			"device-id", Buffer (0x04) {0x98, 0x67, 0x00, 0x00},\n 
-			"@0,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n 
+		Store (Package (0x18) {\n
+			"AAPL,slot-name", Buffer (0x07) {"Slot-1"},\n
+			"device-id", Buffer (0x04) {0x98, 0x67, 0x00, 0x00},\n
+			"@0,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
 			"@1,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
 			"@2,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
-			"@3,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n 
-			"@0,name", Buffer (0x0F) {"ATY,Aji"},\n
-			"@1,name", Buffer (0x0F) {"ATY,Aji"},\n
-			"@2,name", Buffer (0x0F) {"ATY,Aji"},\n
-			"@3,name", Buffer (0x0F) {"ATY,Aji"},\n
+			"@3,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
+			"@0,name", Buffer (0x0D) {"ATY,Aji"},\n
+			"@1,name", Buffer (0x0D) {"ATY,Aji"},\n
+			"@2,name", Buffer (0x0D) {"ATY,Aji"},\n
+			"@3,name", Buffer (0x0D) {"ATY,Aji"},\n
 			"model", Buffer (0x13) {"AMD Radeon R9 280X"},\n
 			"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
 		}, Local0)\n
@@ -33,7 +31,7 @@ Device (GFX0)\n
 }\n
 end;
 
-# Add the HDAU method (HDMI audio)
+# Add the HDAU method (HDMI audio) (edits thanks to RampageDev)
 into device label PEG0 insert begin
 Device (HDAU)\n
 {\n
