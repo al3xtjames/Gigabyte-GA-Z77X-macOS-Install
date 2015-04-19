@@ -4,10 +4,26 @@
 # Patch Notes:	Apply PJALM's GA-Z77X-UD5H patch from his repo before applying this patch. After applying this patch, apply a graphics patch.
 
 # Add alternate layout for ALC898 (edits thanks to toleda)
-into method label _DSM parent_label HDEF insert begin
-If (LEqual (Arg2, Zero)) {\n
-	Return (Buffer (One) {0x03})\n
-}\n
+into method label _DSM parent_label HDEF remove_entry;
+into device label HDEF insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) {\n
+		Return (Buffer (One) {0x03})\n
+	}\n
+	Store (Package (0x10) {\n
+		"AAPL,slot-name", "Built In",\n
+		"name", "Realtek Audio Controller",\n
+		"model", Buffer () {"Realtek ALC898 Audio Controller"},\n
+		"device_type", Buffer (0x10) {"Audio Controller"},\n
+		"layout-id", Buffer (0x04) {0x01,0x00,0x00,0x00},\n
+		"PinConfigurations", Buffer (Zero) {},\n
+		"MaximumBootBeepVolume", Buffer(One) {0x40},\n
+		"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
+	}, Local0)\n
+	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
+	Return (Local0)\n
+}
 end;
 
 # Add AR8151 Ethernet so it shows up in System Profiler under PCI (edits thanks to PJALM)
