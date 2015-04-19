@@ -1,0 +1,30 @@
+# Patch Name:	GA-Z77X-UD5H Cosmetic
+# Patch Date:	Sun Apr 19 4:16:32 UTC 2015
+# Patch Author:	TheRacerMaster
+# Patch Notes:	Apply PJALM's GA-Z77X-UD5H patch from his repo before applying this patch. After applying this patch, apply a graphics patch.
+
+# Add alternate layout for ALC898 (edits thanks to toleda)
+into method label _DSM parent_label HDEF insert begin
+If (LEqual (Arg2, Zero)) {\n
+	Return (Buffer (One) {0x03})\n
+}\n
+end;
+
+# Add AR8151 Ethernet so it shows up in System Profiler under PCI (edits thanks to PJALM)
+into device label PXSX parent_label RP07 replace_content begin
+Name (_ADR, Zero)\n
+Name (_PRW, Package (0x02) {0x09,0x04})\n
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	Store (Package (0x0C) {\n
+		"AAPL,slot-name", "Built In",\n
+		"name", "Qualcomm Atheros Ethernet Controller",\n
+		"model", "Qualcomm Atheros AR8151 Gigabit Network Controller",\n
+		"device_type", "Ethernet Controller",\n
+		"built-in", Buffer (One) {0x01},\n
+		"location", Buffer (0x02) {"1"}\n
+	}, Local0)\n
+	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
+	Return (Local0)\n
+}
+end;
