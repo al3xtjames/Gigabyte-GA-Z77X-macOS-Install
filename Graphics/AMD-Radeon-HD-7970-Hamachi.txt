@@ -1,8 +1,20 @@
-# Patch Name:	AMD Radeon R9 280X Aji
+# Patch Name:	AMD Radeon HD 7970 Hamachi
 # Patch Date:	Sat Apr 18 8:42:16 UTC 2015
 # Patch Author:	RampageDev (modified by TheRacerMaster)
-# Patch Notes:	Apply after using PJALM GA-Z77X-UD5H patch and GA-Z77X-UD5H Cosmetic patch. For Sapphire Dual-X / Vapor-X, the Aji framebuffer needs to be patched:
+# Patch Notes:	Apply after using PJALM GA-Z77X-UD5H patch and GA-Z77X-UD5H Cosmetic patch. Specifically for the Sapphire Radeon HD 7970 Dual-X OC with Boost. The Hamachi framebuffer needs to be patched in the kext:
 sudo perl -pi -e 's|\x00\x04\x00\x00\x04\x03\x00\x00\x00\x01\x01\x01\x12\x04\x04\x01\x00\x04\x00\x00\x04\x03\x00\x00\x00\x01\x02\x01\x22\x05\x05\x02\x04\x00\x00\x00\x14\x02\x00\x00\x00\x01\x03\x00\x00\x00\x06\x06\x00\x08\x00\x00\x04\x02\x00\x00\x00\x01\x04\x00\x11\x02\x01\x03|\x04\x00\x00\x00\x14\x02\x00\x00\x00\x01\x00\x00\x11\x02\x05\x05\x00\x08\x00\x00\x04\x02\x00\x00\x00\x01\x00\x00\x22\x05\x02\x03\x00\x04\x00\x00\x04\x03\x00\x00\x00\x01\x00\x00\x12\x04\x01\x01\x00\x02\x00\x00\x04\x02\x00\x00\x00\x01\x00\x00\x10\x00\x03\x06|g' /System/Library/Extensions/AMD7000Controller.kext/Contents/MacOS/AMD7000Controller
+# Or in Clover config.plist (KextsToPatch):
+# <dict>
+#	<key>Comment</key>
+#	<string>10.9-10.10-AMD7000Controller/Hamachi Framebuffer Patch</string>
+#	<key>Find</key>
+#	<data>AAQAAAQDAAAAAQEBEgQFAQAEAAAEAwAAAAECASIFBAIEAAAAFAIAAAABAwAAAAMGAAgAAAQCAAAAAQQAEQIBBA==</data>
+#	<key>Name</key>
+#	<string>AMD7000Controller</string>
+#	<key>Replace</key>
+#	<data>AAQAAAQDAAAAAQAAEgQBAQAIAAAEAgAAAAEAACIFAgQAAgAABAIAAAABAAARAgMDBAAAABQCAAAAAQAAEAAEBg==</data>
+# </dict>
+# SPECIAL NOTE: For whatever reason, to get all outputs working, you must boot with a monitor plugged into the DVI-D slot.
 
 # Add the GFX0 method (edits thanks to RampageDev)
 into device label PEG0 insert begin
@@ -11,19 +23,21 @@ Device (GFX0)\n
 	Name (_ADR, Zero)\n
 	Method (_DSM, 4, NotSerialized)\n
 	{\n
-		Store (Package (0x18) {\n
+		Store (Package (0x1C) {\n
 			"AAPL,slot-name", Buffer (0x07) {"Slot-1"},\n
-			"device-id", Buffer (0x04) {0x98, 0x67, 0x00, 0x00},\n
 			"@0,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
 			"@1,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
 			"@2,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
 			"@3,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
-			"@0,name", Buffer (0x0D) {"ATY,Aji"},\n
-			"@1,name", Buffer (0x0D) {"ATY,Aji"},\n
-			"@2,name", Buffer (0x0D) {"ATY,Aji"},\n
-			"@3,name", Buffer (0x0D) {"ATY,Aji"},\n
-			"model", Buffer (0x13) {"AMD Radeon R9 280X"},\n
-			"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
+			"@0,name", Buffer (0x0C) {"ATY,Hamachi"},\n
+			"@1,name", Buffer (0x0C) {"ATY,Hamachi"},\n
+			"@2,name", Buffer (0x0C) {"ATY,Hamachi"},\n
+			"@3,name", Buffer (0x0C) {"ATY,Hamachi"},\n
+			"ATY,Rom#", Buffer (0x11) {"113-2104XTHY-OB6"},\n
+			"device-id", Buffer (0x04) {0x98, 0x67, 0x00, 0x00},\n
+			"device_type", Buffer (0x13) {"Display Controller"},\n
+			"model", Buffer (0x13) {"AMD Radeon HD 7970"},\n
+			"hda-gfx", Buffer (0x0A) {"onboard-2"}\n
 		}, Local0)\n
 	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
 	Return (Local0)\n
@@ -38,8 +52,11 @@ Device (HDAU)\n
 	Name (_ADR, One)\n
 	Method (_DSM, 4, NotSerialized)\n
 	{\n
-		Store (Package (0x02) {\n
-			"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
+		Store (Package (0x08) {\n
+			"AAPL,slot-name", Buffer (0x07) {"Slot-1"},\n
+			"device_type", Buffer (0x11) {"Audio Controller"},\n
+			"model", Buffer (0x13) {"AMD Radeon HD 7970"},\n
+			"hda-gfx", Buffer (0x0A) {"onboard-2"}\n
 		}, Local0)\n
 	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
 	Return (Local0)\n
