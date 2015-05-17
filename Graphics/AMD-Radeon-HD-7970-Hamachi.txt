@@ -1,0 +1,49 @@
+# AMD Radeon HD 7970 (Hamachi) Patch
+# Designed for use with Sapphire Radeon HD 7970 Dual-X OC with Boost (requires patched framebuffer - see README); could possibly be used with other variants if modified
+# Apply the GA-Z77X-UD5H Patch v2 before using this and look at the README.
+#
+# Special thanks to RampageDev & toleda for their original edits; this would not have been possible if not for their work.
+
+# Add the GFX0 method
+into device label PEG0 insert begin
+Device (GFX0)\n
+{\n
+	Name (_ADR, Zero)\n
+	Method (_DSM, 4, NotSerialized)\n
+	{\n
+		Store (Package (0x1C) {\n
+			"AAPL,slot-name", Buffer (0x07) {"Slot-1"},\n
+			"@0,connector-type", Buffer (0x04) {0x00, 0x04, 0x00, 0x00},\n # DisplayPort
+			"@1,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n # HDMI-A
+			"@2,connector-type", Buffer (0x04) {0x00, 0x02, 0x00, 0x00},\n # Single-Link DVI
+			"@3,connector-type", Buffer (0x04) {0x04, 0x00, 0x00, 0x00},\n # Dual-Link DVI
+			"@0,name", Buffer (0x0C) {"ATY,Hamachi"},\n
+			"@1,name", Buffer (0x0C) {"ATY,Hamachi"},\n
+			"@2,name", Buffer (0x0C) {"ATY,Hamachi"},\n
+			"@3,name", Buffer (0x0C) {"ATY,Hamachi"},\n
+			"ATY,Rom#", Buffer (0x11) {"113-2104XTHY-OB6"},\n
+			"device-id", Buffer (0x04) {0x98, 0x67, 0x00, 0x00},\n
+			"device_type", Buffer (0x13) {"Display Controller"},\n
+			"model", Buffer (0x13) {"AMD Radeon HD 7970"},\n
+			"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
+		}, Local0)\n
+	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
+	Return (Local0)\n
+	}\n
+}\n
+end;
+
+into device label PEG0 insert begin
+Device (HDAU)\n
+{\n
+	Name (_ADR, One)\n
+	Method (_DSM, 4, NotSerialized)\n
+	{\n
+		Store (Package (0x02) {\n
+			"hda-gfx", Buffer (0x0A) {"onboard-1”}\n
+		}, Local0)\n
+	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
+	Return (Local0)\n
+	}\n
+}\n
+end;

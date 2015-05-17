@@ -1,20 +1,18 @@
-# AMD 7000 Series Patches
+# Graphics Patches
 
-DSDT patches for AMD Radeon HD 7000 series GPUs on OS X.
+DSDT patches for various graphics cards on OS X.
 
-## Customizing These Patches For Your Card
-The 7970 patch in this repo is specifically for the Sapphire Radeon HD 7970 Dual-X OC with Boost using the Hamachi framebuffer. If you want to make some minor cosmetic adjustments, you can change the ROM number (this can usually be found in the VBIOS of your card).
+## Intel Integrated Graphics
+[WIP]
 
-## Editing Framebuffer Personalities
-The Sapphire Radeon HD 7970 Dual-X OC with Boost has 2x DVI, 1x HDMI, and 1x DP. None of the stock 7000 personalities work with this card, so we need to patch the framebuffer (in this case, `Hamachi`). This guide will be based off the process for this card, it may differ slightly for other cards.
+## AMD Discrete Graphics
+### Customizing These Patches For Your Card
+The 7970 patch in this repo is specifically for the Sapphire Radeon HD 7970 Dual-X OC with Boost using the Hamachi framebuffer. If you want to make some minor cosmetic adjustments, you can change the ROM number (this can usually be found in the VBIOS of your card). You will have to change the connector types as well (this info can be found in a VBIOS dump using either `redsock_bios_decoder` and/or `radeon_bios_decode`). You may also have to change the framebuffer (some cards may need a patched framebuffer - see [RampageDev's guide](http://www.rampagedev.com/?page_id=82&page=10) for more info. [NOTE: Use `radeon_bios_decode` to find OS X sense IDs.])
 
-Using [`radeon_bios_decode`](http://www.insanelymac.com/forum/files/file/190-redsock-bios-decoder-and-radeon-bios-decode/) and [`redsock_bios_decoder`](http://www.insanelymac.com/forum/files/file/190-redsock-bios-decoder-and-radeon-bios-decode/) with the VBIOS of the card (can be extracted using GPU-Z)
-[rest of guide in progress]
+### Editing AMD Framebuffer Personalities
+The Sapphire Radeon HD 7970 Dual-X OC with Boost has 2x DVI, 1x HDMI, and 1x DP. None of the stock 7000 personalities work with this card, so we need to patch the framebuffer (in this case, `Hamachi`).
 
-#### 
-
-#### Applying the patched framebuffer to the kext
-After modifying the framebuffer, we must patch the AMD7000Controller kext and replace the Hamachi framebuffer with our modified one. This can be done in multiple ways.
+We must patch the AMD7000Controller kext and replace the Hamachi framebuffer with our modified one. This can be done in multiple ways.
 
 - Clover auto-patching (recommended, applied at every boot)
 
