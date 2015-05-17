@@ -6,10 +6,9 @@ DSDT patches for various graphics cards on OS X.
 If you want to use both Intel HD Graphics 4000 and a discrete card, you must set IGFX as Display Init (default GPU) in the BIOS, and connect your primary monitor to the IGPU. Apply the Intel HD Graphics 4000 patch first, then the patch for your discrete card (make sure you edit all instances of `onboard-1` to `onboard-2` in the discrete card's patch).
 
 ## Intel Integrated Graphics
-[WIP]
+Apply the patches from the repo if you are using either HD 3000 (Sandy Bridge) or HD 4000 (Ivy Bridge) integrated Intel HD Graphics. Both of these patches will change your audio layout ID to 3 to enable Intel HDMI audio. The HD 3000 patch will also add the MEI device, which is required when using a 7-series board (GA-Z77X-UD5H) with a 6-series CPU (Sandy Bridge) in order to get the HD 3000 kexts to load.
 
 ## AMD Discrete Graphics
-
 ### Customizing These Patches For Your Card
 The 7970 patch in this repo is specifically for the Sapphire Radeon HD 7970 Dual-X OC with Boost using the Hamachi framebuffer. If you want to make some minor cosmetic adjustments, you can change the ROM number (this can usually be found in the VBIOS of your card). You will have to change the connector types as well (this info can be found in a VBIOS dump using either `redsock_bios_decoder` and/or `radeon_bios_decode`). You may also have to change the framebuffer (some cards may need a patched framebuffer - see [RampageDev's guide](http://www.rampagedev.com/?page_id=82&page=10) for more info. [NOTE: Use `radeon_bios_decode` to find OS X sense IDs.])
 
