@@ -20,7 +20,7 @@ To get everything on this board working in OS X, several kexts/drivers/etc. are 
 
 ### Clover Bootloader Configuration
 #### config.plist
-Since the [Clover wiki](http://clover-wiki.zetam.org/Home) is a thing, I won't post everything from config.plist, just what's mandatory.
+Since the [Clover wiki](http://clover-wiki.zetam.org/Home) exists, I will only post what's mandatory in Clover's config.plist, not everything.
 
 ##### ACPI:
 ```plist
