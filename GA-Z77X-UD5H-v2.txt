@@ -4,7 +4,7 @@
 # Designed for use with F16g beta BIOS; please update to that version before applying this.
 # Run a graphics patch after using this (either HD 4000 or discrete) and look at the Graphics README.
 #
-# Special thanks to PJALM, toleda, & RampageDev for their original edits; this would not have been possible if not for their work.
+# Special thanks to PJALM, toleda, RampageDev, SJ_Underwater & Mieze for their original edits; this would not have been possible if not for their work.
 
 # Add the DTGP method (used by other patches)
 # Credit: PJALM
@@ -167,7 +167,6 @@ end;
 
 # Fix HDEF device for the Realtek ALC898 audio codec
 # Credit: toleda, modified by TheRacerMaster
-# Uses layout ID 3 for Intel HD Graphics HDMI audio; if you don't need this, and want more analog outputs, use layout ID 1
 # Use cloverALC by toleda - https://github.com/toleda/audio_CloverALC
 # Added MaximumBootBeepVolume keys to remove sound assertions in OS X 10.8.5+
 
@@ -180,7 +179,7 @@ Method (_DSM, 4, NotSerialized)\n
 		"MaximumBootBeepVolumeAlt", Buffer(One) {0x00},\n
 		"subsystem-id", Buffer () {0x79, 0xCB, 0x00, 0x00},\n
 		"subsystem-vendor-id", Buffer () {0x86, 0x80, 0x00, 0x00},\n
-		"layout-id", Buffer (0x04) {0x03,0x00,0x00,0x00},\n
+		"layout-id", Buffer (0x04) {0x01, 0x00, 0x00, 0x00},\n
 		"PinConfigurations", Buffer (Zero) {},\n
 		"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
 	}, Local0)\n

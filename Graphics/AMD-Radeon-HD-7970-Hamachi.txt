@@ -2,12 +2,12 @@
 # Graphics/AMD-Radeon-HD-7970-Hamachi.txt
 #
 # Designed for use with Sapphire Radeon HD 7970 Dual-X OC with Boost (requires patched framebuffer - see README); could possibly be used with other variants if modified
-# Apply the GA-Z77X-UD5H Patch v2 before using this and look at the README.
+# Apply the GA-Z77X-UD5H Patch v2 before using this and look at the Graphics README.
 # If you are using Intel HD Graphics 4000 as primary GFX, apply that patch first, set the IGPU as default GFX in BIOS, and change all instances of "onboard-1" to "onboard-2" in this patch
 #
 # Special thanks to RampageDev & toleda for their original edits; this would not have been possible if not for their work.
 
-# Add the GFX0 method for the 7970
+# Add the GFX0 method to inject the framebuffer the 7970
 # Credit: RampageDev, some modifications by TheRacerMaster
 # Uses the Hamachi framebuffer
 into device label PEG0 insert begin
@@ -38,7 +38,7 @@ Device (GFX0)\n
 }\n
 end;
 
-# Add the HDAU (HDMI audio method for the 7970
+# Add the HDAU method to inject HDMI audio for the 7970
 # Credit: RampageDev
 into device label PEG0 insert begin
 Device (HDAU)\n
