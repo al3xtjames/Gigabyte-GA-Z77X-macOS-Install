@@ -91,13 +91,25 @@ cloverALC will add two entries here for AppleHDA patching. You shouldn't have to
 ```
 This is a useful patch that enables TRIM on non-Apple SSDs. Since it's a Clover kext patch, it's applied automatically at every boot, so no need to manually patch the kext.
 
-If you need a [modified AMD framebuffer personality, you can insert the patch here](https://github.com/theracermaster/Gigabyte-GA-Z77X-UD5H-DSDT-Patch/tree/master/Graphics#editing-amd-framebuffer-personalities).
+If you need a [modified AMD framebuffer personality](https://github.com/theracermaster/Gigabyte-GA-Z77X-UD5H-DSDT-Patch/tree/master/Graphics#editing-amd-framebuffer-personalities), you can insert the patch here as well.
 ##### RtVariables
 ```plist
 <key>MLB</key>
 <string>XXXXXXXXXXXXX</string>
 ```
-Generate a MLB value using the MLBGenv317 script
+You can generate a MLB using my [simpleMLB script](https://gist.github.com/theracermaster/b6a9db46b14061d4c995). Please read the comments in the script before using it.
+```plist
 <key>ROM</key>
 <string>UseMacAddr0</string>
-[TODO REST]
+```
+The ROM value should be set to the MAC address of your first NIC (don't generate one).
+##### SMBIOS
+Use Clover Configurator to generate a valid SMBIOS for Clover. I recommend using either iMac13,2 or Macmini6,2. Make sure the serial number is generated properly (should not be a real serial, you can check [here](https://selfsolve.apple.com/agreementWarrantyDynamic.do) if it's valid or not). You also need a SmUUID value, which you can generate using `uuidgen`.
+##### SystemParameters
+```plist
+<key>InjectKexts</key>
+<true/>
+<key>InjectSystemID</key>
+<true/>
+```
+These two values should always be set to true.
