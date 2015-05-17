@@ -10,7 +10,7 @@ DSDT patches for various graphics cards on OS X.
 The 7970 patch in this repo is specifically for the Sapphire Radeon HD 7970 Dual-X OC with Boost using the Hamachi framebuffer. If you want to make some minor cosmetic adjustments, you can change the ROM number (this can usually be found in the VBIOS of your card). You will have to change the connector types as well (this info can be found in a VBIOS dump using either `redsock_bios_decoder` and/or `radeon_bios_decode`). You may also have to change the framebuffer (some cards may need a patched framebuffer - see [RampageDev's guide](http://www.rampagedev.com/?page_id=82&page=10) for more info. [NOTE: Use `radeon_bios_decode` to find OS X sense IDs.])
 
 ### Editing AMD Framebuffer Personalities
-The Sapphire Radeon HD 7970 Dual-X OC with Boost has 2x DVI, 1x HDMI, and 1x DP. None of the stock 7000 personalities work with this card, so we need to patch the framebuffer (in this case, `Hamachi`).
+The Sapphire Radeon HD 7970 Dual-X OC with Boost has 2x DVI, 1x HDMI, and 1x DP. None of the stock 7000 personalities work with this card, so we need to patch the framebuffer (in this case, Hamachi).
 
 We must patch the AMD7000Controller kext and replace the Hamachi framebuffer with our modified one. This can be done in multiple ways.
 
@@ -40,7 +40,5 @@ We must patch the AMD7000Controller kext and replace the Hamachi framebuffer wit
   Rebuild kext caches:
   
   `sudo touch /System/Library/Extensions`
-  
-  `sudo kextcache -system-caches`
-  
-  `sudo kextcache -system-prelinked-kernel`
+
+  And then reboot.
