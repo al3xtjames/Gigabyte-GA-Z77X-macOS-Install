@@ -9,7 +9,7 @@ These patches can be applied to a cleanly-extracted native DSDT from the Gigabyt
 Special thanks to PJALM, toleda, and RampageDev for their original edits; this would not have been possible if not for their work.
 
 ## Post-Installation
-To get everything on this board working in OS X, several post-installation kexts/driver/etc. are required:
+To get everything on this board working in OS X, several post-installation steps/kexts/drivers/etc. are required:
 
 - [FakeSMC+HWSensors (RehabMan fork)](https://bitbucket.org/RehabMan/os-x-fakesmc-kozlek) - OS X driver for emulating SMC device and monitoring various hardware sensors
 - [cloverALC](https://github.com/toleda/audio_CloverALC) - OS X driver for onboard Realtek ALC898 Audio Controller
