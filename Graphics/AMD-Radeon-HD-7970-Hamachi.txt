@@ -1,4 +1,4 @@
-# AMD Radeon HD 7970 (Hamachi) Patch
+# AMD Radeon HD 7970 (Hamachi) DSDT Patch
 # Graphics/AMD-Radeon-HD-7970-Hamachi.txt
 #
 # Designed for use with Sapphire Radeon HD 7970 Dual-X OC with Boost (requires patched framebuffer - see README); could possibly be used with other variants if modified
