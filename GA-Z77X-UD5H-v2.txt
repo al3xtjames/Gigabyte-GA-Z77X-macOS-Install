@@ -6,7 +6,8 @@
 #
 # Special thanks to PJALM, toleda, & RampageDev for their original edits; this would not have been possible if not for their work.
 
-# Add the DTGP method
+# Add the DTGP method (used by other patches)
+# Credit: PJALM
 into method label DTGP remove_entry;
 into definitionblock code_regex . insert begin
 Method (DTGP, 5, NotSerialized)\n
@@ -42,7 +43,8 @@ into method label _INI code_regex \{(\s+)(If\s\(_OSI\s\("Windows\s2001"\)\)) rep
 						$2
 end;
 
-# Intel 7 Series Fixes
+# Intel 7 Series Fixes (Fix various errors in the stock DSDT)
+# Credit: PJALM
 into_all all code_regex _T_([0-6]) replaceall_matched begin T_%1 end;
 into device label EC0 set_label begin EC end;
 into_all all code_regex EC0 replaceall_matched begin EC end;
@@ -76,6 +78,7 @@ into definitionblock code_regex . insert begin Method (UXDV, 1, Serialized)\n{\n
 into method label UXDV code_regex .* replace_matched begin %8 end;
 
 # Fix TPM
+# Credit: PJALM
 into method label _HID parent_label _SB.PCI0.LPCB.TPM code_regex (Return\s\(Zero\)\s*) removeall_matched;
 into method label _HID parent_label _SB.PCI0.LPCB.TPM insert begin Return (Zero) end;
 
@@ -92,14 +95,17 @@ into device Label _SB.PCI0.ITPM insert begin Method (_DSM, 4, Serialized)\n{\n} 
 into method label _DSM parent_label _SB.PCI0.ITPM code_regex .* replace_matched begin %8 end;
 
 # Remove the IDE devices from RP05
+# Credit: PJALM
 into device label MVL1 parent_label RP05 remove_entry;
 into device label MVL2 parent_label RP05 remove_entry;
 
 # Remove the IDE devices from PEG2
+# Credit: TheRacerMaster
 into device label MVL3 parent_label PEG2 remove_entry;
 into device label MVL4 parent_label PEG2 remove_entry;
 
-# Add the missing MCHC device
+# Add the missing MCHC device (needed to load AppleSMCPDRC.kext)
+# Credit: PJALM, modified by TheRacerMaster
 into device label MCHC parent_label PCI0 remove_entry;
 into device label PCI0 insert begin
 Device (MCHC)\n
@@ -121,7 +127,8 @@ Device (MCHC)\n
 }\n
 end;
 
-# Fix the LPC Device
+# Fix the LPC Device (needed to load AppleLPC.kext)
+# Credit: PJALM
 into method label _DSM parent_label LPCB remove_entry;
 into device label LPCB insert begin
 Method (_DSM, 4, NotSerialized)\n
@@ -135,6 +142,7 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 # Fix the SMBUS to allow for loading of the AppleSMBusController.kext
+# Credit: PJALM
 into device label BUS0 parent_label SBUS remove_entry;
 into device label SBUS insert begin
 Device (BUS0)\n
@@ -158,6 +166,11 @@ Device (BUS0)\n
 end;
 
 # Fix HDEF device for the Realtek ALC898 audio codec
+# Credit: toleda, modified by TheRacerMaster
+# Uses layout ID 3 for Intel HD Graphics HDMI audio; if you don't need this, and want more analog outputs, use layout ID 1
+# Use cloverALC by toleda - https://github.com/toleda/audio_CloverALC
+# Added MaximumBootBeepVolume keys to remove sound assertions in OS X 10.8.5+
+
 into method label _DSM parent_label HDEF remove_entry;
 into device label HDEF insert begin
 Method (_DSM, 4, NotSerialized)\n
@@ -176,7 +189,9 @@ Method (_DSM, 4, NotSerialized)\n
 }
 end;
 
-# Fixes 'Built-in' status for Intel Gigabit Ethernet
+# Fixes 'Built-in' status for Intel 82579V Gigabit Ethernet Controller
+# Use IntelMausiEthernet.kext by Mieze - http://www.insanelymac.com/forum/topic/304235-intelmausiethernetkext-for-intel-onboard-lan/
+# Credit: PJALM
 into device label GLAN set_label begin LAN0 end;
 into_all all code_regex GLAN replaceall_matched begin LAN0 end;
 into method label _DSM parent_label LAN0 remove_entry;
@@ -193,7 +208,9 @@ Method (_DSM, 4, NotSerialized)\n
 }
 end;
 
-# Fixes 'Built-in' status for Atheros Gigabit Ethernet
+# Fixes 'Built-in' status for Qualcomm Atheros AR8161 Gigabit Ethernet Controller
+# Use AtherosE2200Ethernet.kext by Mieze - http://www.insanelymac.com/forum/topic/300056-solution-for-qualcomm-atheros-ar816x-ar817x-and-killer-e220x/
+# Credit: PJALM
 into device label PXSX parent_label RP07 set_label begin LAN1 end;
 into method label HPME parent_label RP07 code_regex PXSX replaceall_matched begin LAN1 end;
 into method label _DSM parent_label LAN1 remove_entry;
@@ -211,6 +228,7 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 # Change ID of SATA device for Intel 7 Series Chipset
+# Credit: PJALM
 into device label SAT0 set_label begin SATA end;
 into_all all code_regex SAT0 replaceall_matched begin SATA end;
 into device label SAT1 remove_entry;
@@ -228,7 +246,10 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 
-# Fix the Marvell AHCI
+# Fix the Marvell 88SE9172 AHCI Controller
+# Credit: PJALM & RampageDev, some modifications by TheRacerMaster
+# Enables hotswap support, so drives will still appear as external (this is what it should be)
+# Use MarvellAHCIPortInjector.kext to make the controller show up in System Info > SAS/SATA Express instead of Generic AHCI - https://github.com/theracermaster/MarvellAHCIPortInjector
 into device label PXSX parent_label RP02 set_label begin SATA end;
 into method label HPME parent_label RP02 code_regex PXSX replaceall_matched begin SATA end;
 into device label SATA parent_label RP02 replace_content begin
@@ -284,6 +305,7 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 # Patches the Intel USB3 on Intel 7 Series chipsets to allow more power output
+# Credit: PJALM, some modifcations by TheRacerMaster
 #Fix EHC1
 into method label _DSM parent_label EHC1 remove_entry;
 into device label EHC1 insert begin
@@ -431,7 +453,8 @@ Method (_DSM, 4, NotSerialized)\n
 }\n
 end;
 
-# Rename USB[X] to UHC[1]
+# Rename USB[X] to UHC[x]; e.g. USB1 to UHC1
+# Credit: TheRacerMaster
 into_all all label USB1 set_label begin UHC1 end;
 into_all all label USB2 set_label begin UHC2 end;
 into_all all label USB3 set_label begin UHC3 end;
@@ -442,7 +465,7 @@ into_all all label USB7 set_label begin UHC7 end;
 into_all all code_regex USB([1-7]) replaceall_matched begin UHC%1 end;
 
 
-# Intel z77 USB2/USB3 Multiplexing Fix
+# Intel Z77 USB2/USB3 Multiplexing Fix
 # USB3 patches in thanks to SJ_Underwater and Mieze
 
 # Add method OSDW to the main block, it's used by the USB3 patches
