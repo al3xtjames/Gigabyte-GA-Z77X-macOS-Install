@@ -1,4 +1,6 @@
 # GA-Z77X-UD5H DSDT Patch v2
+# GA-Z77X-UD5H-v2.txt
+#
 # Designed for use with F16g beta BIOS; please update to that before applying this.
 # Run a graphics patch after using this (either HD 4000 or discrete) and look at the Graphics README.
 #
