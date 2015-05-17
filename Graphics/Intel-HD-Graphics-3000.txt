@@ -1,0 +1,59 @@
+# Intel HD Graphics 3000 DSDT Patch
+# Graphics/Intel-HD-Graphics-3000.txt
+#
+# Apply the GA-Z77X-UD5H Patch v2 before using this and look at the Graphics README.
+# If you are using Intel HD Graphics 3000 as primary GFX with a secondary discrete GPU, apply this patch first, set the IGPU as default GFX in BIOS, and apply the discrete GPU patch afterwards.
+#
+# Special thanks to PJALM & RampageDev for their original edits; this would not have been possible if not for their work.
+
+# Rename all instances of GFX0 to IGPU
+# Credit: PJALM
+into device label GFX0 parent_label _SB.PCI0 set_label begin IGPU end;
+into scope label _SB.PCI0.GFX0 set_label begin _SB.PCI0.IGPU end;
+into method label GNOT parent_label IGPU code_regex (Notify\s\()GFX0(,\s[0-9A-Za-z]{4}\)) replaceall_matched begin %1IGPU%2 end;
+into method label _L06 parent_label _GPE code_regex (\\_SB.PCI0.)GFX0(.GS[A-Z]{2}) replaceall_matched begin %1IGPU%2 end;
+into method label OL1E parent_label _GPE code_regex (\\_SB.PCI0.)GFX0(\.([A-Z])LID) replaceall_matched begin %1IGPU%2 end;
+into method label _STA parent_label H_EC code_regex (Store\s\(0x[0-9A-F]{2},\s\^\^\^)GFX0(.CLID\)) replace_matched begin %1IGPU%2 end;
+into method label _WAK code_regex (\\_SB.PCI0.)GFX0(\.([A-Z])LID) replaceall_matched begin %1IGPU%2 end;
+into method label BRTN code_regex (\\_SB.PCI0.)GFX0(\.DD0\d) replaceall_matched begin %1IGPU%2 end;
+
+# Edit the IGPU method to inject snb-platform-id for the HD 3000
+# Credit: PJALM & RampageDev
+into method label _DSM parent_label IGPU remove_entry;
+into device label IGPU insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	Store (Package (0x0A) {\n
+		"AAPL,ig-platform-id", Buffer (0x04) {0x10,0x00,0x03,0x00},\n
+		"built-in", Buffer (One) {0x00},\n
+		"device-id", Buffer (0x04) {0x26,0x01,0x00,0x00},\n
+		"model", Buffer (0x16) {"Intel HD Graphics 3000"},\n
+		"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
+	}, Local0)\n
+	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
+	Return (Local0)\n
+}
+end;
+
+# Add the MEI device (for Sandy Bridge CPUs [6-series] with a 7-series motherboard/chipset)
+# Credit: PJALM
+into device label MEI parent_label PCI0 remove_entry;
+into device label PCI0 insert begin
+Device (MEI)\n
+{\n
+	Name (_ADR, 0x00160000)\n
+	Method (_DSM, 4, NotSerialized)\n
+	{\n
+		Store (Package (0x02) {\n
+			"layout-id", Buffer(0x04) {0x3a,0x1c,0x00,0x00},\n
+		}, Local0)\n
+		DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
+		Return (Local0)\n
+	}\n
+}
+end;
+
+# Change the HDEF layout ID for Intel HD Graphics 3000 HDMI audio
+# Credit: PJALM
+# Layout ID 1 (default in the GA-Z77X-UD5H Patch v2) doesn't support Intel HDMI audio; layout ID 3 does
+into method label _DSM parent_label HDEF code_regex ("layout-id",\s*Buffer\s+\(0x04\)\s*\{\s*)0x[0-9A-F]{2},\s*0x[0-9A-F]{2},\s*0x[0-9A-F]{2},\s*0x[0-9A-F]{2} replace_matched begin %10x03,0x00,0x00,0x00 end;
