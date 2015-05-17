@@ -9,7 +9,7 @@ These patches can be applied to a cleanly-extracted native DSDT from the Gigabyt
 Special thanks to PJALM, toleda, and RampageDev for their original edits; this would not have been possible if not for their work.
 
 ## Post-Installation
-To get everything on this board working in OS X, several post-installation steps/kexts/drivers/etc. are required:
+To get everything on this board working in OS X, several kexts/drivers/etc. are required:
 
 - [FakeSMC+HWSensors (RehabMan fork)](https://bitbucket.org/RehabMan/os-x-fakesmc-kozlek) - OS X driver for emulating SMC device and monitoring various hardware sensors
 - [cloverALC](https://github.com/toleda/audio_CloverALC) - OS X driver for onboard Realtek ALC898 Audio Controller
@@ -17,3 +17,87 @@ To get everything on this board working in OS X, several post-installation steps
 - [AtherosE2200Ethernet](http://www.insanelymac.com/forum/topic/300056-solution-for-qualcomm-atheros-ar816x-ar817x-and-killer-e220x) - OS X driver for onboard Qualcomm Atheros AR8161 Gigabit Ethernet Controller
 - [MarvellAHCIPortInjector](https://github.com/theracermaster/MarvellAHCIPortInjector) - OS X driver for injecting Marvell 88SE9172 into AppleAHCIPort (shows in System Information)
 - [ssdtPRGen.sh](https://github.com/Piker-Alpha/ssdtPRGen.sh) - Generates SSDT for your CPU (make sure you use the argument `-w 3` on Yosemite) to enable OS X power management (requires proper SMBIOS entry)
+
+### Clover Bootloader Configuration
+#### config.plist
+Since the [Clover wiki](http://clover-wiki.zetam.org/Home) is a thing, I won't post everything from config.plist, just what's mandatory.
+
+##### ACPI:
+```plist
+<key>DSDT</key>
+<dict>
+	<key>Name</key>
+	<string>DSDT.aml</string>
+</dict>
+```
+Since we are using an already-patched DSDT, we don't need any of Clover's DSDT patching.
+```plist
+<key>SSDT</key>
+<dict>
+	<key>DropOem</key>
+	<true/>
+	<key>Generate</key>
+	<false/>
+</dict>
+```
+We are also using a custom SSDT generated with `./ssdtPRGen -w 3`, so we need to drop the OEM SSDT tables and disable Clover's SSDT generation features.
+##### Boot:
+```plist
+<key>Arguments</key>
+<string>kext-dev-mode=1</string>
+```
+All the custom kexts we are using (FakeSMC, cloverALC, IntelMausiEthernet, AtherosE2200Ethernet, MarvellAHCIPortInjector) are unsigned, so we need to enable this, or else we cannot boot.
+
+##### Devices > Audio:
+```plist
+<key>AFGLowPowerState</key>
+<false/>
+```
+Helps eliminate some popping caused by the audio controller going to sleep. Doesn't always prevent it, so you might want to use [antipop](http://www.tomsick.net/projects/antipop.html).
+```plist
+<key>ResetHDA</key>
+<true/>
+```
+Needed to prevent audio from breaking after sleep.
+##### Devices > USB:
+```plist
+<key>FixOwnership</key>
+<false/>
+<key>Inject</key>
+<false/>
+```
+Neither of these options are necessary, since we edited the USB devices in our DSDT
+##### Graphics > Inject:
+```plist
+<key>ATI</key>
+<false/>
+<key>Intel</key>
+<false/>
+<key>NVidia</key>
+<false/>
+```
+Clover graphics injection should be disabled. Use a [graphics DSDT patch](https://github.com/theracermaster/Gigabyte-GA-Z77X-UD5H-DSDT-Patch/tree/master/Graphics) instead.
+##### KernelAndKextPatches > KextsToPatch
+cloverALC will add two entries here for AppleHDA patching. You shouldn't have to add any other entries for audio.
+```plist
+<key>Comment</key>
+<string>TRIM Enabler Patch</string>
+<key>Find</key>
+<data>QVBQTEUgU1NEAA==</data>
+<key>Name</key>
+<string>IOAHCIBlockStorage</string>
+<key>Replace</key>
+<data>AAAAAAAAAAAAAA==</data>
+```
+This is a useful patch that enables TRIM on non-Apple SSDs. Since it's a Clover kext patch, it's applied automatically at every boot, so no need to manually patch the kext.
+
+If you need a [modified AMD framebuffer personality, you can insert the patch here](https://github.com/theracermaster/Gigabyte-GA-Z77X-UD5H-DSDT-Patch/tree/master/Graphics#editing-amd-framebuffer-personalities).
+##### RtVariables
+```plist
+<key>MLB</key>
+<string>XXXXXXXXXXXXX</string>
+```
+Generate a MLB value using the MLBGenv317 script
+<key>ROM</key>
+<string>UseMacAddr0</string>
+[TODO REST]
