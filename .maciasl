@@ -1,2 +1,4 @@
 [Complete] GA-Z77X-UD5H v2		DSDT	GA-Z77X-UD5H-v2.txt
+[Graphics] Intel HD Graphics 3000		DSDT	Graphics/Intel-HD-Graphics-3000.txt
+[Graphics] Intel HD Graphics 4000		DSDT	Graphics/Intel-HD-Graphics-4000.txt
 [Graphics] AMD Radeon HD 7970 (Hamachi)		DSDT	Graphics/AMD-Radeon-HD-7970-Hamachi.txt
