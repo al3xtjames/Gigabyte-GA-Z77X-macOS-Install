@@ -6,7 +6,10 @@
 #
 # Special thanks to RampageDev & toleda for their original edits; this would not have been possible if not for their work.
 
-# Add the GFX0 method
+# Add the GFX0 method for the 7970
+# Credit: RampageDev, some modifications by TheRacerMaster
+# Uses the Hamachi framebuffer
+# If you are using Intel HD Graphics 4000 as primary GFX, change "onboard-1" to "onboard-2" here
 into device label PEG0 insert begin
 Device (GFX0)\n
 {\n
@@ -35,6 +38,9 @@ Device (GFX0)\n
 }\n
 end;
 
+# Add the HDAU (HDMI audio method for the 7970
+# Credit: RampageDev
+# If you are using Intel HD Graphics 4000 as primary GFX, change "onboard-1" to "onboard-2" here
 into device label PEG0 insert begin
 Device (HDAU)\n
 {\n
