@@ -21,7 +21,7 @@ We must patch the AMD7000Controller kext and replace the Hamachi framebuffer wit
   ```plist
   <dict>
     <key>Comment</key>
-    <string>10.9-10.10-AMD7000Controller/Hamachi Framebuffer Patch</string>
+    <string>Hamachi Framebuffer Patch</string>
     <key>Find</key>
     <data>AAQAAAQDAAAAAQEBEgQFAQAEAAAEAwAAAAECASIFBAIEAAAAFAIAAAABAwAAAAMGAAgAAAQCAAAAAQQAEQIBBA==</data>
     <key>Name</key>
@@ -30,7 +30,6 @@ We must patch the AMD7000Controller kext and replace the Hamachi framebuffer wit
     <data>AAQAAAQDAAAAAQAAEgQBAQAIAAAEAgAAAAEAACIFAgQAAgAABAIAAAABAAARAgMDBAAAABQCAAAAAQAAEAAEBg==</data>
   </dict>
   ```
-  The `<data>` under `Find` (the original framebuffer) and `Replace` (the patched framebuffer) is encoded as base64. Use a PLIST editor such as Xcode to insert the framebuffer.
 
 - Manually patching the kext (needs to be applied after every OS update)
 
