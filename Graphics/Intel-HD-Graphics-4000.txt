@@ -23,16 +23,15 @@ into method label _DSM parent_label IGPU remove_entry;
 into device label IGPU insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
-	Store (Package (0x0A) {\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package () {\n
 		"AAPL,ig-platform-id", Buffer (0x04) {0x0A,0x00,0x66,0x01},\n
 		"built-in", Buffer (One) {0x00},\n
 		"device-id", Buffer (0x04) {0x66,0x01,0x00,0x00},\n
 		"model", Buffer (0x16) {"Intel HD Graphics 4000"},\n
 		"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
-	}, Local0)\n
-	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
-	Return (Local0)\n
-}
+	})\n
+}\n
 end;
 
 # Change the HDEF layout ID for Intel HD Graphics 4000 HDMI audio

@@ -16,7 +16,8 @@ Device (GFX0)\n
 	Name (_ADR, Zero)\n
 	Method (_DSM, 4, NotSerialized)\n
 	{\n
-		Store (Package (0x1C) {\n
+		If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+		Return (Package () {\n
 			"AAPL,slot-name", Buffer (0x07) {"Slot-1"},\n
 			"@0,connector-type", Buffer (0x04) {0x00, 0x04, 0x00, 0x00},\n # DisplayPort
 			"@1,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n # HDMI-A
@@ -31,9 +32,7 @@ Device (GFX0)\n
 			"device_type", Buffer (0x13) {"Display Controller"},\n
 			"model", Buffer (0x13) {"AMD Radeon HD 7970"},\n
 			"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
-		}, Local0)\n
-	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
-	Return (Local0)\n
+		})\n
 	}\n
 }\n
 end;
@@ -46,11 +45,10 @@ Device (HDAU)\n
 	Name (_ADR, One)\n
 	Method (_DSM, 4, NotSerialized)\n
 	{\n
-		Store (Package (0x02) {\n
+		If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+		Return (Package () {\n
 			"hda-gfx", Buffer (0x0A) {"onboard-1”}\n
-		}, Local0)\n
-	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
-	Return (Local0)\n
+		})\n
 	}\n
 }\n
 end;
