@@ -111,19 +111,6 @@ into device label PCI0 insert begin
 Device (MCHC)\n
 {\n
 	Name (_ADR, Zero)\n
-	Method (_DSM, 4, NotSerialized)\n
-	{\n
-		Store (Package (0x02)\n
-			{\n
-				"subsystem-vendor-id",\n
-				Buffer (0x04)\n
-				{\n
-					0x86, 0x80, 0x00, 0x00\n
-				}\n
-			}, Local0)\n
-		DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
-		Return (Local0)\n
-	}\n
 }\n
 end;
 
@@ -174,11 +161,9 @@ into method label _DSM parent_label HDEF remove_entry;
 into device label HDEF insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
-	Store (Package (0xE) {\n
+	Store (Package (0xA) {\n
 		"MaximumBootBeepVolume", Buffer(One) {0x4D},\n
 		"MaximumBootBeepVolumeAlt", Buffer(One) {0x00},\n
-		"subsystem-id", Buffer () {0x79, 0xCB, 0x00, 0x00},\n
-		"subsystem-vendor-id", Buffer () {0x86, 0x80, 0x00, 0x00},\n
 		"layout-id", Buffer (0x04) {0x01, 0x00, 0x00, 0x00},\n
 		"PinConfigurations", Buffer (Zero) {},\n
 		"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
@@ -235,9 +220,8 @@ into method label _DSM parent_label SATA remove_entry;
 into device label SATA insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
-	Store (Package (0x04) {\n
+	Store (Package (0x02) {\n
 		"device-id", Buffer (0x04) {0x03,0x1E,0x00,0x00},\n
-		"subsystem-vendor-id", Buffer (0x04) {0x86, 0x80, 0x00, 0x00}\n
 	}, Local0)\n
 	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
 	Return (Local0)\n
@@ -284,19 +268,8 @@ Method (_HPP, 0, NotSerialized)\n
 					
 Method (_DSM, 4, NotSerialized)\n
 {\n
-	Store (Package (0x04)\n
-		{\n
-			"device-id",\n
-			Buffer (0x04)\n
-			{\n
-				0x72, 0x91, 0x00, 0x00\n
-			},\n
-			
-			"subsystem-vendor-id",\n
-			Buffer (0x04)\n
-			{\n
-				0x58, 0x14, 0x00, 0x00\n
-			}\n
+	Store (Package (0x02) {\n
+			"device-id", Buffer (0x04) {0x72, 0x91, 0x00, 0x00}\n
 		}, Local0)\n
 	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
 	Return (Local0)\n
@@ -305,147 +278,44 @@ end;
 
 # Patches the Intel USB3 on Intel 7 Series chipsets to allow more power output
 # Credit: PJALM, some modifcations by TheRacerMaster
-#Fix EHC1
+## Fix EHC1
 into method label _DSM parent_label EHC1 remove_entry;
 into device label EHC1 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
-	Store (Package (0x14)\n
-		{\n
-			"AAPL,clock-id",\n
-			Buffer (One)\n
-			{\n
-				0x01\n
-			},\n
-
-			"built-in",\n
-			Buffer (One)\n
-			{\n
-				0x00\n
-			},\n
-
-			"subsystem-id",\n
-			Buffer (0x04)\n
-			{\n
-				 0x70, 0x72, 0x00, 0x00\n
-			},\n
-
-			"subsystem-vendor-id",\n
-			Buffer (0x04)\n
-			{\n
-				 0x86, 0x80, 0x00, 0x00\n
-			},\n
-
-			"AAPL,current-available",\n
-			0x0834,\n
-			"AAPL,current-extra",\n
-			0x0898,\n
-			"AAPL,current-extra-in-sleep",\n
-			0x0640,\n
-			"AAPL,current-in-sleep",\n
-			0x03E8,\n
-			"AAPL,device-internal",\n
-			0x02,\n
-			"AAPL,max-port-current-in-sleep",\n
-			0x0834\n
+	Store (Package (0x14) {\n
+			"AAPL,clock-id", Buffer (One) {0x01},\n
+			"built-in", Buffer (One) {0x00},\n
+			"subsystem-id", Buffer (0x04) {0x70, 0x72, 0x00, 0x00},\n
+			"subsystem-vendor-id", Buffer (0x04) {0x86, 0x80, 0x00, 0x00},\n
+			"AAPL,current-available", 2100,\n
+			"AAPL,current-extra", 2200,\n
+			"AAPL,current-extra-in-sleep", 1600,\n
+			"AAPL,current-in-sleep", 1000,\n
+			"AAPL,device-internal", 0x02,\n
+			"AAPL,max-port-current-in-sleep", 2100,\n
 		}, Local0)\n
 	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
 	Return (Local0)\n
 }\n
 end;
 
-#Fix EHC2
+## Fix EHC2
 into method label _DSM parent_label EHC2 remove_entry;
 into device label EHC2 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
-	Store (Package (0x14)\n
-		{\n
-			"AAPL,clock-id",\n
-			Buffer (One)\n
-			{\n
-				0x01\n
-			},\n
-
-			"built-in",\n
-			Buffer (One)\n
-			{\n
-				0x00\n
-			},\n
-
-			"subsystem-id",\n
-			Buffer (0x04)\n
-			{\n
-				 0x70, 0x72, 0x00, 0x00\n
-			},\n
-
-			"subsystem-vendor-id",\n
-			Buffer (0x04)\n
-			{\n
-				 0x86, 0x80, 0x00, 0x00\n
-			},\n
-
-			"AAPL,current-available",\n
-			0x0834,\n
-			"AAPL,current-extra",\n
-			0x0898,\n
-			"AAPL,current-extra-in-sleep",\n
-			0x0640,\n
-			"AAPL,current-in-sleep",\n
-			0x03E8,\n
-			"AAPL,device-internal",\n
-			0x02,\n
-			"AAPL,max-port-current-in-sleep",\n
-			0x0834\n
-		}, Local0)\n
-	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
-	Return (Local0)\n
-}\n
-end;
-
-#Fix XHC1
-into method label _DSM parent_label XHC1 remove_entry;
-into device label XHC1 insert begin
-Method (_DSM, 4, NotSerialized)\n
-{\n
-	Store (Package (0x14)\n
-		{\n
-			"AAPL,clock-id",\n
-			Buffer (One)\n
-			{\n
-				0x02\n
-			},\n
-
-			"built-in",\n
-			Buffer (One)\n
-			{\n
-				0x00\n
-			},\n
-
-			"subsystem-id",\n
-			Buffer (0x04)\n
-			{\n
-				 0x70, 0x72, 0x00, 0x00\n
-			},\n
-
-			"subsystem-vendor-id",\n
-			Buffer (0x04)\n
-			{\n
-				 0x86, 0x80, 0x00, 0x00\n
-			},\n
-
-			"AAPL,current-available",\n
-			0x0834,\n
-			"AAPL,current-extra",\n
-			0x0898,\n
-			"AAPL,current-extra-in-sleep",\n
-			0x0640,\n
-			"AAPL,current-in-sleep",\n
-			0x03E8,\n
-			"AAPL,device-internal",\n
-			0x02,\n
-			"AAPL,max-port-current-in-sleep",\n
-			0x0834\n
+	Store (Package (0x14) {\n
+			"AAPL,clock-id", Buffer (One) {0x01},\n
+			"built-in", Buffer (One) {0x00},\n
+			"subsystem-id", Buffer (0x04) {0x70, 0x72, 0x00, 0x00},\n
+			"subsystem-vendor-id", Buffer (0x04) {0x86, 0x80, 0x00, 0x00},\n
+			"AAPL,current-available", 2100,\n
+			"AAPL,current-extra", 2200,\n
+			"AAPL,current-extra-in-sleep", 1600,\n
+			"AAPL,current-in-sleep", 1000,\n
+			"AAPL,device-internal", 0x02,\n
+			"AAPL,max-port-current-in-sleep", 2100,\n
 		}, Local0)\n
 	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
 	Return (Local0)\n
@@ -462,107 +332,64 @@ into_all all label USB5 set_label begin UHC5 end;
 into_all all label USB6 set_label begin UHC6 end;
 into_all all label USB7 set_label begin UHC7 end;
 into_all all code_regex USB([1-7]) replaceall_matched begin UHC%1 end;
-
+end;
 
 # Intel Z77 USB2/USB3 Multiplexing Fix
 # USB3 patches in thanks to SJ_Underwater and Mieze
+# Code optimizations thanks to RehabMan and PikeRAlpha; further optimizations by RehabMan 2013-10-14
 
-# Add method OSDW to the main block, it's used by the USB3 patches
-into method label OSDW remove_entry;
-into definitionblock code_regex . insert
-begin
-Method (OSDW, 0, NotSerialized)\n
-{\n
-	If (LEqual (OSYS, 0x2710))\n
-	{\n
-		Return (One)\n
-	}\n
-	Else\n
-	{\n
-		Return (Zero)\n
-	}\n
-}
-end;
-
-# Fix method _OSC
+## Fix method _OSC
 into method label _OSC parent_label PCI0 remove_entry;
 into device label PCI0 parent_label _SB insert
 begin
 Method (_OSC, 4, Serialized)\n
 {\n
-	Store (Arg3, Local0)\n
-	CreateDWordField (Local0, Zero, CDW1)\n
-	CreateDWordField (Local0, 0x04, CDW2)\n
-	CreateDWordField (Local0, 0x08, CDW3)\n
-	Store (CDW2, SUPP)\n
-	Store (CDW3, CTRL)\n
-	If (LEqual (One, OSDW ()))\n
-	{\n
-		If (LAnd (LEqual (Arg0, GUID), NEXP))\n
-		{\n
-			If (Not (And (CDW1, One)))\n
-			{\n
-				If (And (CTRL, 0x02))\n
-				{\n
-					NHPG ()\n
-				}\n
-\n
-				If (And (CTRL, 0x04))\n
-				{\n
-					NPME ()\n
-				}\n
-			}\n
-\n
-			If (LNotEqual (Arg1, One))\n
-			{\n
-				Or (CDW1, 0x08, CDW1)\n
-			}\n
-\n
-			If (LNotEqual (CDW3, CTRL))\n
-			{\n
-				Or (CDW1, 0x10, CDW1)\n
-			}\n
-\n
-			Store (CTRL, CDW3)\n
-			Store (CTRL, OSCC)\n
-			Return (Local0)\n
-		}\n
-		Else\n
-		{\n
-			Or (CDW1, 0x04, CDW1)\n
-			Return (Local0)\n
-		}\n
-	}\n
-	Else\n
-	{\n
-		If (LEqual (Arg0, Buffer (0x10)\n
-			{\n
-				/* 0000 */   0xA9, 0x12, 0x95, 0x7C, 0x05, 0x17, 0xB4, 0x4C,\n
-				/* 0008 */   0xAF, 0x7D, 0x50, 0x6A, 0x24, 0x23, 0xAB, 0x71\n
-			}))\n
-		{\n
-			Store (One, ^XHC1.PASS)\n
-			Store (One, ^XHC1.PAHC)\n
-			Store (One, ^XHC1.PBSS)\n
-			Store (One, ^XHC1.PBHC)\n
-			Store (One, ^XHC1.PCSS)\n
-			Store (One, ^XHC1.PCHC)\n
-			Store (One, ^XHC1.PDSS)\n
-			Store (One, ^XHC1.PDHC)\n
-		}\n
-		Return (Local0)\n
-	}\n
-}
+    Store (Arg3, Local0)\n
+    CreateDWordField (Local0, Zero, CDW1)\n
+    CreateDWordField (Local0, 0x04, CDW2)\n
+    CreateDWordField (Local0, 0x08, CDW3)\n
+    //was: Store (CDW2, SUPP)\n
+    Store (CDW3, Local3) //was: Store (CDW3, CTRL))\n
+    If (LAnd (LEqual (Arg0, GUID), NEXP))\n
+    {\n
+        If (Not (And (CDW1, One)))\n
+        {\n
+            If (And (Local3, 0x02)) //was: And (CTRL, 0x02)\n
+            {\n
+                NHPG ()\n
+            }\n
+            If (And (Local3, 0x04)) //was: And (CTRL, 0x04)\n
+            {\n
+                NPME ()\n
+            }\n
+        }\n
+        If (LNotEqual (Arg1, One))\n
+        {\n
+            Or (CDW1, 0x08, CDW1)\n
+        }\n
+        If (LNotEqual (CDW3, Local3)) //was: LNotEqual (CDW3, CTRL)\n
+        {\n
+            Or (CDW1, 0x10, CDW1)\n
+        }\n
+        Store (Local3, CDW3) //was: Store(CTRL, CDW3)\n
+        Store (Local3, OSCC) //was: Store(CTRL, OSCC)\n
+    }\n
+    Else\n
+    {\n
+        Or (CDW1, 0x04, CDW1)\n
+    }\n
+    Return (Local0)\n
+}\n
 end;
 
-# Fix EHC1
-into Device label PR11 code_regex Name\s\(MUXS[^)]+\) remove_matched;
+## Fix EHC1
+into device label PR11 code_regex Name\s\(MUXS[^)]+\) remove_matched;
 into device label PR11 parent_label PR01 insert begin Name (MUXS, "XHCA") end;
-into Device label PR12 code_regex Name\s\(MUXS[^)]+\) remove_matched;
+into device label PR12 code_regex Name\s\(MUXS[^)]+\) remove_matched;
 into device label PR12 parent_label PR01 insert begin Name (MUXS, "XHCB") end;
-into Device label PR13 code_regex Name\s\(MUXS[^)]+\) remove_matched;
+into device label PR13 code_regex Name\s\(MUXS[^)]+\) remove_matched;
 into device label PR13 parent_label PR01 insert begin Name (MUXS, "XHCC") end;
-into Device label PR18 code_regex Name\s\(MUXS[^)]+\) remove_matched;
+into device label PR18 code_regex Name\s\(MUXS[^)]+\) remove_matched;
 into device label PR18 parent_label PR01 insert begin Name (MUXS, "XHCD") end;
 
 into method label XHCA parent_label EHC1 remove_entry;
@@ -578,51 +405,29 @@ into device label EHC1 code_regex Name\s\(XHCN,\sOne\) remove_matched;
 
 into device label EHC1 insert begin
 Name (XHCN, One)\n
-Method (XHCA, 0, NotSerialized)\n
-{\n
-	Store (One, ^^XHC1.PAHC)\n
-}\n
-Method (XHCB, 0, NotSerialized)\n
-{\n
-	Store (One, ^^XHC1.PBHC)\n
-}\n
-Method (XHCC, 0, NotSerialized)\n
-{\n
-	Store (One, ^^XHC1.PCHC)\n
-}\n
-Method (XHCD, 0, NotSerialized)\n
-{\n
-	Store (One, ^^XHC1.PDHC)\n
-}\n
-Method (EHCA, 0, NotSerialized)\n
-{\n
-	Store (Zero, ^^XHC1.PAHC)\n
-}\n
-Method (EHCB, 0, NotSerialized)\n
-{\n
-	Store (Zero, ^^XHC1.PBHC)\n
-}\n
-Method (EHCC, 0, NotSerialized)\n
-{\n
-	Store (Zero, ^^XHC1.PCHC)\n
-}\n
-Method (EHCD, 0, NotSerialized)\n
-{\n
-	Store (Zero, ^^XHC1.PDHC)\n
-}\n
+Method (XHCA, 0, NotSerialized) { Store (1, ^^XHC1.PAHC) }\n
+Method (XHCB, 0, NotSerialized) { Store (1, ^^XHC1.PBHC) }\n
+Method (XHCC, 0, NotSerialized) { Store (1, ^^XHC1.PCHC) }\n
+Method (XHCD, 0, NotSerialized) { Store (1, ^^XHC1.PDHC) }\n
+Method (EHCA, 0, NotSerialized) { Store (0, ^^XHC1.PAHC) }\n
+Method (EHCB, 0, NotSerialized) { Store (0, ^^XHC1.PBHC) }\n
+Method (EHCC, 0, NotSerialized) { Store (0, ^^XHC1.PCHC) }\n
+Method (EHCD, 0, NotSerialized) { Store (0, ^^XHC1.PDHC) }\n
 end;
 
-# Fix EHC2
+## Fix EHC2
 into method label XHCN parent_label EHC2 remove_entry;
 into device label EHC2 code_regex Name\s\(XHCN,\sOne\) remove_matched;
 into device label EHC2 insert begin Name (XHCN, One)\n end;
 
-# Fix XHC1
+## Fix XHC1
 into device label XHC set_label begin XHC1 end;
 into_all all code_regex XHC(?=\W) replaceall_matched begin XHC1 end;
 into method label _WAK code_regex \_SB.PCI0.XHC1.XWAK replace_matched begin _SB.PCI0.XHC1._INI end;
 
-into device label XHC1 replace_content begin
+## Rewrite XHC/XHC1 device
+into device label XHC1 replace_content 
+begin
 Name (_ADR, 0x00140000)\n
 Name (_S3D, 0x02)\n
 Name (_S4D, 0x02)\n
@@ -631,264 +436,125 @@ Name (XRST, Zero)\n
 OperationRegion (XPRT, PCI_Config, 0x74, 0x10)\n
 Field (XPRT, DWordAcc, NoLock, Preserve)\n
 {\n
-	Offset (0x01),\n
-	PMEE,   1,\n
-		,   6,\n
-	PMES,   1\n
+    Offset (0x01),\n
+    PMEE,   1,\n
+        ,   6,\n
+    PMES,   1\n
 }\n
 \n
 OperationRegion (XH1C, PCI_Config, 0xD0, 0x10)\n
 Field (XH1C, ByteAcc, NoLock, Preserve)\n
 {\n
-	PAHC,   1,\n
-	PBHC,   1,\n
-	PCHC,   1,\n
-	PDHC,   1,\n
-	Offset (0x08),\n
-	PASS,   1,\n
-	PBSS,   1,\n
-	PCSS,   1,\n
-	PDSS,   1\n
+    PAHC,   1,\n
+    PBHC,   1,\n
+    PCHC,   1,\n
+    PDHC,   1,\n
+    Offset (0x08),\n
+    PASS,   1,\n
+    PBSS,   1,\n
+    PCSS,   1,\n
+    PDSS,   1\n
 }\n
 \n
 OperationRegion (XHC2, PCI_Config, 0x44, 0x04)\n
 Field (XHC2, ByteAcc, NoLock, Preserve)\n
 {\n
-	Offset (0x01),\n
-	MIAI,   2\n
+    Offset (0x01),\n
+    MIAI,   2\n
 }\n
 \n
 Method (_INI, 0, NotSerialized)\n
 {\n
-	If (OSDW ())\n
-	{\n
-		Store (Zero, MIAI)\n
-	}\n
-\n
-	If (LAnd (LGreaterEqual (OSYS, 0x07DC), LLess (OSYS, 0x2710)))\n
-	{\n
-		Store (One, PASS)\n
-		Store (One, PAHC)\n
-		Store (One, PBSS)\n
-		Store (One, PBHC)\n
-		Store (One, PCSS)\n
-		Store (One, PCHC)\n
-		Store (One, PDSS)\n
-		Store (One, PDHC)\n
-	}\n
+    Store (Zero, MIAI)\n
 }\n
 \n
 Device (RHUB)\n
 {\n
-	Name (_ADR, Zero)\n
-	Device (PRT1)\n
-	{\n
-		Name (_ADR, One)\n
-		Method (_UPC, 0, Serialized)\n
-		{\n
-			Name (UPCP, Package (0x04)\n
-			{\n
-				0xFF,\n
-				0x03,\n
-				Zero,\n
-				Zero\n
-			})\n
-			Return (UPCP)\n
-		}\n
-\n
-		Method (_PLD, 0, Serialized)\n
-		{\n
-			Name (PLDP, Package (0x01)\n
-			{\n
-				Buffer (0x10)\n
-				{\n
-					/* 0000 */   0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-					/* 0008 */   0x69, 0x0C, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00\n
-				}\n
-			})\n
-			Return (PLDP)\n
-		}\n
-		Name (MUXS, "EHCA")\n
-	}\n
-\n
-	Device (PRT2)\n
-	{\n
-		Name (_ADR, 0x02)\n
-		Method (_UPC, 0, Serialized)\n
-		{\n
-			Name (UPCP, Package (0x04)\n
-			{\n
-				0xFF,\n
-				0x03,\n
-				Zero,\n
-				Zero\n
-			})\n
-			Return (UPCP)\n
-		}\n
-\n
-		Method (_PLD, 0, Serialized)\n
-		{\n
-			Name (PLDP, Package (0x01)\n
-			{\n
-				Buffer (0x10)\n
-			{\n
-					/* 0000 */   0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-					/* 0008 */   0x69, 0x0C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00\n
-				}\n
-			})\n
-			Return (PLDP)\n
-		}\n
-		Name (MUXS, "EHCB")\n
-	}\n
-\n
-	Device (PRT3)\n
-	{\n
-		Name (_ADR, 0x03)\n
-		Method (_UPC, 0, Serialized)\n
-		{\n
-			Name (UPCP, Package (0x04)\n
-			{\n
-				0xFF,\n
-				0x03,\n
-				Zero,\n
-				Zero\n
-			})\n
-			Return (UPCP)\n
-		}\n
-\n
-		Method (_PLD, 0, Serialized)\n
-		{\n
-			Name (PLDP, Package (0x01)\n
-			{\n
-				Buffer (0x10)\n
-				{\n
-					/* 0000 */   0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-					/* 0008 */   0x69, 0x0C, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00\n
-				}\n
-			})\n
-			Return (PLDP)\n
-		}\n
-		Name (MUXS, "EHCC")\n
-	}\n
-\n
-	Device (PRT4)\n
-	{\n
-		Name (_ADR, 0x04)\n
-		Method (_UPC, 0, Serialized)\n
-		{\n
-			Name (UPCP, Package (0x04)\n
-			{\n
-				0xFF,\n
-				0x03,\n
-				Zero,\n
-				Zero\n
-			})\n
-			Return (UPCP)\n
-		}\n
-\n
-		Method (_PLD, 0, Serialized)\n
-		{\n
-			Name (PLDP, Package (0x01)\n
-			{\n
-				Buffer (0x10)\n
-				{\n
-					/* 0000 */   0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-					/* 0008 */   0x69, 0x0C, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00\n
-				}\n
-			})\n
-			Return (PLDP)\n
-		}\n
-		Name (MUXS, "EHCD")\n
-	}\n
-}\n
-\n
-Method (_PRW, 0, NotSerialized)\n
-{\n
-	Return (GPRW (0x0D, 0x04))\n
-}\n
-\n
-Method (XHCA, 0, NotSerialized)\n
-{\n
-	Store (One, PAHC)\n
-}\n
-\n
-Method (XHCB, 0, NotSerialized)\n
-{\n
-	Store (One, PBHC)\n
-}\n
-\n
-Method (XHCC, 0, NotSerialized)\n
-{\n
-	Store (One, PCHC)\n
-}\n
-\n
-Method (XHCD, 0, NotSerialized)\n
-{\n
-	Store (One, PDHC)\n
-}\n
-\n
-Method (EHCA, 0, NotSerialized)\n
-{\n
-	Store (Zero, PAHC)\n
-}\n
-\n
-Method (EHCB, 0, NotSerialized)\n
-{\n
-	Store (Zero, PBHC)\n
-}\n
-\n
-Method (EHCC, 0, NotSerialized)\n
-{\n
-	Store (Zero, PCHC)\n
-}\n
-\n
-Method (EHCD, 0, NotSerialized)\n
-{\n
-	Store (Zero, PDHC)\n
+    Name (_ADR, Zero)\n
+    Name (UPCP, Package() { 0xFF, 0x03, Zero, Zero })\n
+    Device (PRT1)\n
+    {\n
+        Name (_ADR, One)\n
+        Alias (UPCP, _UPC)\n
+        Name (_PLD, Package()\n
+        {\n
+            Buffer()\n
+            {\n
+                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+                0x69, 0x0C, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00\n
+            }\n
+        })\n
+        Name (MUXS, "EHCA")\n
+    }\n
+    Device (PRT2)\n
+    {\n
+        Name (_ADR, 0x02)\n
+        Alias (UPCP, _UPC)\n
+        Name (_PLD, Package()\n
+        {\n
+            Buffer()\n
+            {\n
+                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+                0x69, 0x0C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00\n
+            }\n
+        })\n
+        Name (MUXS, "EHCB")\n
+    }\n
+    Device (PRT3)\n
+    {\n
+        Name (_ADR, 0x03)\n
+        Alias (UPCP, _UPC)\n
+        Name (_PLD, Package()\n
+        {\n
+            Buffer()\n
+            {\n
+                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+                0x69, 0x0C, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00\n
+            }\n
+        })\n
+        Name (MUXS, "EHCC")\n
+    }\n
+    Device (PRT4)\n
+    {\n
+        Name (_ADR, 0x04)\n
+        Alias (UPCP, _UPC)\n
+        Name (_PLD, Package()\n
+        {\n
+            Buffer()\n
+            {\n
+                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+                0x69, 0x0C, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00\n
+            }\n
+        })\n
+        Name (MUXS, "EHCD")\n
+    }\n
 }\n
 \n
 Method (_DSM, 4, NotSerialized)\n
 {\n
-	Store (Package (0x14)\n
-		{\n
-			"AAPL,clock-id",\n
-			Buffer (One)\n
-			{\n
-				0x02\n
-			},\n
-
-			"built-in",\n
-			Buffer (One)\n
-			{\n
-				0x00\n
-			},\n
-
-			"subsystem-id",\n
-			Buffer (0x04)\n
-			{\n
-				 0x70, 0x72, 0x00, 0x00\n
-			},\n
-
-			"subsystem-vendor-id",\n
-			Buffer (0x04)\n
-			{\n
-				 0x86, 0x80, 0x00, 0x00\n
-			},\n
-
-			"AAPL,current-available",\n
-			0x0834,\n
-			"AAPL,current-extra",\n
-			0x0898,\n
-			"AAPL,current-extra-in-sleep",\n
-			0x0640,\n
-			"AAPL,current-in-sleep",\n
-			0x03E8,\n
-			"AAPL,device-internal",\n
-			0x02,\n
-			"AAPL,max-port-current-in-sleep",\n
-			0x0834\n
-		}, Local0)\n
-	DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
-	Return (Local0)\n
-}
+    Store (Package (0x14) {\n
+            "AAPL,clock-id", Buffer (One) {0x02},\n
+            "built-in", Buffer (One) {0x00},\n
+            "subsystem-id", Buffer (0x04) {0x70, 0x72, 0x00, 0x00},\n
+            "subsystem-vendor-id", Buffer (0x04) {0x86, 0x80, 0x00, 0x00},\n
+            "AAPL,current-available", 2100,\n
+            "AAPL,current-extra", 2200,\n
+            "AAPL,current-extra-in-sleep", 1600,\n
+            "AAPL,current-in-sleep", 1000,\n
+            "AAPL,device-internal", 0x02,\n
+            "AAPL,max-port-current-in-sleep", 2100,\n
+        }, Local0)\n
+    DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))\n
+    Return (Local0)\n
+}\n
+\n
+Method (_PRW, 0, NotSerialized) { Return (GPRW (0x0D, 0x04)) }\n
+Method (XHCA, 0, NotSerialized) { Store (One, PAHC) }\n
+Method (XHCB, 0, NotSerialized) { Store (One, PBHC) }\n
+Method (XHCC, 0, NotSerialized) { Store (One, PCHC) }\n
+Method (XHCD, 0, NotSerialized) { Store (One, PDHC) }\n
+Method (EHCA, 0, NotSerialized) { Store (Zero, PAHC) }\n
+Method (EHCB, 0, NotSerialized) { Store (Zero, PBHC) }\n
+Method (EHCC, 0, NotSerialized) { Store (Zero, PCHC) }\n
+Method (EHCD, 0, NotSerialized) { Store (Zero, PDHC) }\n
 end;
