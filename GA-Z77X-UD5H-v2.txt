@@ -238,7 +238,6 @@ Method (_DSM, 4, NotSerialized)\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package () {\n
 		"device-id", Buffer (0x04) {0x72, 0x91, 0x00, 0x00}\n
-		}, Local0)\n
 	})\n
 }\n
 end;
@@ -313,8 +312,7 @@ Method (_OSC, 4, Serialized)\n
 	CreateDWordField (Local0, Zero, CDW1)\n
 	CreateDWordField (Local0, 0x04, CDW2)\n
 	CreateDWordField (Local0, 0x08, CDW3)\n
-	//was: Store (CDW2, SUPP)\n
-	Store (CDW3, Local3) //was: Store (CDW3, CTRL))\n
+	Store (CDW3, Local3)
 	If (LAnd (LEqual (Arg0, GUID), NEXP))\n
 	{\n
 		If (Not (And (CDW1, One)))\n
