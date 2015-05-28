@@ -19,10 +19,10 @@ Device (GFX0)\n
 		If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 		Return (Package () {\n
 			"AAPL,slot-name", Buffer (0x07) {"Slot-1"},\n
-			"@0,connector-type", Buffer (0x04) {0x00, 0x04, 0x00, 0x00},\n # DisplayPort
-			"@1,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n # HDMI-A
-			"@2,connector-type", Buffer (0x04) {0x00, 0x02, 0x00, 0x00},\n # Single-Link DVI
-			"@3,connector-type", Buffer (0x04) {0x04, 0x00, 0x00, 0x00},\n # Dual-Link DVI
+			"@0,connector-type", Buffer (0x04) {0x00, 0x04, 0x00, 0x00},\n
+			"@1,connector-type", Buffer (0x04) {0x00, 0x08, 0x00, 0x00},\n
+			"@2,connector-type", Buffer (0x04) {0x00, 0x02, 0x00, 0x00},\n
+			"@3,connector-type", Buffer (0x04) {0x04, 0x00, 0x00, 0x00},\n
 			"@0,name", Buffer (0x0C) {"ATY,Hamachi"},\n
 			"@1,name", Buffer (0x0C) {"ATY,Hamachi"},\n
 			"@2,name", Buffer (0x0C) {"ATY,Hamachi"},\n
@@ -40,14 +40,14 @@ end;
 # Add the HDAU method to inject HDMI audio for the 7970
 # Credit: RampageDev
 into device label PEG0 insert begin
-Device (HDAU)\n
+Device (HDEF)\n
 {\n
 	Name (_ADR, One)\n
 	Method (_DSM, 4, NotSerialized)\n
 	{\n
 		If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 		Return (Package () {\n
-			"hda-gfx", Buffer (0x0A) {"onboard-1”}\n
+			"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
 		})\n
 	}\n
 }\n

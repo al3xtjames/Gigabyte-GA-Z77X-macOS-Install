@@ -190,7 +190,7 @@ Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package () {\n
-		"device-id", Buffer (0x04) {0x03,0x1E,0x00,0x00},\n
+		"device-id", Buffer (0x04) {0x03,0x1E,0x00,0x00}\n
 	})\n
 }
 end;
@@ -260,7 +260,7 @@ Method (_DSM, 4, NotSerialized)\n
 		"AAPL,current-extra-in-sleep", 1600,\n
 		"AAPL,current-in-sleep", 1000,\n
 		"AAPL,device-internal", 0x02,\n
-		"AAPL,max-port-current-in-sleep", 2100,\n
+		"AAPL,max-port-current-in-sleep", 2100\n
 	})\n
 }\n
 end;
@@ -281,7 +281,7 @@ Method (_DSM, 4, NotSerialized)\n
 		"AAPL,current-extra-in-sleep", 1600,\n
 		"AAPL,current-in-sleep", 1000,\n
 		"AAPL,device-internal", 0x02,\n
-		"AAPL,max-port-current-in-sleep", 2100,\n
+		"AAPL,max-port-current-in-sleep", 2100\n
 	})\n
 }\n
 end;
@@ -506,7 +506,7 @@ Method (_DSM, 4, NotSerialized)\n
 		"AAPL,current-extra-in-sleep", 1600,\n
 		"AAPL,current-in-sleep", 1000,\n
 		"AAPL,device-internal", 0x02,\n
-		"AAPL,max-port-current-in-sleep", 2100,\n
+		"AAPL,max-port-current-in-sleep", 2100\n
 	})\n
 }\n
 \n

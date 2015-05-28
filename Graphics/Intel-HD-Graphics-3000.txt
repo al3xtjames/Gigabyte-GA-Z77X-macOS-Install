@@ -45,7 +45,7 @@ Device (MEI)\n
 	{\n
 		If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 		Return (Package () {\n
-			"layout-id", Buffer(0x04) {0x3a,0x1c,0x00,0x00},\n
+			"layout-id", Buffer(0x04) {0x3a,0x1c,0x00,0x00}\n
 		})\n
 	}\n
 }\n
