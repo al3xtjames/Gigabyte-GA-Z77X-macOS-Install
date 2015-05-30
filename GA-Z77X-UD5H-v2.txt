@@ -103,23 +103,17 @@ end;
 # Fix the SMBUS to allow for loading of the AppleSMBusController.kext
 # Credit: PJALM
 into device label BUS0 parent_label SBUS remove_entry;
+into device label BUS1 parent_label SBUS remove_entry;
 into device label SBUS insert begin
 Device (BUS0)\n
 {\n
 	Name (_CID, "smbus")\n
 	Name (_ADR, Zero)\n
-	Device (DVL0)\n
-	{\n
-		Name (_ADR, 0x57)\n
-		Name (_CID, "diagsvault")\n
-		Method (_DSM, 4, NotSerialized)\n
-		{\n
-			If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-			Return (Package () {\n
-				"address", 0x57\n
-			})\n
-		}\n
-	}\n
+}\n
+Device (BUS1)\n
+{\n
+	Name (_CID, "smbus")\n
+	Name (_ADR, One)\n
 }\n
 end;
 
@@ -146,10 +140,10 @@ end;
 # Fixes 'Built-in' status for Intel 82579V Gigabit Ethernet Controller
 # Use IntelMausiEthernet.kext by Mieze - http://www.insanelymac.com/forum/topic/304235-intelmausiethernetkext-for-intel-onboard-lan/
 # Credit: PJALM
-into device label GLAN set_label begin LAN0 end;
-into_all all code_regex GLAN replaceall_matched begin LAN0 end;
-into method label _DSM parent_label LAN0 remove_entry;
-into device label LAN0 insert begin
+into device label GLAN set_label begin ETH0 end;
+into_all all code_regex GLAN replaceall_matched begin ETH0 end;
+into method label _DSM parent_label ETH0 remove_entry;
+into device label ETH0 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
@@ -164,10 +158,10 @@ end;
 # Fixes 'Built-in' status for Qualcomm Atheros AR8161 Gigabit Ethernet Controller
 # Use AtherosE2200Ethernet.kext by Mieze - http://www.insanelymac.com/forum/topic/300056-solution-for-qualcomm-atheros-ar816x-ar817x-and-killer-e220x/
 # Credit: PJALM
-into device label PXSX parent_label RP07 set_label begin LAN1 end;
-into method label HPME parent_label RP07 code_regex PXSX replaceall_matched begin LAN1 end;
-into method label _DSM parent_label LAN1 remove_entry;
-into device label LAN1 insert begin
+into device label PXSX parent_label RP07 set_label begin ETH1 end;
+into method label HPME parent_label RP07 code_regex PXSX replaceall_matched begin ETH1 end;
+into method label _DSM parent_label ETH1 remove_entry;
+into device label ETH1 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
@@ -179,22 +173,12 @@ Method (_DSM, 4, NotSerialized)\n
 }
 end;
 
-# Change ID of SATA device for Intel 7 Series Chipset
+# Remove unnecessary SATA devices and rename them
 # Credit: PJALM
 into device label SAT0 set_label begin SATA end;
 into_all all code_regex SAT0 replaceall_matched begin SATA end;
 into device label SAT1 remove_entry;
-into method label _DSM parent_label SATA remove_entry;
-into device label SATA insert begin
-Method (_DSM, 4, NotSerialized)\n
-{\n
-	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-	Return (Package () {\n
-		"device-id", Buffer (0x04) {0x03,0x1E,0x00,0x00}\n
-	})\n
-}
 end;
-
 
 # Fix the Marvell 88SE9172 AHCI Controller
 # Credit: PJALM & RampageDev, some modifications by TheRacerMaster
