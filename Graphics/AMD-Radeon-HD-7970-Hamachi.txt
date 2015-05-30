@@ -37,10 +37,10 @@ Device (GFX0)\n
 }\n
 end;
 
-# Add the HDAU method to inject HDMI audio for the 7970
+# Add the HDAU device to inject HDMI audio for the 7970
 # Credit: RampageDev
 into device label PEG0 insert begin
-Device (HDEF)\n
+Device (HDAU)\n
 {\n
 	Name (_ADR, One)\n
 	Method (_DSM, 4, NotSerialized)\n
