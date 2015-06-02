@@ -50,6 +50,14 @@ into method label UXDV remove_entry;
 into definitionblock code_regex . insert begin Method (UXDV, 1, Serialized)\n{\n\n} end;
 into method label UXDV code_regex .* replace_matched begin %8 end;
 
+# Rename RP05/PXSX (AirPort) to RP06/ARPT
+into device label PXSX parent_label RP05 set_label begin ARPT end;
+into method label HPME parent_label RP05 code_regex PXSX replaceall_matched begin ARPT end;
+
+# Rename RP06/PXSX (FireWire) to RP06/FRWR
+into device label PXSX parent_label RP06 set_label begin FRWR end;
+into method label HPME parent_label RP06 code_regex PXSX replaceall_matched begin FRWR end;
+
 # Fix TPM
 # Credit: PJALM
 into method label _HID parent_label _SB.PCI0.LPCB.TPM code_regex (Return\s\(Zero\)\s*) removeall_matched;
@@ -148,7 +156,6 @@ Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package () {\n
-		"built-in", Buffer (One) {0x00},\n
 		"location", Buffer (0x02) {"1"},\n
 		"device_type", Buffer (0x14) {"Ethernet Controller"}\n
 	})\n
@@ -166,7 +173,6 @@ Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package () {\n
-		"built-in", Buffer (One) {0x00},\n
 		"location", Buffer (0x02) {"2"},\n
 		"device_type", Buffer (0x14) {"Ethernet Controller"}\n
 	})\n
@@ -186,14 +192,7 @@ end;
 # Use MarvellAHCIPortInjector.kext to make the controller show up in System Info > SAS/SATA Express instead of Generic AHCI - https://github.com/theracermaster/MarvellAHCIPortInjector
 into device label PXSX parent_label RP02 set_label begin SATA end;
 into method label HPME parent_label RP02 code_regex PXSX replaceall_matched begin SATA end;
-into device label SATA parent_label RP02 replace_content begin
-Name (_ADR, Zero)\n
-Name (_PRW, Package (0x02)\n
-{\n
-	0x09,\n
-	0x04\n
-})\n
-	
+into device label SATA parent_label RP02 insert begin
 Device (PRT0)\n
 {\n
 	Name (_ADR, Zero)\n
@@ -202,27 +201,8 @@ Device (PRT0)\n
 					
 Device (PRT1)\n
 {\n
-	Name (_ADR, Zero)\n
+	Name (_ADR, One)\n
 	Method (_EJ0, 1, NotSerialized) {}\n
-}\n
-					
-Method (_HPP, 0, NotSerialized)\n
-{\n
-	Return (Package (0x04)\n
-	{\n
-		0x08,\n
-		0x40,\n
-		One,\n
-		Zero\n
-	})\n
-}\n
-					
-Method (_DSM, 4, NotSerialized)\n
-{\n
-	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-	Return (Package () {\n
-		"device-id", Buffer (0x04) {0x72, 0x91, 0x00, 0x00}\n
-	})\n
 }\n
 end;
 
@@ -272,13 +252,13 @@ end;
 
 # Rename USB[X] to UHC[x]; e.g. USB1 to UHC1
 # Credit: TheRacerMaster
-into_all all label USB1 set_label begin UHC1 end;
-into_all all label USB2 set_label begin UHC2 end;
-into_all all label USB3 set_label begin UHC3 end;
-into_all all label USB4 set_label begin UHC4 end;
-into_all all label USB5 set_label begin UHC5 end;
-into_all all label USB6 set_label begin UHC6 end;
-into_all all label USB7 set_label begin UHC7 end;
+into device label USB1 set_label begin UHC1 end;
+into device label USB2 set_label begin UHC2 end;
+into device label USB3 set_label begin UHC3 end;
+into device label USB4 set_label begin UHC4 end;
+into device label USB5 set_label begin UHC5 end;
+into device label USB6 set_label begin UHC6 end;
+into device label USB7 set_label begin UHC7 end;
 into_all all code_regex USB([1-7]) replaceall_matched begin UHC%1 end;
 end;
 
