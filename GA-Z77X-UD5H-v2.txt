@@ -186,28 +186,17 @@ into_all all code_regex SAT0 replaceall_matched begin SATA end;
 into device label SAT1 remove_entry;
 end;
 
-# Fix the Marvell 88SE9172 AHCI Controller
+# Rename Marvell 88SE9172 AHCI Controller Devices
 # Credit: PJALM & RampageDev, some modifications by TheRacerMaster
 # Enables hotswap support, so drives will still appear as external (this is what it should be)
-# Use MarvellAHCIPortInjector.kext to make the controller show up in System Info > SAS/SATA Express instead of Generic AHCI - https://github.com/theracermaster/MarvellAHCIPortInjector
+# Use MarvellAHCIPortInjector.kext to make the controller show up in System Info and make drives appear as internal - https://github.com/theracermaster/MarvellAHCIPortInjector
 into device label PXSX parent_label RP02 set_label begin SATA end;
 into method label HPME parent_label RP02 code_regex PXSX replaceall_matched begin SATA end;
-into device label SATA parent_label RP02 insert begin
-Device (PRT0)\n
-{\n
-	Name (_ADR, Zero)\n
-	Method (_EJ0, 1, NotSerialized) {}\n
-}\n
-					
-Device (PRT1)\n
-{\n
-	Name (_ADR, One)\n
-	Method (_EJ0, 1, NotSerialized) {}\n
-}\n
-end;
+into device label PXSX parent_label RP08 set_label begin SATA end;
+into method label HPME parent_label RP08 code_regex PXSX replaceall_matched begin SATA end;
 
 # Patches the Intel USB3 on Intel 7 Series chipsets to allow more power output
-# Credit: PJALM, some modifcations by TheRacerMaster
+# Credit: PJALM, some modifications by TheRacerMaster
 ## Fix EHC1
 into method label _DSM parent_label EHC1 remove_entry;
 into device label EHC1 insert begin
