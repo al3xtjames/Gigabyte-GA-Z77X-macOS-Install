@@ -1,12 +1,145 @@
-# GA-Z77X-UD5H DSDT Patch v2
+# Gigabyte GA-Z77X-UD5H DSDT Patch v2
 # GA-Z77X-UD5H-v2.txt
+# Gigabyte GA-Z77X-UD5H DSDT Patch Repo - http://git.io/vIatr
 #
-# Designed for use with F16g beta BIOS; please update to that version before applying this.
-# Run a graphics patch after using this (either HD 4000 or discrete) and look at the Graphics README.
+# Fixes various errors in the stock DSDT and makes it more compatible with OS X.
+# Apply a graphics patch after using this and look at the README.
 #
-# Special thanks to PJALM, toleda, RampageDev, SJ_Underwater & Mieze for their original edits; this would not have been possible if not for their work.
+# Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, SJ_Underwater & toleda for their original edits; this would not have been possible if not for their work.
 
-# Add Darwin to the supported operating systems
+# 1. Fix errors/warnings in the stock DSDT
+
+## 2368, 3128, ResourceTag larger than Field (Size mismatch, Tag: 64 bits, Field: 32 bits)
+into method label _CRS parent_label PCI0 code_regex CreateDWordField\s\(BUF0,\s\\_SB.PCI0._Y0F._LEN,\sMSLN\) replace_matched begin CreateQWordField (BUF0, \\_SB.PCI0._Y0F._LEN, MSLN) end;
+
+## 3553, 3130, Result is not used, possible operator timeout will be missed
+into_all all code_regex (Acquire\s\(MUT0,\s0x)....\) replace_matched begin %1FFFF) end;
+
+## 2011, Use of compiler reserved name (_T_0)
+into_all all code_regex _T_([0-6]) replaceall_matched begin T_%1 end;
+
+## 8879, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label UXDV code_regex ([\s\S]*) store_%8;
+into method label UXDV remove_entry;
+into definitionblock code_regex . insert begin Method (UXDV, 1, Serialized)\n{\n\n} end;
+into method label UXDV code_regex .* replace_matched begin %8 end;
+
+## 8941, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label RRIO code_regex ([\s\S]*) store_%8;
+into method label RRIO remove_entry;
+into definitionblock code_regex . insert begin Method (RRIO, 4, Serialized)\n{\n\n} end;
+into method label RRIO code_regex .* replace_matched begin %8 end;
+
+## 9269, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label _DOD parent_label GFX0 code_regex ([\s\S]*) store_%8;
+into method label _DOD parent_label GFX0 remove_entry;
+into device label GFX0 insert begin Method (_DOD, 0, Serialized)\n{\n\n} end;
+into method label _DOD parent_label GFX0 code_regex .* replace_matched begin %8 end;
+
+## 10704, 6035, _HID suffix must be all hex digits (GH)
+into_all all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (_HID, EisaId ("PNP0C15") end;
+
+## 12137, 6136, Non-hex letters must be upper case (pnp0c14)
+into_all all code_regex pnp0c14 replaceall_matched begin PNP0C14 end;
+
+## 12160, 3115, Not all control paths return a value (_HID)
+into method label _HID parent_label _SB.PCI0.LPCB.TPM code_regex (Return\s\(Zero\)\s*) removeall_matched;
+into method label _HID parent_label _SB.PCI0.LPCB.TPM insert begin Return (Zero) end;
+
+## 12218, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label _DSM parent_label _SB.PCI0.LPCB.TPM code_regex (([\s\S])*) store_%8;
+into method label _DSM parent_label _SB.PCI0.LPCB.TPM remove_entry;
+into scope label _SB.PCI0.LPCB.TPM insert begin Method (_DSM, 4, Serialized)\n{\n} end;
+into method label _DSM parent_label _SB.PCI0.LPCB.TPM code_regex .* replace_matched begin %8 end;
+
+## 12452, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label _DSM parent_label _SB.PCI0.ITPM code_regex (([\s\S])*) store_%8;
+into method label _DSM parent_label _SB.PCI0.ITPM remove_entry;
+into device Label _SB.PCI0.ITPM insert begin Method (_DSM, 4, Serialized)\n{\n} end;
+into method label _DSM parent_label _SB.PCI0.ITPM code_regex .* replace_matched begin %8 end;
+
+## Device (SIO1) Fixes
+into device label SIO1 code_regex 0x00(,\s+//\s+L) replaceall_matched begin 0x01%1 end;
+
+## Store (0x00000000) → Store (Zero)
+into_all all code_regex \(0x00000000 replaceall_matched begin \(Zero end;
+
+## Package (0x01) → Package (One)
+into_all all code_regex Package\s\(0x01\) replaceall_matched begin Package (One) end;
+
+# 2. Rename devices to Apple device names
+
+## Device (COPR) → Device (MATH) // Math Coprocessor
+into device label COPR set_label begin MATH end;
+into_all all code_regex COPR replaceall_matched begin MATH end;
+
+## Device (EC0) → Device (EC) // Embedded Controller
+into device label EC0 set_label begin EC end;
+into scope label EC0 set_label begin EC end;
+into_all all code_regex EC0 replaceall_matched begin EC end;
+into_all all code_regex 0x000EC00 replaceall_matched begin 0x000EC000 end;
+into_all all code_regex 0xFEC0000 replaceall_matched begin 0xFEC00000 end;
+
+## Device (GFX0) → Device (IGPU) // Integrated Graphics
+into_all all code_regex GFX0\. replaceall_matched begin IGPU. end;
+into_all all code_regex \.GFX0 replaceall_matched begin .IGPU end;
+into_all all code_regex \sGFX0, replaceall_matched begin IGPU, end;
+into_all all code_regex \(GFX0 replaceall_matched begin (IGPU end;
+into_all all label GFX0 set_label begin IGPU end;
+into_all all label _SB.PCI0.GFX0 set_label begin _SB.PCI0.IGPU end;
+into_all all label \_SB.PCI0.GFX0 set_label begin \_SB.PCI0.IGPU end;
+into_all all label _SB.PCI0.GFX0.DD02 set_label begin _SB.PCI0.IGPU.DD02 end;
+into_all all label \_SB.PCI0.GFX0.DD02 set_label begin \_SB.PCI0.IGPU.DD02 end;
+into_all all label ^^GFX0 set_label begin ^^IGPU end;
+into_all all label ^GFX0 set_label begin ^IGPU end;
+
+## Device (GLAN) → Device (ETH0) // Gigabit Ethernet Controller (Intel 82579V)
+into device label GLAN set_label begin ETH0 end;
+into_all all code_regex GLAN replaceall_matched begin ETH0 end;
+
+## Device (PXSX) [RP02] → Device (SATA) // SATA Controller (Marvell 88SE9172) 
+into device label PXSX parent_label RP02 set_label begin SATA end;
+into method label HPME parent_label RP02 code_regex PXSX replaceall_matched begin SATA end;
+
+## Device (PXSX) [RP05] → Device (ARPT) // AirPort (WiFi + Bluetooth)
+into device label PXSX parent_label RP05 set_label begin ARPT end;
+into method label HPME parent_label RP05 code_regex PXSX replaceall_matched begin ARPT end;
+
+## Device (PXSX) [RP06] → Device (FRWR) // FireWire Host Controller
+into device label PXSX parent_label RP06 set_label begin FRWR end;
+into method label HPME parent_label RP06 code_regex PXSX replaceall_matched begin FRWR end;
+
+## Device (PXSX) [RP07] → Device (ETH1) // Gigabit Ethernet Controller (Qualcomm Atheros AR8161)
+into device label PXSX parent_label RP07 set_label begin ETH1 end;
+into method label HPME parent_label RP07 code_regex PXSX replaceall_matched begin ETH1 end;
+
+## Device (PXSX) [RP08] → Device (SATA) // SATA Controller (Marvell 88SE9172) 
+into device label PXSX parent_label RP08 set_label begin SATA end;
+into method label HPME parent_label RP08 code_regex PXSX replaceall_matched begin SATA end;
+
+## Device (SAT0) Device (SAT1) → Device (SATA) // SATA Controller (Intel 7-Series)
+into device label SAT0 set_label begin SATA end;
+into_all all code_regex SAT0 replaceall_matched begin SATA end;
+into device label SAT1 remove_entry end;
+
+## Device (USBx) → Device (UHCx) // Universal Host Controller (USB 1.1)
+into device label USB1 set_label begin UHC1 end;
+into device label USB2 set_label begin UHC2 end;
+into device label USB3 set_label begin UHC3 end;
+into device label USB4 set_label begin UHC4 end;
+into device label USB5 set_label begin UHC5 end;
+into device label USB6 set_label begin UHC6 end;
+into device label USB7 set_label begin UHC7 end;
+into_all all code_regex USB([1-7]) replaceall_matched begin UHC%1 end;
+end;
+
+## Device (XHC) Device (XHC1) // eXtensible Host Controller (USB 3.0)
+into device label XHC set_label begin XHC1 end;
+into_all all code_regex \^XHC\. replaceall_matched begin \^XHC1\. end;
+
+# 3. Add missing Apple devices
+
+## Add Darwin as a supported OS
 into method label _INI code_regex \{(\s+)(If\s\(_OSI\s\("Windows\s2001"\)\)) replace_matched begin  {\n
 						If (_OSI ("Darwin"))\n
 						{\n
@@ -16,77 +149,8 @@ into method label _INI code_regex \{(\s+)(If\s\(_OSI\s\("Windows\s2001"\)\)) rep
 						$2
 end;
 
-# Intel 7 Series Fixes (Fix various errors in the stock DSDT)
-# Credit: PJALM
-into_all all code_regex _T_([0-6]) replaceall_matched begin T_%1 end;
-into device label EC0 set_label begin EC end;
-into_all all code_regex EC0 replaceall_matched begin EC end;
-into method label _REG parent_label EC remove_entry;
-into device label COPR set_label begin MATH end;
-into_all all code_regex COPR replaceall_matched begin MATH end;
-into_all all code_regex 0x000EC00 replaceall_matched begin 0x000EC000 end;
-into_all all code_regex 0xFEC0000 replaceall_matched begin 0xFEC00000 end;
-into_all all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (_HID, EisaId ("PNP0C15") end;
-into device label SIO1 code_regex 0x00(,\s+//\s+L) replaceall_matched begin 0x01%1 end;
-into_all all code_regex (Acquire\s\(MUT0,\s0x)....\) replace_matched begin %1FFFF) end;
-into_all all code_regex pnp0c14 replaceall_matched begin PNP0C14 end;
-into method label _CRS parent_label PCI0 code_regex CreateDWordField\s\(BUF0,\s\\_SB.PCI0._Y0F._LEN,\sMSLN\) replace_matched begin CreateQWordField (BUF0, \\_SB.PCI0._Y0F._LEN, MSLN) end;
 
-## Method _DOD in GFX0
-into method label _DOD parent_label GFX0 code_regex ([\s\S]*) store_%8;
-into method label _DOD parent_label GFX0 remove_entry;
-into device label GFX0 insert begin Method (_DOD, 0, Serialized)\n{\n\n} end;
-into method label _DOD parent_label GFX0 code_regex .* replace_matched begin %8 end;
-
-## Method RRIO in definitionblock
-into method label RRIO code_regex ([\s\S]*) store_%8;
-into method label RRIO remove_entry;
-into definitionblock code_regex . insert begin Method (RRIO, 4, Serialized)\n{\n\n} end;
-into method label RRIO code_regex .* replace_matched begin %8 end;
-
-## Method UXDV in definitionblock
-into method label UXDV code_regex ([\s\S]*) store_%8;
-into method label UXDV remove_entry;
-into definitionblock code_regex . insert begin Method (UXDV, 1, Serialized)\n{\n\n} end;
-into method label UXDV code_regex .* replace_matched begin %8 end;
-
-# Rename RP05/PXSX (AirPort) to RP06/ARPT
-into device label PXSX parent_label RP05 set_label begin ARPT end;
-into method label HPME parent_label RP05 code_regex PXSX replaceall_matched begin ARPT end;
-
-# Rename RP06/PXSX (FireWire) to RP06/FRWR
-into device label PXSX parent_label RP06 set_label begin FRWR end;
-into method label HPME parent_label RP06 code_regex PXSX replaceall_matched begin FRWR end;
-
-# Fix TPM
-# Credit: PJALM
-into method label _HID parent_label _SB.PCI0.LPCB.TPM code_regex (Return\s\(Zero\)\s*) removeall_matched;
-into method label _HID parent_label _SB.PCI0.LPCB.TPM insert begin Return (Zero) end;
-
-## Method _DSM in _SB.PCI0.LPCB.TPM
-into method label _DSM parent_label _SB.PCI0.LPCB.TPM code_regex (([\s\S])*) store_%8;
-into method label _DSM parent_label _SB.PCI0.LPCB.TPM remove_entry;
-into scope label _SB.PCI0.LPCB.TPM insert begin Method (_DSM, 4, Serialized)\n{\n} end;
-into method label _DSM parent_label _SB.PCI0.LPCB.TPM code_regex .* replace_matched begin %8 end;
-
-## Method _DSM in _SB.PCI0.ITPM
-into method label _DSM parent_label _SB.PCI0.ITPM code_regex (([\s\S])*) store_%8;
-into method label _DSM parent_label _SB.PCI0.ITPM remove_entry;
-into device Label _SB.PCI0.ITPM insert begin Method (_DSM, 4, Serialized)\n{\n} end;
-into method label _DSM parent_label _SB.PCI0.ITPM code_regex .* replace_matched begin %8 end;
-
-# Remove the IDE devices from RP05
-# Credit: PJALM
-into device label MVL1 parent_label RP05 remove_entry;
-into device label MVL2 parent_label RP05 remove_entry;
-
-# Remove the IDE devices from PEG2
-# Credit: TheRacerMaster
-into device label MVL3 parent_label PEG2 remove_entry;
-into device label MVL4 parent_label PEG2 remove_entry;
-
-# Add the missing MCHC device (needed to load AppleSMCPDRC.kext)
-# Credit: PJALM, modified by TheRacerMaster
+## Device (MCHC) // Memory Controller Hub
 into device label MCHC parent_label PCI0 remove_entry;
 into device label PCI0 insert begin
 Device (MCHC)\n
@@ -95,21 +159,7 @@ Device (MCHC)\n
 }\n
 end;
 
-# Fix the LPC Device (needed to load AppleLPC.kext)
-# Credit: PJALM
-into method label _DSM parent_label LPCB remove_entry;
-into device label LPCB insert begin
-Method (_DSM, 4, NotSerialized)\n
-{\n
-	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-	Return (Package (){\n
-		"compatible", Buffer () {"pci8086,1e44"}\n
-	})\n
-}\n
-end;
-
-# Fix the SMBUS to allow for loading of the AppleSMBusController.kext
-# Credit: PJALM
+## Device (SBUS) // System Management Bus - Needed to load AppleSMBusController.kext
 into device label BUS0 parent_label SBUS remove_entry;
 into device label BUS1 parent_label SBUS remove_entry;
 into device label SBUS insert begin
@@ -125,135 +175,136 @@ Device (BUS1)\n
 }\n
 end;
 
-# Fix HDEF device for the Realtek ALC898 audio codec
-# Credit: toleda, modified by TheRacerMaster
-# Use cloverALC by toleda - https://github.com/toleda/audio_CloverALC
-# Added MaximumBootBeepVolume keys to remove sound assertions in OS X 10.8.5+
+# 4. Remove conflicting devices
 
-into method label _DSM parent_label HDEF remove_entry;
-into device label HDEF insert begin
-Method (_DSM, 4, NotSerialized)\n
-{\n
-	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-	Return (Package () {\n
-		"MaximumBootBeepVolume", Buffer(One) {0x4D},\n
-		"MaximumBootBeepVolumeAlt", Buffer(One) {0x00},\n
-		"layout-id", Buffer (0x04) {0x01, 0x00, 0x00, 0x00},\n
-		"PinConfigurations", Buffer (Zero) {},\n
-		"hda-gfx", Buffer (0x0A) {"onboard-1"}\n
-	})\n
-}\n
-end;
+## Device (MVL1) // IDE Controller
+into device label MVL1 parent_label RP05 remove_entry;
 
-# Fixes 'Built-in' status for Intel 82579V Gigabit Ethernet Controller
-# Use IntelMausiEthernet.kext by Mieze - http://www.insanelymac.com/forum/topic/304235-intelmausiethernetkext-for-intel-onboard-lan/
-# Credit: PJALM
-into device label GLAN set_label begin ETH0 end;
-into_all all code_regex GLAN replaceall_matched begin ETH0 end;
-into method label _DSM parent_label ETH0 remove_entry;
-into device label ETH0 insert begin
-Method (_DSM, 4, NotSerialized)\n
-{\n
-	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-	Return (Package () {\n
-		"location", Buffer (0x02) {"1"},\n
-		"device_type", Buffer (0x14) {"Ethernet Controller"}\n
-	})\n
-}\n
-end;
+## Device (MVL2) // IDE Controller
+into device label MVL2 parent_label RP05 remove_entry;
 
-# Fixes 'Built-in' status for Qualcomm Atheros AR8161 Gigabit Ethernet Controller
-# Use AtherosE2200Ethernet.kext by Mieze - http://www.insanelymac.com/forum/topic/300056-solution-for-qualcomm-atheros-ar816x-ar817x-and-killer-e220x/
-# Credit: PJALM
-into device label PXSX parent_label RP07 set_label begin ETH1 end;
-into method label HPME parent_label RP07 code_regex PXSX replaceall_matched begin ETH1 end;
-into method label _DSM parent_label ETH1 remove_entry;
-into device label ETH1 insert begin
-Method (_DSM, 4, NotSerialized)\n
-{\n
-	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-	Return (Package () {\n
-		"location", Buffer (0x02) {"2"},\n
-		"device_type", Buffer (0x14) {"Ethernet Controller"}\n
-	})\n
-}
-end;
+## Device (MVL3) // IDE Controller
+into device label MVL3 parent_label PEG2 remove_entry;
 
-# Remove unnecessary SATA devices and rename them
-# Credit: PJALM
-into device label SAT0 set_label begin SATA end;
-into_all all code_regex SAT0 replaceall_matched begin SATA end;
-into device label SAT1 remove_entry;
-end;
+## Device (MVL4) // IDE Controller
+into device label MVL4 parent_label PEG2 remove_entry;
 
-# Rename Marvell 88SE9172 AHCI Controller Devices
-# Credit: PJALM & RampageDev, some modifications by TheRacerMaster
-# Enables hotswap support, so drives will still appear as external (this is what it should be)
-# Use MarvellAHCIPortInjector.kext to make the controller show up in System Info and make drives appear as internal - https://github.com/theracermaster/MarvellAHCIPortInjector
-into device label PXSX parent_label RP02 set_label begin SATA end;
-into method label HPME parent_label RP02 code_regex PXSX replaceall_matched begin SATA end;
-into device label PXSX parent_label RP08 set_label begin SATA end;
-into method label HPME parent_label RP08 code_regex PXSX replaceall_matched begin SATA end;
+# 4. Inject device properties into existing devices
 
-# Patches the Intel USB3 on Intel 7 Series chipsets to allow more power output
-# Credit: PJALM, some modifications by TheRacerMaster
-## Fix EHC1
+## Device (EHC1) // Enhanced Host Controller (USB 2.0) - Increases power output for USB 2.0 ports
 into method label _DSM parent_label EHC1 remove_entry;
 into device label EHC1 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package () {\n
-		"AAPL,clock-id", Buffer (One) {0x01},\n
-		"built-in", Buffer (One) {0x00},\n
-		"subsystem-id", Buffer (0x04) {0x70, 0x72, 0x00, 0x00},\n
-		"subsystem-vendor-id", Buffer (0x04) {0x86, 0x80, 0x00, 0x00},\n
+		"AAPL,clock-id", Buffer() { 0x01 },\n
+		"built-in", Buffer() { 0x00 },\n
+		"subsystem-id", Buffer() { 0x70, 0x72, 0x00, 0x00 },\n
+		"subsystem-vendor-id", Buffer() { 0x86, 0x80, 0x00, 0x00 },\n
 		"AAPL,current-available", 2100,\n
 		"AAPL,current-extra", 2200,\n
 		"AAPL,current-extra-in-sleep", 1600,\n
-		"AAPL,current-in-sleep", 1000,\n
 		"AAPL,device-internal", 0x02,\n
 		"AAPL,max-port-current-in-sleep", 2100\n
 	})\n
 }\n
 end;
 
-## Fix EHC2
+## Device (EHC2) // Enhanced Host Controller (USB 2.0) - Increases power output for USB 2.0 ports
 into method label _DSM parent_label EHC2 remove_entry;
 into device label EHC2 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package () {\n
-		"AAPL,clock-id", Buffer (One) {0x01},\n
-		"built-in", Buffer (One) {0x00},\n
-		"subsystem-id", Buffer (0x04) {0x70, 0x72, 0x00, 0x00},\n
-		"subsystem-vendor-id", Buffer (0x04) {0x86, 0x80, 0x00, 0x00},\n
+		"AAPL,clock-id", Buffer() { 0x01},\n
+		"built-in", Buffer() { 0x00},\n
+		"subsystem-id", Buffer() { 0x70, 0x72, 0x00, 0x00 },\n
+		"subsystem-vendor-id", Buffer() { 0x86, 0x80, 0x00, 0x00 },\n
 		"AAPL,current-available", 2100,\n
 		"AAPL,current-extra", 2200,\n
 		"AAPL,current-extra-in-sleep", 1600,\n
-		"AAPL,current-in-sleep", 1000,\n
 		"AAPL,device-internal", 0x02,\n
 		"AAPL,max-port-current-in-sleep", 2100\n
 	})\n
 }\n
 end;
 
-# Rename USB[X] to UHC[x]; e.g. USB1 to UHC1
-# Credit: TheRacerMaster
-into device label USB1 set_label begin UHC1 end;
-into device label USB2 set_label begin UHC2 end;
-into device label USB3 set_label begin UHC3 end;
-into device label USB4 set_label begin UHC4 end;
-into device label USB5 set_label begin UHC5 end;
-into device label USB6 set_label begin UHC6 end;
-into device label USB7 set_label begin UHC7 end;
-into_all all code_regex USB([1-7]) replaceall_matched begin UHC%1 end;
+## Device (ETH0) // Gigabit Ethernet Controller (Intel 82579V)
+into method label _DSM parent_label ETH0 remove_entry;
+into device label ETH0 insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package () {\n
+		"built-in", Buffer() { "0x01" },\n
+		"device_type", Buffer() { "Ethernet Controller" },\n
+		"location", Buffer() { "1" }\n
+	})\n
+}\n
 end;
 
-# Intel Z77 USB2/USB3 Multiplexing Fix
+## Device (ETH1) // Gigabit Ethernet Controller (Qualcomm Atheros AR8161)
+into method label _DSM parent_label ETH1 remove_entry;
+into device label ETH1 insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package () {\n
+		"built-in", Buffer() { "0x01" },\n
+		"device_type", Buffer() { "Ethernet Controller" },\n
+		"location", Buffer() { "2" }\n
+	})\n
+}\n
+end;
+
+## Device (HDEF) // High Definition Audio - Needed to enable audio for Realtek ALC 271
+into method label _DSM parent_label HDEF remove_entry;
+into device label HDEF insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package () {\n
+		"MaximumBootBeepVolume", Buffer() { 0x4D },\n
+		"MaximumBootBeepVolumeAlt", Buffer() { 0x00},\n
+		"layout-id", Buffer() { 0x01, 0x00, 0x00, 0x00 },\n
+		"PinConfigurations", Buffer(Zero) {},\n
+		"hda-gfx", Buffer() { "onboard-1" }\n
+	})\n
+}\n
+end;
+
+## Device (LPCB) // Low-Pin-Count Bus - Needed to load AppleLPC.kext
+into method label _DSM parent_label LPCB remove_entry;
+into device label LPCB insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package (){\n
+		"compatible", Buffer() { "pci8086,1e44" }\n
+	})\n
+}\n
+end;
+
+# 6. Fix 7-Series USB 3.0 Multiplexing
+#Maintained by: RehabMan for: Laptop Patches
+#usb_7-series-multiplex.txt
+
+# Originally Maintained by: PJALM for: PJALM Intel7 at: Thu Aug 15 09:07:46 UTC 2013
+# Intel z77 USB2/USB3 Multiplexing Fix
 # USB3 patches in thanks to SJ_Underwater and Mieze
-# Code optimizations thanks to RehabMan and PikeRAlpha; further optimizations by RehabMan 2013-10-14
+# Code optimizations thanks to RehabMan and PikeRAlpha
+
+# Further optimizations by RehabMan 2013-10-14
+# Some modifications by shinzon for Acer Aspire laptops
+
+#
+# Note: These patches are often not universal.  If your DSDT is substantially
+# different, you may need to tweak them or refer to the various
+# guides for XHC patching to implement it correctly for your
+# board.
+#
 
 ## Fix method _OSC
 into method label _OSC parent_label PCI0 remove_entry;
@@ -263,38 +314,38 @@ Method (_OSC, 4, Serialized)\n
 {\n
 	Store (Arg3, Local0)\n
 	CreateDWordField (Local0, Zero, CDW1)\n
-	CreateDWordField (Local0, 0x04, CDW2)\n
-	CreateDWordField (Local0, 0x08, CDW3)\n
-	Store (CDW3, Local3)
-	If (LAnd (LEqual (Arg0, GUID), NEXP))\n
-	{\n
-		If (Not (And (CDW1, One)))\n
-		{\n
-			If (And (Local3, 0x02)) //was: And (CTRL, 0x02)\n
-			{\n
-				NHPG ()\n
-			}\n
-			If (And (Local3, 0x04)) //was: And (CTRL, 0x04)\n
-			{\n
-				NPME ()\n
-			}\n
-		}\n
-		If (LNotEqual (Arg1, One))\n
-		{\n
-			Or (CDW1, 0x08, CDW1)\n
-		}\n
-		If (LNotEqual (CDW3, Local3)) //was: LNotEqual (CDW3, CTRL)\n
-		{\n
-			Or (CDW1, 0x10, CDW1)\n
-		}\n
-		Store (Local3, CDW3) //was: Store(CTRL, CDW3)\n
-		Store (Local3, OSCC) //was: Store(CTRL, OSCC)\n
-	}\n
-	Else\n
-	{\n
-		Or (CDW1, 0x04, CDW1)\n
-	}\n
-	Return (Local0)\n
+	CreateDWordField (Local0, 0x08, CDW2)\n
+    //was: Store (CDW2, SUPP)\n
+    Store (CDW2, Local3) //was: Store (CDW2, CTRL))\n
+    If (LAnd (LEqual (Arg0, GUID), NEXP))\n
+    {\n
+        If (Not (And (CDW1, One)))\n
+        {\n
+            If (And (Local3, 0x02)) //was: And (CTRL, 0x02)\n
+            {\n
+                NHPG ()\n
+            }\n
+            If (And (Local3, 0x04)) //was: And (CTRL, 0x04)\n
+            {\n
+                NPME ()\n
+            }\n
+        }\n
+        If (LNotEqual (Arg1, One))\n
+        {\n
+            Or (CDW1, 0x08, CDW1)\n
+        }\n
+        If (LNotEqual (CDW2, Local3)) //was: LNotEqual (CDW2, CTRL)\n
+        {\n
+            Or (CDW1, 0x10, CDW1)\n
+        }\n
+        Store (Local3, CDW2) //was: Store(CTRL, CDW2)\n
+        Store (Local3, OSCC) //was: Store(CTRL, OSCC)\n
+    }\n
+    Else\n
+    {\n
+        Or (CDW1, 0x04, CDW1)\n
+    }\n
+    Return (Local0)\n
 }\n
 end;
 
@@ -381,86 +432,86 @@ Field (XHC2, ByteAcc, NoLock, Preserve)\n
 \n
 Method (_INI, 0, NotSerialized)\n
 {\n
-	Store (Zero, MIAI)\n
+    Store (Zero, MIAI)\n
 }\n
 \n
 Device (RHUB)\n
 {\n
 	Name (_ADR, Zero)\n
-	Name (UPCP, Package() { 0xFF, 0x03, Zero, Zero })\n
+    Name (UPCP, Package() { 0xFF, 0x03, Zero, Zero })\n
 	Device (PRT1)\n
 	{\n
 		Name (_ADR, One)\n
 		Alias (UPCP, _UPC)\n
 		Name (_PLD, Package()\n
-		{\n
-			Buffer()\n
-			{\n
-				0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-				0x69, 0x0C, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00\n
-			}\n
-		})\n
+        {\n
+            Buffer()\n
+            {\n
+                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+                0x69, 0x0C, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00\n
+            }\n
+        })\n
 		Name (MUXS, "EHCA")\n
 	}\n
 	Device (PRT2)\n
 	{\n
 		Name (_ADR, 0x02)\n
 		Alias (UPCP, _UPC)\n
-		Name (_PLD, Package()\n
-		{\n
-			Buffer()\n
-			{\n
-				0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-				0x69, 0x0C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00\n
-			}\n
-		})\n
+        Name (_PLD, Package()\n
+        {\n
+            Buffer()\n
+            {\n
+                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+                0x69, 0x0C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00\n
+            }\n
+        })\n
 		Name (MUXS, "EHCB")\n
 	}\n
 	Device (PRT3)\n
 	{\n
 		Name (_ADR, 0x03)\n
 		Alias (UPCP, _UPC)\n
-		Name (_PLD, Package()\n
-		{\n
-			Buffer()\n
-			{\n
-				0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-				0x69, 0x0C, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00\n
-			}\n
-		})\n
+        Name (_PLD, Package()\n
+        {\n
+            Buffer()\n
+            {\n
+                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+                0x69, 0x0C, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00\n
+            }\n
+        })\n
 		Name (MUXS, "EHCC")\n
 	}\n
 	Device (PRT4)\n
 	{\n
 		Name (_ADR, 0x04)\n
 		Alias (UPCP, _UPC)\n
-		Name (_PLD, Package()\n
-		{\n
-			Buffer()\n
-			{\n
-				0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-				0x69, 0x0C, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00\n
-			}\n
-		})\n
+        Name (_PLD, Package()\n
+        {\n
+            Buffer()\n
+            {\n
+                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+                0x69, 0x0C, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00\n
+            }\n
+        })\n
 		Name (MUXS, "EHCD")\n
 	}\n
 }\n
 \n
 Method (_DSM, 4, NotSerialized)\n
 {\n
-	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-	Return (Package () {\n
-		"AAPL,clock-id", Buffer (One) {0x02},\n
-		"built-in", Buffer (One) {0x00},\n
-		"subsystem-id", Buffer (0x04) {0x70, 0x72, 0x00, 0x00},\n
-		"subsystem-vendor-id", Buffer (0x04) {0x86, 0x80, 0x00, 0x00},\n
-		"AAPL,current-available", 2100,\n
-		"AAPL,current-extra", 2200,\n
-		"AAPL,current-extra-in-sleep", 1600,\n
-		"AAPL,current-in-sleep", 1000,\n
-		"AAPL,device-internal", 0x02,\n
-		"AAPL,max-port-current-in-sleep", 2100\n
-	})\n
+    If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package()\n
+    {\n
+        "AAPL,clock-id", Buffer() { 0x02 },\n
+        "built-in", Buffer() { 0x00 },\n
+        "subsystem-id", Buffer() { 0x70, 0x72, 0x00, 0x00 },\n
+        "subsystem-vendor-id", Buffer() { 0x86, 0x80, 0x00, 0x00 },\n
+        "AAPL,current-available", 2100,\n
+        "AAPL,current-extra", 2200,\n
+        "AAPL,current-extra-in-sleep", 1600,\n
+        "AAPL,device-internal", 0x02,\n
+        "AAPL,max-port-current-in-sleep", 2100,\n
+    })\n
 }\n
 \n
 Method (_PRW, 0, NotSerialized) { Return (GPRW (0x0D, 0x04)) }\n
