@@ -42,22 +42,6 @@ into_all all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (
 ## 12137, 6136, Non-hex letters must be upper case (pnp0c14)
 into_all all code_regex pnp0c14 replaceall_matched begin PNP0C14 end;
 
-## 12160, 3115, Not all control paths return a value (_HID)
-into method label _HID parent_label _SB.PCI0.LPCB.TPM code_regex (Return\s\(Zero\)\s*) removeall_matched;
-into method label _HID parent_label _SB.PCI0.LPCB.TPM insert begin Return (Zero) end;
-
-## 12218, 2120, Control Method should be made Serialized (due to creation of named objects within)
-into method label _DSM parent_label _SB.PCI0.LPCB.TPM code_regex (([\s\S])*) store_%8;
-into method label _DSM parent_label _SB.PCI0.LPCB.TPM remove_entry;
-into scope label _SB.PCI0.LPCB.TPM insert begin Method (_DSM, 4, Serialized)\n{\n} end;
-into method label _DSM parent_label _SB.PCI0.LPCB.TPM code_regex .* replace_matched begin %8 end;
-
-## 12452, 2120, Control Method should be made Serialized (due to creation of named objects within)
-into method label _DSM parent_label _SB.PCI0.ITPM code_regex (([\s\S])*) store_%8;
-into method label _DSM parent_label _SB.PCI0.ITPM remove_entry;
-into device Label _SB.PCI0.ITPM insert begin Method (_DSM, 4, Serialized)\n{\n} end;
-into method label _DSM parent_label _SB.PCI0.ITPM code_regex .* replace_matched begin %8 end;
-
 ## Device (SIO1) Fixes
 into device label SIO1 code_regex 0x00(,\s+//\s+L) replaceall_matched begin 0x01%1 end;
 
@@ -66,6 +50,22 @@ into_all all code_regex \(0x00000000 replaceall_matched begin \(Zero end;
 
 ## Package (0x01) → Package (One)
 into_all all code_regex Package\s\(0x01\) replaceall_matched begin Package (One) end;
+
+## Remove Device (WMI1)
+into device label WMI1 remove_entry;
+
+## Remove TPM Devices
+into device label TPMX remove_entry;
+into device label _SB.PCI0.ITPM remove_entry;
+into device label _SB.PCI0.LPCB.TPM remove_entry;
+into scope label _SB.PCI0.LPCB.TPM remove_entry;
+
+## Remove all stock _DSMs (Device Specific Methods)
+into_all method label _DSM remove_entry;
+
+## Remove ThermalZone Scope
+into scope label _TZ remove_entry;
+into_all method code_regex Notify\s+\(\\_TZ.* removeall_matched;
 
 # 2. Rename devices to Apple device names
 
@@ -177,22 +177,21 @@ end;
 
 # 4. Remove conflicting devices
 
-## Device (MVL1) // IDE Controller
+## Remove Device (MVL1) // IDE Controller
 into device label MVL1 parent_label RP05 remove_entry;
 
-## Device (MVL2) // IDE Controller
+## Remove Device (MVL2) // IDE Controller
 into device label MVL2 parent_label RP05 remove_entry;
 
-## Device (MVL3) // IDE Controller
+## Remove Device (MVL3) // IDE Controller
 into device label MVL3 parent_label PEG2 remove_entry;
 
-## Device (MVL4) // IDE Controller
+## Remove Device (MVL4) // IDE Controller
 into device label MVL4 parent_label PEG2 remove_entry;
 
 # 4. Inject device properties into existing devices
 
 ## Device (EHC1) // Enhanced Host Controller (USB 2.0) - Increases power output for USB 2.0 ports
-into method label _DSM parent_label EHC1 remove_entry;
 into device label EHC1 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -212,7 +211,6 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (EHC2) // Enhanced Host Controller (USB 2.0) - Increases power output for USB 2.0 ports
-into method label _DSM parent_label EHC2 remove_entry;
 into device label EHC2 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -232,7 +230,6 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (ETH0) // Gigabit Ethernet Controller (Intel 82579V)
-into method label _DSM parent_label ETH0 remove_entry;
 into device label ETH0 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -246,7 +243,6 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (ETH1) // Gigabit Ethernet Controller (Qualcomm Atheros AR8161)
-into method label _DSM parent_label ETH1 remove_entry;
 into device label ETH1 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -260,7 +256,6 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (HDEF) // High Definition Audio - Needed to enable audio for Realtek ALC 271
-into method label _DSM parent_label HDEF remove_entry;
 into device label HDEF insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -276,7 +271,6 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (LPCB) // Low-Pin-Count Bus - Needed to load AppleLPC.kext
-into method label _DSM parent_label LPCB remove_entry;
 into device label LPCB insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -292,7 +286,7 @@ end;
 #usb_7-series-multiplex.txt
 
 # Originally Maintained by: PJALM for: PJALM Intel7 at: Thu Aug 15 09:07:46 UTC 2013
-# Intel z77 USB2/USB3 Multiplexing Fix
+# Intel Z77 USB2/USB3 Multiplexing Fix
 # USB3 patches in thanks to SJ_Underwater and Mieze
 # Code optimizations thanks to RehabMan and PikeRAlpha
 
