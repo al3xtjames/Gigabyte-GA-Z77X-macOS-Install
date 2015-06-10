@@ -45,12 +45,6 @@ into_all all code_regex pnp0c14 replaceall_matched begin PNP0C14 end;
 ## Device (SIO1) Fixes
 into device label SIO1 code_regex 0x00(,\s+//\s+L) replaceall_matched begin 0x01%1 end;
 
-## Store (0x00000000) → Store (Zero)
-into_all all code_regex \(0x00000000 replaceall_matched begin \(Zero end;
-
-## Package (0x01) → Package (One)
-into_all all code_regex Package\s\(0x01\) replaceall_matched begin Package (One) end;
-
 ## Remove Device (WMI1)
 into device label WMI1 remove_entry;
 
