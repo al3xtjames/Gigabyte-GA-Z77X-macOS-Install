@@ -1,5 +1,5 @@
-# Gigabyte GA-Z77X-UD5X DSDT Patch v2
-# GA-Z77X-UD5X.txt
+# Gigabyte GA-Z77X-UD5H DSDT Patch
+# GA-Z77X-UD5H.txt
 # Gigabyte GA-Z77X-UDXX DSDT Patch Repo - http://git.io/vIatr
 #
 # Fixes various errors in the stock DSDT and makes it more compatible with OS X.
@@ -31,12 +31,6 @@ into method label RRIO remove_entry;
 into definitionblock code_regex . insert begin Method (RRIO, 4, Serialized)\n{\n\n} end;
 into method label RRIO code_regex .* replace_matched begin %8 end;
 
-## 9233, 2120, Control Method should be made Serialized (due to creation of named objects within)
-into method label OL1X parent_label _GPE code_regex ([\s\S]*) store_%8;
-into method label OL1X parent_label _GPE remove_entry;
-into scope label _GPE insert begin Method (OL1X, 0, Serialized)\n{\n\n} end;
-into method label OL1X parent_label _GPE code_regex .* replace_matched begin %8 end;
-
 ## 9269, 2120, Control Method should be made Serialized (due to creation of named objects within)
 into method label _DOD parent_label GFX0 code_regex ([\s\S]*) store_%8;
 into method label _DOD parent_label GFX0 remove_entry;
@@ -45,9 +39,6 @@ into method label _DOD parent_label GFX0 code_regex .* replace_matched begin %8 
 
 ## 10704, 6035, _HID suffix must be all hex digits (GH)
 into_all all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (_HID, EisaId ("PNP0C15") end;
-
-## 12137, 6136, Non-hex letters must be upper case (pnp0c14)
-into_all all code_regex pnp0c14 replaceall_matched begin PNP0C14 end;
 
 ## Device (SIO1) Fixes
 into device label SIO1 code_regex 0x00(,\s+//\s+L) replaceall_matched begin 0x01%1 end;
