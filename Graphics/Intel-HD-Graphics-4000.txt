@@ -12,16 +12,6 @@
 
 # 1. Enable graphics acceleration for Intel HD Graphics 4000
 
-## Rename all instances of GFX0 to IGPU for Intel HD Graphics 4000
-into device label GFX0 parent_label _SB.PCI0 set_label begin IGPU end;
-into scope label _SB.PCI0.GFX0 set_label begin _SB.PCI0.IGPU end;
-into method label GNOT parent_label IGPU code_regex (Notify\s\()GFX0(,\s[0-9A-Za-z]{4}\)) replaceall_matched begin %1IGPU%2 end;
-into method label _L06 parent_label _GPE code_regex (\\_SB.PCI0.)GFX0(.GS[A-Z]{2}) replaceall_matched begin %1IGPU%2 end;
-into method label OL1E parent_label _GPE code_regex (\\_SB.PCI0.)GFX0(\.([A-Z])LID) replaceall_matched begin %1IGPU%2 end;
-into method label _STA parent_label H_EC code_regex (Store\s\(0x[0-9A-F]{2},\s\^\^\^)GFX0(.CLID\)) replace_matched begin %1IGPU%2 end;
-into method label _WAK code_regex (\\_SB.PCI0.)GFX0(\.([A-Z])LID) replaceall_matched begin %1IGPU%2 end;
-into method label BRTN code_regex (\\_SB.PCI0.)GFX0(\.DD0\d) replaceall_matched begin %1IGPU%2 end;
-
 ## Add device properties to IGPU device for Intel HD Graphics 4000 graphics acceleration
 into method label _DSM parent_label IGPU remove_entry;
 into device label IGPU insert begin
