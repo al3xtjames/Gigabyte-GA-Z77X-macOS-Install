@@ -1,9 +1,9 @@
-# Gigabyte GA-Z77X-UD5X DSDT Patch v2
-# GA-Z77X-UD5X.txt
+# Gigabyte GA-Z77X-UP5 TH DSDT Patch v2
+# GA-Z77X-UP5—TH.txt
 # Gigabyte GA-Z77X-UDXX DSDT Patch Repo - http://git.io/vIatr
 #
 # Fixes various errors in the stock DSDT and makes it more compatible with OS X.
-# Compatible with GA-Z77X-UD5H (F16g BIOS) and GA-Z77X-UP5 TH (F12 BIOS)
+# Compatible with GA-Z77X-UP5 TH (F12 BIOS)
 # Apply a graphics patch after using this and look at the README.
 #
 # Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, SJ_Underwater & toleda for their original edits; this would not have been possible if not for their work.
@@ -46,11 +46,18 @@ into method label OL1X parent_label _GPE remove_entry;
 into scope label _GPE insert begin Method (OL1X, 0, Serialized)\n{\n\n} end;
 into method label OL1X parent_label _GPE code_regex .* replace_matched begin %8 end;
 
-## Device (SIO1) Fixes
-into device label SIO1 code_regex 0x00(,\s+//\s+L) replaceall_matched begin 0x01%1 end;
+## Remove Device (RMSC)
+into device label RMSC parent_label LPCB remove_entry;
+
+## Remove Device (SIO1) and related methods
+into device label SIO1 parent_label LPCB remove_entry;
+into method label SIOS parent_label LPCB remove_entry;
+into method label SIOW parent_label LPCB remove_entry;
+into method label PTS code_regex \\_SB\.PCI0\.LPCB\.SIOS* remove_matched;
+into method label WAK code_regex \\_SB\.PCI0\.LPCB\.SIOW* remove_matched;
 
 ## Remove Device (WMI1)
-into device label WMI1 remove_entry;
+into device label WMI1 parent_label _SB.PCI0 remove_entry;
 
 ## Remove IDE Controller Devices
 into device label MVL1 parent_label RP05 remove_entry;
@@ -227,7 +234,6 @@ Method (_DSM, 4, NotSerialized)\n
 	Return (Package () {\n
 		"built-in", Buffer() { "0x01" },\n
 		"device_type", Buffer() { "Ethernet Controller" },\n
-		"location", Buffer() { "1" }\n
 	})\n
 }\n
 end;
