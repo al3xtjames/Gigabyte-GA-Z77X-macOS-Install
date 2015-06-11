@@ -1,8 +1,9 @@
-# Gigabyte GA-Z77X-UD5H DSDT Patch v2
-# GA-Z77X-UD5H-v2.txt
-# Gigabyte GA-Z77X-UD5H DSDT Patch Repo - http://git.io/vIatr
+# Gigabyte GA-Z77X-UD5X DSDT Patch v2
+# GA-Z77X-UD5X.txt
+# Gigabyte GA-Z77X-UDXX DSDT Patch Repo - http://git.io/vIatr
 #
 # Fixes various errors in the stock DSDT and makes it more compatible with OS X.
+# Compatible with GA-Z77X-UD5H (F16g BIOS) and GA-Z77X-UP5 TH (F12 BIOS)
 # Apply a graphics patch after using this and look at the README.
 #
 # Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, SJ_Underwater & toleda for their original edits; this would not have been possible if not for their work.
@@ -30,6 +31,12 @@ into method label RRIO remove_entry;
 into definitionblock code_regex . insert begin Method (RRIO, 4, Serialized)\n{\n\n} end;
 into method label RRIO code_regex .* replace_matched begin %8 end;
 
+## 9233, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label OL1X parent_label _GPE code_regex ([\s\S]*) store_%8;
+into method label OL1X parent_label _GPE remove_entry;
+into scope label _GPE insert begin Method (OL1X, 0, Serialized)\n{\n\n} end;
+into method label OL1X parent_label _GPE code_regex .* replace_matched begin %8 end;
+
 ## 9269, 2120, Control Method should be made Serialized (due to creation of named objects within)
 into method label _DOD parent_label GFX0 code_regex ([\s\S]*) store_%8;
 into method label _DOD parent_label GFX0 remove_entry;
@@ -48,14 +55,25 @@ into device label SIO1 code_regex 0x00(,\s+//\s+L) replaceall_matched begin 0x01
 ## Remove Device (WMI1)
 into device label WMI1 remove_entry;
 
+## Remove IDE Controller Devices
+into device label MVL1 parent_label RP05 remove_entry;
+into device label MVL2 parent_label RP05 remove_entry;
+into device label MVL3 parent_label PEG2 remove_entry;
+into device label MVL4 parent_label PEG2 remove_entry;
+
+## Remove PS2 Devices and related methods
+into device label PS2K remove_entry;
+into device label PS2M remove_entry;
+into method label SIOH remove_entry;
+into method label PS2M._PRW remove_entry;
+into method label PS2K._PRW remove_entry;
+into method label _L1D code_regex \\_SB\.PCI0\.LPCB\.SIOH\s+\(\) remove_matched;
+
 ## Remove TPM Devices
 into device label TPMX remove_entry;
 into device label _SB.PCI0.ITPM remove_entry;
 into device label _SB.PCI0.LPCB.TPM remove_entry;
 into scope label _SB.PCI0.LPCB.TPM remove_entry;
-
-## Remove all stock _DSMs (Device Specific Methods)
-into_all method label _DSM remove_entry;
 
 ## Remove ThermalZone Scope
 into scope label _TZ remove_entry;
@@ -169,23 +187,10 @@ Device (BUS1)\n
 }\n
 end;
 
-# 4. Remove conflicting devices
-
-## Remove Device (MVL1) // IDE Controller
-into device label MVL1 parent_label RP05 remove_entry;
-
-## Remove Device (MVL2) // IDE Controller
-into device label MVL2 parent_label RP05 remove_entry;
-
-## Remove Device (MVL3) // IDE Controller
-into device label MVL3 parent_label PEG2 remove_entry;
-
-## Remove Device (MVL4) // IDE Controller
-into device label MVL4 parent_label PEG2 remove_entry;
-
 # 4. Inject device properties into existing devices
 
 ## Device (EHC1) // Enhanced Host Controller (USB 2.0) - Increases power output for USB 2.0 ports
+into method label _DSM parent_label EHC1 remove_entry;
 into device label EHC1 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -205,6 +210,7 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (EHC2) // Enhanced Host Controller (USB 2.0) - Increases power output for USB 2.0 ports
+into method label _DSM parent_label EHC2 remove_entry;
 into device label EHC2 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -224,6 +230,7 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (ETH0) // Gigabit Ethernet Controller (Intel 82579V)
+into method label _DSM parent_label EHC1 remove_entry
 into device label ETH0 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -237,6 +244,7 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (ETH1) // Gigabit Ethernet Controller (Qualcomm Atheros AR8161)
+into method label _DSM parent_label EHC1 remove_entry
 into device label ETH1 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -249,7 +257,8 @@ Method (_DSM, 4, NotSerialized)\n
 }\n
 end;
 
-## Device (HDEF) // High Definition Audio - Needed to enable audio for Realtek ALC 271
+## Device (HDEF) // High Definition Audio - Needed to enable audio for Realtek ALC 898
+into method label _DSM parent_label HDEF remove_entry;
 into device label HDEF insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -260,17 +269,6 @@ Method (_DSM, 4, NotSerialized)\n
 		"layout-id", Buffer() { 0x01, 0x00, 0x00, 0x00 },\n
 		"PinConfigurations", Buffer(Zero) {},\n
 		"hda-gfx", Buffer() { "onboard-1" }\n
-	})\n
-}\n
-end;
-
-## Device (LPCB) // Low-Pin-Count Bus - Needed to load AppleLPC.kext
-into device label LPCB insert begin
-Method (_DSM, 4, NotSerialized)\n
-{\n
-	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-	Return (Package (){\n
-		"compatible", Buffer() { "pci8086,1e44" }\n
 	})\n
 }\n
 end;
