@@ -47,8 +47,8 @@ into device label RMSC parent_label LPCB remove_entry;
 into device label SIO1 parent_label LPCB remove_entry;
 into method label SIOS parent_label LPCB remove_entry;
 into method label SIOW parent_label LPCB remove_entry;
-into method label PTS code_regex \\_SB\.PCI0\.LPCB\.SIOS* remove_matched;
-into method label WAK code_regex \\_SB\.PCI0\.LPCB\.SIOW* remove_matched;
+into method label PTS code_regex \\_SB.PCI0.LPCB.SIOS\s\(Arg0\) remove_matched;
+into method label WAK code_regex \\_SB.PCI0.LPCB.SIOW\s\(Arg0\) remove_matched;
 
 ## Remove Device (WMI1)
 into device label WMI1 parent_label _SB.PCI0 remove_entry;
@@ -272,8 +272,8 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 # 6. Fix 7-Series USB 3.0 Multiplexing
-#Maintained by: RehabMan for: Laptop Patches
-#usb_7-series-multiplex.txt
+# Maintained by: RehabMan for: Laptop Patches
+# usb_7-series-multiplex.txt
 
 # Originally Maintained by: PJALM for: PJALM Intel7 at: Thu Aug 15 09:07:46 UTC 2013
 # Intel Z77 USB2/USB3 Multiplexing Fix
@@ -299,37 +299,37 @@ Method (_OSC, 4, Serialized)\n
 	Store (Arg3, Local0)\n
 	CreateDWordField (Local0, Zero, CDW1)\n
 	CreateDWordField (Local0, 0x08, CDW2)\n
-    //was: Store (CDW2, SUPP)\n
-    Store (CDW2, Local3) //was: Store (CDW2, CTRL))\n
-    If (LAnd (LEqual (Arg0, GUID), NEXP))\n
-    {\n
-        If (Not (And (CDW1, One)))\n
-        {\n
-            If (And (Local3, 0x02)) //was: And (CTRL, 0x02)\n
-            {\n
-                NHPG ()\n
-            }\n
-            If (And (Local3, 0x04)) //was: And (CTRL, 0x04)\n
-            {\n
-                NPME ()\n
-            }\n
-        }\n
-        If (LNotEqual (Arg1, One))\n
-        {\n
-            Or (CDW1, 0x08, CDW1)\n
-        }\n
-        If (LNotEqual (CDW2, Local3)) //was: LNotEqual (CDW2, CTRL)\n
-        {\n
-            Or (CDW1, 0x10, CDW1)\n
-        }\n
-        Store (Local3, CDW2) //was: Store(CTRL, CDW2)\n
-        Store (Local3, OSCC) //was: Store(CTRL, OSCC)\n
-    }\n
-    Else\n
-    {\n
-        Or (CDW1, 0x04, CDW1)\n
-    }\n
-    Return (Local0)\n
+	//was: Store (CDW2, SUPP)\n
+	Store (CDW2, Local3) //was: Store (CDW2, CTRL))\n
+	If (LAnd (LEqual (Arg0, GUID), NEXP))\n
+	{\n
+		If (Not (And (CDW1, One)))\n
+		{\n
+			If (And (Local3, 0x02)) //was: And (CTRL, 0x02)\n
+			{\n
+				NHPG ()\n
+			}\n
+			If (And (Local3, 0x04)) //was: And (CTRL, 0x04)\n
+			{\n
+				NPME ()\n
+			}\n
+		}\n
+		If (LNotEqual (Arg1, One))\n
+		{\n
+			Or (CDW1, 0x08, CDW1)\n
+		}\n
+		If (LNotEqual (CDW2, Local3)) //was: LNotEqual (CDW2, CTRL)\n
+		{\n
+			Or (CDW1, 0x10, CDW1)\n
+		}\n
+		Store (Local3, CDW2) //was: Store(CTRL, CDW2)\n
+		Store (Local3, OSCC) //was: Store(CTRL, OSCC)\n
+	}\n
+	Else\n
+	{\n
+		Or (CDW1, 0x04, CDW1)\n
+	}\n
+	Return (Local0)\n
 }\n
 end;
 
@@ -416,86 +416,86 @@ Field (XHC2, ByteAcc, NoLock, Preserve)\n
 \n
 Method (_INI, 0, NotSerialized)\n
 {\n
-    Store (Zero, MIAI)\n
+	Store (Zero, MIAI)\n
 }\n
 \n
 Device (RHUB)\n
 {\n
 	Name (_ADR, Zero)\n
-    Name (UPCP, Package() { 0xFF, 0x03, Zero, Zero })\n
+	Name (UPCP, Package() { 0xFF, 0x03, Zero, Zero })\n
 	Device (PRT1)\n
 	{\n
 		Name (_ADR, One)\n
 		Alias (UPCP, _UPC)\n
 		Name (_PLD, Package()\n
-        {\n
-            Buffer()\n
-            {\n
-                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-                0x69, 0x0C, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00\n
-            }\n
-        })\n
+		{\n
+			Buffer()\n
+			{\n
+				0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+				0x69, 0x0C, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00\n
+			}\n
+		})\n
 		Name (MUXS, "EHCA")\n
 	}\n
 	Device (PRT2)\n
 	{\n
 		Name (_ADR, 0x02)\n
 		Alias (UPCP, _UPC)\n
-        Name (_PLD, Package()\n
-        {\n
-            Buffer()\n
-            {\n
-                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-                0x69, 0x0C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00\n
-            }\n
-        })\n
+		Name (_PLD, Package()\n
+		{\n
+			Buffer()\n
+			{\n
+				0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+				0x69, 0x0C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00\n
+			}\n
+		})\n
 		Name (MUXS, "EHCB")\n
 	}\n
 	Device (PRT3)\n
 	{\n
 		Name (_ADR, 0x03)\n
 		Alias (UPCP, _UPC)\n
-        Name (_PLD, Package()\n
-        {\n
-            Buffer()\n
-            {\n
-                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-                0x69, 0x0C, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00\n
-            }\n
-        })\n
+		Name (_PLD, Package()\n
+		{\n
+			Buffer()\n
+			{\n
+				0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+				0x69, 0x0C, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00\n
+			}\n
+		})\n
 		Name (MUXS, "EHCC")\n
 	}\n
 	Device (PRT4)\n
 	{\n
 		Name (_ADR, 0x04)\n
 		Alias (UPCP, _UPC)\n
-        Name (_PLD, Package()\n
-        {\n
-            Buffer()\n
-            {\n
-                0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
-                0x69, 0x0C, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00\n
-            }\n
-        })\n
+		Name (_PLD, Package()\n
+		{\n
+			Buffer()\n
+			{\n
+				0x01, 0xC6, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00,\n
+				0x69, 0x0C, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00\n
+			}\n
+		})\n
 		Name (MUXS, "EHCD")\n
 	}\n
 }\n
 \n
 Method (_DSM, 4, NotSerialized)\n
 {\n
-    If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package()\n
-    {\n
-        "AAPL,clock-id", Buffer() { 0x02 },\n
-        "built-in", Buffer() { 0x00 },\n
-        "subsystem-id", Buffer() { 0x70, 0x72, 0x00, 0x00 },\n
-        "subsystem-vendor-id", Buffer() { 0x86, 0x80, 0x00, 0x00 },\n
-        "AAPL,current-available", 2100,\n
-        "AAPL,current-extra", 2200,\n
-        "AAPL,current-extra-in-sleep", 1600,\n
-        "AAPL,device-internal", 0x02,\n
-        "AAPL,max-port-current-in-sleep", 2100,\n
-    })\n
+	{\n
+		"AAPL,clock-id", Buffer() { 0x02 },\n
+		"built-in", Buffer() { 0x00 },\n
+		"subsystem-id", Buffer() { 0x70, 0x72, 0x00, 0x00 },\n
+		"subsystem-vendor-id", Buffer() { 0x86, 0x80, 0x00, 0x00 },\n
+		"AAPL,current-available", 2100,\n
+		"AAPL,current-extra", 2200,\n
+		"AAPL,current-extra-in-sleep", 1600,\n
+		"AAPL,device-internal", 0x02,\n
+		"AAPL,max-port-current-in-sleep", 2100,\n
+	})\n
 }\n
 \n
 Method (_PRW, 0, NotSerialized) { Return (GPRW (0x0D, 0x04)) }\n
