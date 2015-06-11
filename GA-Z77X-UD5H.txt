@@ -221,7 +221,7 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (ETH0) // Gigabit Ethernet Controller (Intel 82579V)
-into method label _DSM parent_label EHC1 remove_entry
+into method label _DSM parent_label ETH0 remove_entry;
 into device label ETH0 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
@@ -235,7 +235,7 @@ Method (_DSM, 4, NotSerialized)\n
 end;
 
 ## Device (ETH1) // Gigabit Ethernet Controller (Qualcomm Atheros AR8161)
-into method label _DSM parent_label EHC1 remove_entry
+into method label _DSM parent_label ETH1 remove_entry;
 into device label ETH1 insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
