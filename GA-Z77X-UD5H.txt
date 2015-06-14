@@ -14,10 +14,10 @@
 into method label _CRS parent_label PCI0 code_regex CreateDWordField\s\(BUF0,\s\\_SB.PCI0._Y0F._LEN,\sMSLN\) replace_matched begin CreateQWordField (BUF0, \\_SB.PCI0._Y0F._LEN, MSLN) end;
 
 ## 3553, 3130, Result is not used, possible operator timeout will be missed
-into_all all code_regex (Acquire\s\(MUT0,\s0x)....\) replace_matched begin %1FFFF) end;
+into all code_regex (Acquire\s\(MUT0,\s0x)....\) replace_matched begin %1FFFF) end;
 
 ## 2011, Use of compiler reserved name (_T_0)
-into_all all code_regex _T_([0-6]) replaceall_matched begin T_%1 end;
+into all code_regex _T_([0-6]) replaceall_matched begin T_%1 end;
 
 ## 8879, 2120, Control Method should be made Serialized (due to creation of named objects within)
 into method label UXDV code_regex ([\s\S]*) store_%8;
@@ -38,7 +38,7 @@ into device label GFX0 insert begin Method (_DOD, 0, Serialized)\n{\n\n} end;
 into method label _DOD parent_label GFX0 code_regex .* replace_matched begin %8 end;
 
 ## 10704, 6035, _HID suffix must be all hex digits (GH)
-into_all all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (_HID, EisaId ("PNP0C15") end;
+into all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (_HID, EisaId ("PNP0C15") end;
 
 ## Remove Device (RMSC)
 into device label RMSC parent_label LPCB remove_entry;
@@ -81,31 +81,31 @@ into_all method code_regex Notify\s+\(\\_TZ.* removeall_matched;
 
 ## Device (COPR) → Device (MATH) // Math Coprocessor
 into device label COPR set_label begin MATH end;
-into_all all code_regex COPR replaceall_matched begin MATH end;
+into all code_regex COPR replaceall_matched begin MATH end;
 
 ## Device (EC0) → Device (EC) // Embedded Controller
 into device label EC0 set_label begin EC end;
 into scope label EC0 set_label begin EC end;
-into_all all code_regex EC0 replaceall_matched begin EC end;
-into_all all code_regex 0x000EC00 replaceall_matched begin 0x000EC000 end;
-into_all all code_regex 0xFEC0000 replaceall_matched begin 0xFEC00000 end;
+into all code_regex EC0 replaceall_matched begin EC end;
+into all code_regex 0x000EC00 replaceall_matched begin 0x000EC000 end;
+into all code_regex 0xFEC0000 replaceall_matched begin 0xFEC00000 end;
 
 ## Device (GFX0) → Device (IGPU) // Integrated Graphics
-into_all all code_regex GFX0\. replaceall_matched begin IGPU. end;
-into_all all code_regex \.GFX0 replaceall_matched begin .IGPU end;
-into_all all code_regex \sGFX0, replaceall_matched begin IGPU, end;
-into_all all code_regex \(GFX0 replaceall_matched begin (IGPU end;
-into_all all label GFX0 set_label begin IGPU end;
-into_all all label _SB.PCI0.GFX0 set_label begin _SB.PCI0.IGPU end;
-into_all all label \_SB.PCI0.GFX0 set_label begin \_SB.PCI0.IGPU end;
-into_all all label _SB.PCI0.GFX0.DD02 set_label begin _SB.PCI0.IGPU.DD02 end;
-into_all all label \_SB.PCI0.GFX0.DD02 set_label begin \_SB.PCI0.IGPU.DD02 end;
-into_all all label ^^GFX0 set_label begin ^^IGPU end;
-into_all all label ^GFX0 set_label begin ^IGPU end;
+into all code_regex GFX0\. replaceall_matched begin IGPU. end;
+into all code_regex \.GFX0 replaceall_matched begin .IGPU end;
+into all code_regex \sGFX0, replaceall_matched begin IGPU, end;
+into all code_regex \(GFX0 replaceall_matched begin (IGPU end;
+into all label GFX0 set_label begin IGPU end;
+into all label _SB.PCI0.GFX0 set_label begin _SB.PCI0.IGPU end;
+into all label \_SB.PCI0.GFX0 set_label begin \_SB.PCI0.IGPU end;
+into all label _SB.PCI0.GFX0.DD02 set_label begin _SB.PCI0.IGPU.DD02 end;
+into all label \_SB.PCI0.GFX0.DD02 set_label begin \_SB.PCI0.IGPU.DD02 end;
+into all label ^^GFX0 set_label begin ^^IGPU end;
+into all label ^GFX0 set_label begin ^IGPU end;
 
 ## Device (GLAN) → Device (ETH0) // Gigabit Ethernet Controller (Intel 82579V)
 into device label GLAN set_label begin ETH0 end;
-into_all all code_regex GLAN replaceall_matched begin ETH0 end;
+into all code_regex GLAN replaceall_matched begin ETH0 end;
 
 ## Device (PXSX) [RP02] → Device (SATA) // SATA Controller (Marvell 88SE9172) 
 into device label PXSX parent_label RP02 set_label begin SATA end;
@@ -129,7 +129,7 @@ into method label HPME parent_label RP08 code_regex PXSX replaceall_matched begi
 
 ## Device (SAT0) Device (SAT1) → Device (SATA) // SATA Controller (Intel 7-Series)
 into device label SAT0 set_label begin SATA end;
-into_all all code_regex SAT0 replaceall_matched begin SATA end;
+into all code_regex SAT0 replaceall_matched begin SATA end;
 into device label SAT1 remove_entry end;
 
 ## Device (USBx) → Device (UHCx) // Universal Host Controller (USB 1.1)
@@ -140,12 +140,12 @@ into device label USB4 set_label begin UHC4 end;
 into device label USB5 set_label begin UHC5 end;
 into device label USB6 set_label begin UHC6 end;
 into device label USB7 set_label begin UHC7 end;
-into_all all code_regex USB([1-7]) replaceall_matched begin UHC%1 end;
+into all code_regex USB([1-7]) replaceall_matched begin UHC%1 end;
 end;
 
 ## Device (XHC) Device (XHC1) // eXtensible Host Controller (USB 3.0)
 into device label XHC set_label begin XHC1 end;
-into_all all code_regex \^XHC\. replaceall_matched begin \^XHC1\. end;
+into all code_regex \^XHC\. replaceall_matched begin \^XHC1\. end;
 
 # 3. Add missing Apple devices
 
@@ -373,7 +373,7 @@ into device label EHC2 insert begin Name (XHCN, One)\n end;
 
 ## Fix XHC1
 into device label XHC set_label begin XHC1 end;
-into_all all code_regex XHC(?=\W) replaceall_matched begin XHC1 end;
+into all code_regex XHC(?=\W) replaceall_matched begin XHC1 end;
 into method label _WAK code_regex \_SB.PCI0.XHC1.XWAK replace_matched begin _SB.PCI0.XHC1._INI end;
 
 ## Rewrite XHC/XHC1 device
