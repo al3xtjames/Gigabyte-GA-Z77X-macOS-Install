@@ -1,3 +1,6 @@
 [submodule "externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch"]
 	path = externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch
 	url = https://github.com/theracermaster/Gigabyte-GA-Z77X-Graphics-DSDT-Patch
+[submodule "externals/ssdtPRGen.sh"]
+	path = externals/ssdtPRGen.sh
+	url = https://github.com/Piker-Alpha/ssdtPRGen.sh
