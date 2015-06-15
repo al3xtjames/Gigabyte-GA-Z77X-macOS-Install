@@ -145,10 +145,10 @@ inject_hda()
 
 	echo "[HDA]: Installing created AppleHDA"$codecModel".kext"
 	echo "NOTE: Root access is required."
-	#sudo cp -R audio/$codecShortName/AppleHDA$codecModel.kext /System/Library/Extensions
+	sudo cp -R audio/$codecShortName/AppleHDA$codecModel.kext /System/Library/Extensions
 
 	echo "[HDA]: Rebuilding kext caches"
-	#sudo kextcache -prelinked-kernel
+	sudo kextcache -prelinked-kernel
 }
 
 install_clover()
