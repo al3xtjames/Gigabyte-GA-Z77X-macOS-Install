@@ -1,0 +1,265 @@
+# Gigabyte GA-Z77X-D3H DSDT Patch
+# D3H-main.txt
+#
+# Fixes various errors in the stock DSDT and makes it more compatible with OS X.
+# Compatible with GA-Z77X-D3H (F18k BIOS)
+# Apply a graphics patch after using this and look at the README.
+#
+# Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, SJ_Underwater & toleda for their original edits; this would not have been possible if not for their work.
+
+# 1. Fix errors/warnings in the stock DSDT
+
+## 2332, 3128, ResourceTag larger than Field (Size mismatch, Tag: 64 bits, Field: 32 bits)
+into method label _CRS parent_label PCI0 code_regex CreateDWordField\s\(BUF0,\s\\_SB.PCI0._Y0F._LEN,\sMSLN\) replace_matched begin CreateQWordField (BUF0, \\_SB.PCI0._Y0F._LEN, MSLN) end;
+
+## 3517, 3130, Result is not used, possible operator timeout will be missed
+into all code_regex (Acquire\s\(MUT0,\s0x)....\) replace_matched begin %1FFFF) end;
+
+## 2011, Use of compiler reserved name (_T_0)
+into all code_regex _T_([0-6]) replaceall_matched begin T_%1 end;
+
+## 8210, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label UXDV code_regex ([\s\S]*) store_%8;
+into method label UXDV remove_entry;
+into definitionblock code_regex . insert begin Method (UXDV, 1, Serialized)\n{\n\n} end;
+into method label UXDV code_regex .* replace_matched begin %8 end;
+
+## 8272, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label RRIO code_regex ([\s\S]*) store_%8;
+into method label RRIO remove_entry;
+into definitionblock code_regex . insert begin Method (RRIO, 4, Serialized)\n{\n\n} end;
+into method label RRIO code_regex .* replace_matched begin %8 end;
+
+## 8600, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label _DOD parent_label GFX0 code_regex ([\s\S]*) store_%8;
+into method label _DOD parent_label GFX0 remove_entry;
+into device label GFX0 insert begin Method (_DOD, 0, Serialized)\n{\n\n} end;
+into method label _DOD parent_label GFX0 code_regex .* replace_matched begin %8 end;
+
+## 12119, 6035, _HID suffix must be all hex digits (GH)
+into all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (_HID, EisaId ("PNP0C15") end;
+
+## Remove Device (RMSC)
+into device label RMSC parent_label LPCB remove_entry;
+
+## Remove Device (SIO1) and related methods
+into device label SIO1 parent_label LPCB remove_entry;
+into method label SIOS parent_label LPCB remove_entry;
+into method label SIOW parent_label LPCB remove_entry;
+into method label PTS code_regex \\_SB.PCI0.LPCB.SIOS\s\(Arg0\) remove_matched;
+into method label WAK code_regex \\_SB.PCI0.LPCB.SIOW\s\(Arg0\) remove_matched;
+
+## Remove Device (WMI1)
+into device label WMI1 parent_label _SB.PCI0 remove_entry;
+
+## Remove IDE Controller Devices
+into device label MVL1 parent_label RP05 remove_entry;
+into device label MVL2 parent_label RP05 remove_entry;
+into device label MVL3 parent_label PEG2 remove_entry;
+into device label MVL4 parent_label PEG2 remove_entry;
+
+## Remove PS2 Devices and related methods
+into device label PS2K remove_entry;
+into device label PS2M remove_entry;
+into method label SIOH remove_entry;
+into method label PS2M._PRW remove_entry;
+into method label PS2K._PRW remove_entry;
+into method label _L1D code_regex \\_SB\.PCI0\.LPCB\.SIOH\s+\(\) remove_matched;
+
+## Remove TPM Devices
+into device label TPMX remove_entry;
+into device label _SB.PCI0.ITPM remove_entry;
+into device label _SB.PCI0.LPCB.TPM remove_entry;
+into scope label _SB.PCI0.LPCB.TPM remove_entry;
+
+## Remove ThermalZone Scope
+into scope label _TZ remove_entry;
+into_all method code_regex Notify\s+\(\\_TZ.* removeall_matched;
+
+# 2. Rename devices to Apple device names
+
+## Device (COPR) → Device (MATH) // Math Coprocessor
+into device label COPR set_label begin MATH end;
+into all code_regex COPR replaceall_matched begin MATH end;
+
+## Device (EC0) → Device (EC) // Embedded Controller
+into device label EC0 set_label begin EC end;
+into scope label EC0 set_label begin EC end;
+into all code_regex EC0 replaceall_matched begin EC end;
+into all code_regex 0x000EC00 replaceall_matched begin 0x000EC000 end;
+into all code_regex 0xFEC0000 replaceall_matched begin 0xFEC00000 end;
+
+## Device (GFX0) → Device (IGPU) // Integrated Graphics
+into all code_regex GFX0\. replaceall_matched begin IGPU. end;
+into all code_regex \.GFX0 replaceall_matched begin .IGPU end;
+into all code_regex \sGFX0, replaceall_matched begin IGPU, end;
+into all code_regex \(GFX0 replaceall_matched begin (IGPU end;
+into all label GFX0 set_label begin IGPU end;
+into all label _SB.PCI0.GFX0 set_label begin _SB.PCI0.IGPU end;
+into all label \_SB.PCI0.GFX0 set_label begin \_SB.PCI0.IGPU end;
+into all label _SB.PCI0.GFX0.DD02 set_label begin _SB.PCI0.IGPU.DD02 end;
+into all label \_SB.PCI0.GFX0.DD02 set_label begin \_SB.PCI0.IGPU.DD02 end;
+into all label ^^GFX0 set_label begin ^^IGPU end;
+into all label ^GFX0 set_label begin ^IGPU end;
+
+## Device (GLAN) → Device (GIGE) // Gigabit Ethernet Controller (Intel 82579V)
+into device label GLAN set_label begin GIGE end;
+into all code_regex GLAN replaceall_matched begin GIGE end;
+
+## Device (PXSX) [RP05] → Device (ARPT) // AirPort (WiFi + Bluetooth)
+into device label PXSX parent_label RP05 set_label begin ARPT end;
+into method label HPME parent_label RP05 code_regex PXSX replaceall_matched begin ARPT end;
+
+## Device (PXSX) [RP06] → Device (FRWR) // FireWire Host Controller
+into device label PXSX parent_label RP06 set_label begin FRWR end;
+into method label HPME parent_label RP06 code_regex PXSX replaceall_matched begin FRWR end;
+
+## Device (PXSX) [RP08] → Device (SATA) // SATA Controller (Marvell 88SE9172) 
+into device label PXSX parent_label RP08 set_label begin SATA end;
+into method label HPME parent_label RP08 code_regex PXSX replaceall_matched begin SATA end;
+
+## Device (SAT0) Device (SAT1) → Device (SATA) // SATA Controller (Intel 7-Series)
+into device label SAT0 set_label begin SATA end;
+into all code_regex SAT0 replaceall_matched begin SATA end;
+into device label SAT1 remove_entry end;
+
+## Device (USBx) → Device (UHCx) // Universal Host Controller (USB 1.1)
+into device label USB1 set_label begin UHC1 end;
+into device label USB2 set_label begin UHC2 end;
+into device label USB3 set_label begin UHC3 end;
+into device label USB4 set_label begin UHC4 end;
+into device label USB5 set_label begin UHC5 end;
+into device label USB6 set_label begin UHC6 end;
+into device label USB7 set_label begin UHC7 end;
+into all code_regex USB([1-7]) replaceall_matched begin UHC%1 end;
+
+## Device (XHC) Device (XHC1) // eXtensible Host Controller (USB 3.0)
+into device label XHC set_label begin XHC1 end;
+into all code_regex \^XHC\. replaceall_matched begin \^XHC1\. end;
+
+# 3. Add missing Apple devices
+
+## Add Darwin as a supported OS
+into method label _INI code_regex \{(\s+)(If\s\(_OSI\s\("Windows\s2001"\)\)) replace_matched begin  {\n
+						If (_OSI ("Darwin"))\n
+						{\n
+							Store (0x2710, OSYS)\n
+						}\n
+\n
+						$2
+end;
+
+
+## Device (MCHC) // Memory Controller Hub
+into device label MCHC parent_label PCI0 remove_entry;
+into device label PCI0 insert begin
+Device (MCHC)\n
+{\n
+	Name (_ADR, Zero)\n
+}\n
+end;
+
+## Device (SBUS) // System Management Bus - Needed to load AppleSMBusController.kext
+into device label BUS0 parent_label SBUS remove_entry;
+into device label BUS1 parent_label SBUS remove_entry;
+into device label SBUS insert begin
+Device (BUS0)\n
+{\n
+	Name (_CID, "smbus")\n
+	Name (_ADR, Zero)\n
+}\n
+Device (BUS1)\n
+{\n
+	Name (_CID, "smbus")\n
+	Name (_ADR, One)\n
+}\n
+end;
+
+# 4. Inject device properties into existing devices
+
+## Device (EHC1) // Enhanced Host Controller (USB 2.0) - Increases power output for USB 2.0 ports
+into method label _DSM parent_label EHC1 remove_entry;
+into device label EHC1 insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package () {\n
+		"AAPL,clock-id", Buffer() { 0x01 },\n
+		"built-in", Buffer() { 0x00 },\n
+		"subsystem-id", Buffer() { 0x70, 0x72, 0x00, 0x00 },\n
+		"subsystem-vendor-id", Buffer() { 0x86, 0x80, 0x00, 0x00 },\n
+		"AAPL,current-available", 2100,\n
+		"AAPL,current-extra", 2200,\n
+		"AAPL,current-extra-in-sleep", 1600,\n
+		"AAPL,device-internal", 0x02,\n
+		"AAPL,max-port-current-in-sleep", 2100\n
+	})\n
+}\n
+end;
+
+## Device (EHC2) // Enhanced Host Controller (USB 2.0) - Increases power output for USB 2.0 ports
+into method label _DSM parent_label EHC2 remove_entry;
+into device label EHC2 insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package () {\n
+		"AAPL,clock-id", Buffer() { 0x01},\n
+		"built-in", Buffer() { 0x00},\n
+		"subsystem-id", Buffer() { 0x70, 0x72, 0x00, 0x00 },\n
+		"subsystem-vendor-id", Buffer() { 0x86, 0x80, 0x00, 0x00 },\n
+		"AAPL,current-available", 2100,\n
+		"AAPL,current-extra", 2200,\n
+		"AAPL,current-extra-in-sleep", 1600,\n
+		"AAPL,device-internal", 0x02,\n
+		"AAPL,max-port-current-in-sleep", 2100\n
+	})\n
+}\n
+end;
+
+## Device (GIGE) // Gigabit Ethernet Controller (Qualcomm Atheros AR8161)
+into method label _DSM parent_label GIGE remove_entry;
+into device label GIGE insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package () {\n
+		"built-in", Buffer() { "0x01" },\n
+		"device_type", Buffer() { "Ethernet Controller" },\n
+	})\n
+}\n
+end;
+
+## Device (HDEF) // High Definition Audio - Needed to enable audio for Realtek ALC 898
+into method label _DSM parent_label HDEF remove_entry;
+into device label HDEF insert begin
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package () {\n
+		"MaximumBootBeepVolume", Buffer() { 0x4D },\n
+		"MaximumBootBeepVolumeAlt", Buffer() { 0x00},\n
+		"layout-id", Buffer() { 12, 0x00, 0x00, 0x00 },\n
+		"PinConfigurations", Buffer(Zero) {},\n
+		"hda-gfx", Buffer() { "onboard-1" }\n
+	})\n
+}\n
+end;
+
+## Device (XHC1) // eXtensible Host Controller (USB 3.0)
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package()\n
+	{\n
+		"AAPL,clock-id", Buffer() { 0x02 },\n
+		"built-in", Buffer() { 0x00 },\n
+		"subsystem-id", Buffer() { 0x70, 0x72, 0x00, 0x00 },\n
+		"subsystem-vendor-id", Buffer() { 0x86, 0x80, 0x00, 0x00 },\n
+		"AAPL,current-available", 2100,\n
+		"AAPL,current-extra", 2200,\n
+		"AAPL,current-extra-in-sleep", 1600,\n
+		"AAPL,device-internal", 0x02,\n
+		"AAPL,max-port-current-in-sleep", 2100,\n
+	})\n
+}\n

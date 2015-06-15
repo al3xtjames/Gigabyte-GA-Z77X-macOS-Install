@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.theracermaster.MarvellAHCIPortInjector</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>MarvellAHCIPortInjector</string>
+	<key>CFBundlePackageType</key>
+	<string>KEXT</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>IOKitPersonalities</key>
+	<dict>
+		<key>AppleAHCIDiskDriver</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.iokit.IOAHCIBlockStorage</string>
+			<key>IOClass</key>
+			<string>AppleAHCIDiskDriver</string>
+			<key>IOProbeScore</key>
+			<integer>3000</integer>
+			<key>IOProviderClass</key>
+			<string>IOAHCIDevice</string>
+			<key>Protocol Characteristics</key>
+			<dict>
+				<key>Physical Interconnect</key>
+				<string>SATA</string>
+				<key>Physical Interconnect Location</key>
+				<string>Internal</string>
+			</dict>
+		</dict>
+		<key>Marvell 88SE9120</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9120</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91201b4b</string>
+			<key>IOProbeScore</key>
+			<integer>3000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9123</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9123</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91231b4b</string>
+			<key>IOProbeScore</key>
+			<integer>3000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9125</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9125</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91251b4b</string>
+			<key>IOProbeScore</key>
+			<integer>3000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9128</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9128</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91281b4b</string>
+			<key>IOProbeScore</key>
+			<integer>3000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9172</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9172</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91721b4b</string>
+			<key>IOProbeScore</key>
+			<integer>3000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9230</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9230</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x92301b4b</string>
+			<key>IOProbeScore</key>
+			<integer>3000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+	</dict>
+	<key>OSBundleRequired</key>
+	<string>Local-Root</string>
+</dict>
+</plist>

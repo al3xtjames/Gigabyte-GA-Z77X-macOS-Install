@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>HDAConfigDefault</key>
+	<array>
+		<dict>
+			<key>CodecID</key>
+			<integer>285606977</integer>
+			<key>ConfigData</key>
+			<data>IkccECJHHUAiRx4RIkcfASJXHPAiVx0AIlceACJXH0AiZxzwImcdACJnHgAiZx9AIncc8CJ3HQAidx4AIncfQCKHHPAihx0AIoceACKHH0AilxzwIpcdACKXHgAilx9AIqccUCKnHTAipx6BIqcfASK3HGAitx2QIrceoSK3H5AixxzwIscdACLHHgAixx9AItccICLXHSEi1x5FItcfByLnHPAi5x0AIuceACLnH0Ai9xzwIvcdACL3HgAi9x9A</data>
+			<key>FuncGroup</key>
+			<integer>1</integer>
+			<key>LayoutID</key>
+			<integer>12</integer>
+		</dict>
+	</array>
+</dict>
+</plist>

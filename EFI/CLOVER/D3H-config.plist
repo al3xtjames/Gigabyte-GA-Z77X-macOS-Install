@@ -118,19 +118,99 @@
 		<array>
 			<dict>
 				<key>Comment</key>
-				<string>Realtek ALC 898 Patch #1</string>
+				<string>Disable Intel &amp; Fresco Logic USB 3.0 controllers check</string>
 				<key>Find</key>
-				<data>ixnUEQ==</data>
+				<data>9oDUAAAAgHU0</data>
 				<key>Name</key>
 				<string>AppleHDA</string>
 				<key>Replace</key>
-				<data>mQjsEA==</data>
+				<data>9oDUAAAAgOs0</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
-				<string>Realtek ALC 898 Patch #2</string>
+				<string>Disable XHCI 1.0 check</string>
 				<key>Find</key>
-				<data>gxnUEQ==</data>
+				<data>QbzHAgDgPQABAAA=</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>QbzHAgDgPQAAAAA=</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Disable XHCI sleep code</string>
+				<key>Find</key>
+				<data>xoDIAAAAAQ==</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>xoDIAAAAAA==</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Enable PCI Power Management</string>
+				<key>Find</key>
+				<data>dU1Ii7voAQAA</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>601Ii7voAQAA</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Patch MSI or pin interrupts #1</string>
+				<key>Find</key>
+				<data>gUkIAABAAA==</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>AAAAAA==</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Patch MSI or pin interrupts #2</string>
+				<key>Find</key>
+				<data>QcdHCAAAQAA=</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>QcdHCAAAAAA=</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Patch MSI or pin interrupts #3</string>
+				<key>Find</key>
+				<data>QcdHCAAAQAA=</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>QcdHCAAAAAA=</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>VIA VT2021 Audio Patch #1</string>
+				<key>Find</key>
+				<data>hAjsEA==</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>AAAAAA==</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>VIA VT2021 Audio Patch #2</string>
+				<key>Find</key>
+				<data>hBnUEQ==</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>QQQGEQ==</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>VIA VT2021 Audio Patch #3</string>
+				<key>Find</key>
+				<data>hQjsEA==</data>
 				<key>Name</key>
 				<string>AppleHDA</string>
 				<key>Replace</key>

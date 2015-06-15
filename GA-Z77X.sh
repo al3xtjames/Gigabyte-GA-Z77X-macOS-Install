@@ -1,9 +1,28 @@
 #/bin/bash
 #
-# GA-Z77X-UD5H Post Installation Script
+# GA-Z77X OS X Post Installation Script
 
 REPO=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 GIT_DIR="${REPO}"
+
+check_motherboard()
+{
+	motherboard=$(bdmesg | grep "Z77X" | cut -d '-' -f2 | strings)
+	echo "Detected Gigabyte GA-Z77X-"$motherboard "motherboard."
+	case $motherboard in
+		D3H)
+			codecName="VIA VT2021"
+			codecShortName="VT2021"
+			codecModel="2021";;
+		UD5H)
+			codecName="Realtek ALC898"
+			codecShortName="ALC898"
+			codecModel="898";;
+		*)
+			echo "Motherboard "$board "is unsupported by this script."
+			exit 0;;
+	esac
+}
 
 git_update()
 {
@@ -41,14 +60,16 @@ decompile_dsdt()
 	echo "Decompilation log available at logs/dsdt_decompile.log"
 	mv /$mountPoint/EFI/CLOVER/ACPI/origin/DSDT.dsl DSDT/decompiled/DSDT.dsl
 	sed -e s,//Volumes/EFI/EFI/CLOVER/ACPI/origin/,,g -i "" DSDT/decompiled/DSDT.dsl
+
+	diskutil unmount /Volumes/EFI &> /dev/null
 }
 
 patch_dsdt()
 {
 	cd "${REPO}"
 
-	echo "[DSDT]: Applying GA-Z77X-UD5H main patch"
-	tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/main.txt DSDT/decompiled/DSDT.dsl | tee logs/dsdt_patch_main.log
+	echo "[DSDT]: Applying GA-Z77X-"$motherboard" main patch"
+	tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/$motherboard-main.txt DSDT/decompiled/DSDT.dsl | tee logs/dsdt_patch_main.log
 
 	if [[ -z $(system_profiler -detailLevel mini | grep "GeForce") ]] && [[ -z $(system_profiler -detailLevel mini | grep "Radeon") ]]; then
 		echo "[DSDT]: No discrete GPU detected, assuming integrated GPU only"
@@ -57,7 +78,7 @@ patch_dsdt()
 	else
 		echo "[DSDT]: Discrete GPU detected, assuming both integrated+discrete GPUs"
 		echo "[DSDT]: Applying Intel HD Graphics 4000 (AirPlay) patch"
-		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000-AirPlay.txt DSDT/decompiled/DSDT.dsl  | tee logs/dsdt_patch_Intel-HD-Graphics-4000-AirPlay.log
+		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000-AirPlay.txt DSDT/decompiled/DSDT.dsl | tee logs/dsdt_patch_Intel-HD-Graphics-4000-AirPlay.log
 	fi
 
 	echo "[DSDT] Compiling patched DSDT"
@@ -89,19 +110,19 @@ inject_hda()
 {
 	cd "${REPO}"
 
-	echo "[HDA]: Creating AppleHDA injector kext for Realtek ALC 898"
-	mkdir -p audio/AppleHDA898.kext/Contents
-	mkdir audio/AppleHDA898.kext/Contents/MacOS
+	echo "[HDA]: Creating AppleHDA injector kext for "$codecName
+	mkdir -p audio/$codecShortName/AppleHDA$codecModel.kext/Contents
+	mkdir audio/$codecShortName/AppleHDA$codecModel.kext/Contents/MacOS
 
-	echo "[HDA]: Creating symbolic link to AppleHDA binary in AppleHDA898.kext"
-	ln -s /System/Library/Extensions/AppleHDA.kext/Contents/MacOS/AppleHDA audio/AppleHDA898.kext/Contents/MacOS/AppleHDA
+	echo "[HDA]: Creating symbolic link to AppleHDA binary in AppleHDA"$codecModel".kext"
+	ln -s /System/Library/Extensions/AppleHDA.kext/Contents/MacOS/AppleHDA audio/$codecShortName/AppleHDA$codecModel.kext/Contents/MacOS/AppleHDA
 
-	echo "[HDA]: Copying XML files to AppleHDA898.kext"
-	mkdir audio/AppleHDA898.kext/Contents/Resources
-	cp -R audio/*.zlib audio/AppleHDA898.kext/Contents/Resources/
+	echo "[HDA]: Copying XML files to AppleHDA"$codecModel".kext"
+	mkdir audio/$codecShortName/AppleHDA$codecModel.kext/Contents/Resources
+	cp -R audio/$codecShortName/*.zlib audio/$codecShortName/AppleHDA$codecModel.kext/Contents/Resources/
 
-	echo "[HDA]: Modifying Info.plist in AppleHDA898.kext"
-	plist=audio/AppleHDA898.kext/Contents/Info.plist
+	echo "[HDA]: Modifying Info.plist in AppleHDA"$codecModel".kext"
+	plist=audio/$codecShortName/AppleHDA$codecModel.kext/Contents/Info.plist
 	cp /System/Library/Extensions/AppleHDA.kext/Contents/Info.plist $plist
 	replace=`/usr/libexec/plistbuddy -c "Print :NSHumanReadableCopyright" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
 	/usr/libexec/plistbuddy -c "Set :NSHumanReadableCopyright '$replace'" $plist
@@ -119,21 +140,20 @@ inject_hda()
 	/usr/libexec/plistbuddy -c "Delete ':IOKitPersonalities:HDA Hardware Config Resource:PostConstructionInitialization'" $plist
 	/usr/libexec/plistbuddy -c "Add ':IOKitPersonalities:HDA Hardware Config Resource:IOProbeScore' integer" $plist
 	/usr/libexec/plistbuddy -c "Set ':IOKitPersonalities:HDA Hardware Config Resource:IOProbeScore' 2000" $plist
-	/usr/libexec/plistbuddy -c "Merge audio/hdacd.plist ':IOKitPersonalities:HDA Hardware Config Resource'" $plist
+	/usr/libexec/plistbuddy -c "Merge audio/$codecShortName/hdacd.plist ':IOKitPersonalities:HDA Hardware Config Resource'" $plist
 
-	echo "[HDA]: Installing created AppleHDA898.kext"
+	echo "[HDA]: Installing created AppleHDA"$codecModel".kext"
 	echo "NOTE: Root access is required."
-	sudo cp -R audio/AppleHDA898.kext /System/Library/Extensions
+	#sudo cp -R audio/$codecShortName/AppleHDA$codecModel.kext /System/Library/Extensions
 
 	echo "[HDA]: Rebuilding kext caches"
-	sudo kextcache -prelinked-kernel
+	#sudo kextcache -prelinked-kernel
 }
 
 install_clover()
 {
 	cd "${REPO}"
 
-	diskutil unmount /Volumes/EFI &> /dev/null
 	osVolume=$(df / | grep "/dev/disk" | cut -d ' ' -f1)
 	efiVolume=$(diskutil list "$osVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
 	if [ -z "$(mount | grep $efiVolume | sed -e 's/^[ \t]*//')" ]; then
@@ -149,6 +169,10 @@ install_clover()
 	mkdir -p /Volumes/EFI/EFI/CLOVER/ACPI/patched/
 	cp -R EFI/BOOT/ /Volumes/EFI/EFI/BOOT/
 	cp -R EFI/CLOVER/ /Volumes/EFI/EFI/CLOVER/
+	mv /Volumes/EFI/EFI/CLOVER/$motherboard-kexts /Volumes/EFI/EFI/CLOVER/kexts
+	rm -rf /Volumes/EFI/EFI/CLOVER/*-kexts
+	mv /Volumes/EFI/EFI/CLOVER/$motherboard-config.plist /Volumes/EFI/EFI/CLOVER/config.plist
+	rm /Volumes/EFI/EFI/CLOVER/*-config.plist
 
 	echo "[EFI]: Generating serial number, MLB & SmUUID for Clover SMBIOS"
 	chmod +x externals/simpleMacSerial/simpleMacSerial.sh
@@ -164,15 +188,16 @@ install_clover()
 	echo "[EFI]: Copying patched DSDT to EFI partition"
 	cp -R DSDT/compiled/DSDT.aml /Volumes/EFI/EFI/CLOVER/ACPI/patched/DSDT.aml
 
-	echo "[EFI]: Copying generated SSDT to EFI partition"
+	printf "[EFI]: Copying generated SSDT to EFI partition..."
 	cp -R DSDT/compiled/SSDT.aml /Volumes/EFI/EFI/CLOVER/ACPI/patched/SSDT.aml
+	echo "complete."
 }
 
 cleanup()
 {
 	cd "${REPO}"
 	printf "Deleting generated files in repo folders..."
-	rm -rf audio/*.kext 2&>/dev/null
+	rm -rf audio/*/*.kext 2&>/dev/null
 	rm DSDT/compiled/*.aml 2&>/dev/null
 	rm DSDT/decompiled/*.dsl 2&>/dev/null
 	rm logs/*.log 2&>/dev/null
@@ -189,12 +214,15 @@ case "$1" in
 		decompile_dsdt
 		RETVAL=1;;
 	--patch-dsdt)
+		check_motherboard
 		patch_dsdt
 		RETVAL=1;;
 	--inject-hda)
+		check_motherboard
 		inject_hda
 		RETVAL=1;;
 	--install-clover)
+		check_motherboard
 		install_clover
 		RETVAL=1;;
 	--cleanup)

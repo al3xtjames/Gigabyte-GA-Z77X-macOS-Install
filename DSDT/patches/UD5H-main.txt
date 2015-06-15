@@ -1,6 +1,6 @@
 # Gigabyte GA-Z77X-UD5H DSDT Patch
-# main.txt
-# Gigabyte GA-Z77X-UD5H DSDT Patch Repo - http://git.io/vIatr
+# UD5H-main.txt
+# Gigabyte GA-Z77X DSDT Patch Repo - http://git.io/vIatr
 #
 # Fixes various errors in the stock DSDT and makes it more compatible with OS X.
 # Compatible with GA-Z77X-UD5H (F16g BIOS)
