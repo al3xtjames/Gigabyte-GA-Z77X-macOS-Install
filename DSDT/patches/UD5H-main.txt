@@ -262,8 +262,6 @@ Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package () {\n
-		"MaximumBootBeepVolume", Buffer() { 0x4D },\n
-		"MaximumBootBeepVolumeAlt", Buffer() { 0x00},\n
 		"layout-id", Buffer() { 0x01, 0x00, 0x00, 0x00 },\n
 		"PinConfigurations", Buffer(Zero) {},\n
 		"hda-gfx", Buffer() { "onboard-1" }\n
