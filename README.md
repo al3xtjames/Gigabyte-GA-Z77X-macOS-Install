@@ -15,5 +15,5 @@ These patches can be applied to a cleanly-extracted native DSDT from a Gigabyte 
 
 ![MaciASL Preferences Screenshot](http://i.imgur.com/7H53wEk.png)
 
-Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, SJ_Underwater, and toleda for their original edits; this would not have been possible if not for their work.
+Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, SJ_Underwater, the-darkvoid, and toleda for their original edits; this would not have been possible if not for their work.
 Also, special thanks to [AustinSMU](https://github.com/AustinSMU); the repo design and large parts of the script were based off his [PRECISION-M3800-OSX repo](https://github.com/AustinSMU/PRECISION-M3800-OSX). 

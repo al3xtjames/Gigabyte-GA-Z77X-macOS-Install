@@ -136,6 +136,16 @@
 				<key>Replace</key>
 				<data>AAAAAA==</data>
 			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Bootloader Graphics - Second Stage Patch</string>
+				<key>Find</key>
+				<data>QYjE6xE=</data>
+				<key>Name</key>
+				<string>IOGraphicsFamily</string>
+				<key>Replace</key>
+				<data>QYjE6zE=</data>
+			</dict>
 		</array>
 	</dict>
 	<key>RtVariables</key>

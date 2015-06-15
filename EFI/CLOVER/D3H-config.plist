@@ -122,7 +122,7 @@
 				<key>Find</key>
 				<data>9oDUAAAAgHU0</data>
 				<key>Name</key>
-				<string>AppleHDA</string>
+				<string>AppleUSBXHCI</string>
 				<key>Replace</key>
 				<data>9oDUAAAAgOs0</data>
 			</dict>
@@ -132,7 +132,7 @@
 				<key>Find</key>
 				<data>QbzHAgDgPQABAAA=</data>
 				<key>Name</key>
-				<string>AppleHDA</string>
+				<string>AppleUSBXHCI</string>
 				<key>Replace</key>
 				<data>QbzHAgDgPQAAAAA=</data>
 			</dict>
@@ -142,7 +142,7 @@
 				<key>Find</key>
 				<data>xoDIAAAAAQ==</data>
 				<key>Name</key>
-				<string>AppleHDA</string>
+				<string>AppleUSBXHCI</string>
 				<key>Replace</key>
 				<data>xoDIAAAAAA==</data>
 			</dict>
@@ -152,7 +152,7 @@
 				<key>Find</key>
 				<data>dU1Ii7voAQAA</data>
 				<key>Name</key>
-				<string>AppleHDA</string>
+				<string>AppleUSBXHCI</string>
 				<key>Replace</key>
 				<data>601Ii7voAQAA</data>
 			</dict>
@@ -162,7 +162,7 @@
 				<key>Find</key>
 				<data>gUkIAABAAA==</data>
 				<key>Name</key>
-				<string>AppleHDA</string>
+				<string>AppleUSBXHCI</string>
 				<key>Replace</key>
 				<data>AAAAAA==</data>
 			</dict>
@@ -172,7 +172,7 @@
 				<key>Find</key>
 				<data>QcdHCAAAQAA=</data>
 				<key>Name</key>
-				<string>AppleHDA</string>
+				<string>AppleUSBXHCI</string>
 				<key>Replace</key>
 				<data>QcdHCAAAAAA=</data>
 			</dict>
@@ -182,7 +182,7 @@
 				<key>Find</key>
 				<data>QcdHCAAAQAA=</data>
 				<key>Name</key>
-				<string>AppleHDA</string>
+				<string>AppleUSBXHCI</string>
 				<key>Replace</key>
 				<data>QcdHCAAAAAA=</data>
 			</dict>
@@ -202,7 +202,7 @@
 				<key>Find</key>
 				<data>hBnUEQ==</data>
 				<key>Name</key>
-				<string>AppleHDA</string>
+				<string>AppleUSBXHCI</string>
 				<key>Replace</key>
 				<data>QQQGEQ==</data>
 			</dict>
@@ -215,6 +215,16 @@
 				<string>AppleHDA</string>
 				<key>Replace</key>
 				<data>AAAAAA==</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Bootloader Graphics - Second Stage Patch</string>
+				<key>Find</key>
+				<data>QYjE6xE=</data>
+				<key>Name</key>
+				<string>IOGraphicsFamily</string>
+				<key>Replace</key>
+				<data>QYjE6zE=</data>
 			</dict>
 		</array>
 	</dict>
