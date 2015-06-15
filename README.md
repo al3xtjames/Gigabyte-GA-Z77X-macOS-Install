@@ -7,6 +7,7 @@ Look [at the wiki](https://github.com/theracermaster/Gigabyte-GA-Z77X-UD5H-DSDT-
 
 ### Manually Using These Patches (advanced)
 These patches can be applied to a cleanly-extracted native DSDT from the Gigabyte GA-Z77X-UD5H motherboard using an editor such as [MaciASL](http://maciasl.sourceforge.net). Add `https://raw.githubusercontent.com/theracermaster/Gigabyte-GA-Z77X-UD5H-DSDT-Patch/master` as a repo in MaciASL > Preferences > Sources. Graphics patches are available at the [Gigabyte GA-Z77X Graphics DSDT Patch repo](https://github.com/theracermaster/Gigabyte-GA-Z77X-Graphics-DSDT-Patch) (MaciASL repo: `https://raw.githubusercontent.com/theracermaster/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/master`)
+
 ![MaciASL Preferences Screenshot](http://i.imgur.com/fV48uhM.png)
 
-Special thanks to PJALM, toleda, and RampageDev for their original edits; this would not have been possible if not for their work.
+Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, SJ_Underwater, and toleda for their original edits; this would not have been possible if not for their work.
