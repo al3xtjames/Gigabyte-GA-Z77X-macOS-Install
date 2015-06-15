@@ -9,7 +9,7 @@ GIT_DIR="${REPO}"
 check_motherboard()
 {
 	motherboard=$(bdmesg | grep "Z77X" | cut -d '-' -f2 | strings)
-	echo "Detected Gigabyte GA-Z77X-"$motherboard "motherboard."
+	printf "Detected Gigabyte GA-Z77X-"$motherboard" motherboard"
 	case $motherboard in
 		D3H)
 			codecName="VIA VT2021"
@@ -69,6 +69,8 @@ patch_dsdt()
 {
 	cd "${REPO}"
 
+	echo "."
+
 	echo "[DSDT]: Applying GA-Z77X-"$motherboard" main patch"
 	tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/$motherboard-main.txt DSDT/decompiled/DSDT.dsl | tee logs/dsdt_patch_main.log
 
@@ -110,6 +112,8 @@ patch_dsdt()
 inject_hda()
 {
 	cd "${REPO}"
+
+	echo " with "$codecName" audio codec."
 
 	echo "[HDA]: Creating AppleHDA injector kext for "$codecName
 	mkdir -p audio/$codecShortName/AppleHDA$codecModel.kext/Contents
@@ -155,6 +159,8 @@ inject_hda()
 install_clover()
 {
 	cd "${REPO}"
+
+	echo "."
 
 	osVolume=$(df / | grep "/dev/disk" | cut -d ' ' -f1)
 	efiVolume=$(diskutil list "$osVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
