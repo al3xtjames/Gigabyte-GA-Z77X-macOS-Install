@@ -58,7 +58,7 @@ decompile_dsdt()
 	cd "${REPO}"
 	tools/iasl /$mountPoint/EFI/CLOVER/ACPI/origin/DSDT.aml &> logs/dsdt_decompile.log
 	echo "complete."
-	echo "Decompilation log available at logs/dsdt_decompile.log"
+	echo "Decompilation log available at logs/dsdt_decompile.log."
 	mv /$mountPoint/EFI/CLOVER/ACPI/origin/DSDT.dsl DSDT/decompiled/DSDT.dsl
 	sed -e s,//Volumes/EFI/EFI/CLOVER/ACPI/origin/,,g -i "" DSDT/decompiled/DSDT.dsl
 
