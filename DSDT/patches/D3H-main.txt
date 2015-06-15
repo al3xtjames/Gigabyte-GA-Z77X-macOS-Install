@@ -1,5 +1,6 @@
 # Gigabyte GA-Z77X-D3H DSDT Patch
 # D3H-main.txt
+# Gigabyte GA-Z77X DSDT Patch Repo - http://git.io/vIatr
 #
 # Fixes various errors in the stock DSDT and makes it more compatible with OS X.
 # Compatible with GA-Z77X-D3H (F18k BIOS)
