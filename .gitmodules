@@ -4,3 +4,9 @@
 [submodule "externals/ssdtPRGen.sh"]
 	path = externals/ssdtPRGen.sh
 	url = https://github.com/Piker-Alpha/ssdtPRGen.sh
+[submodule "externals/simpleMLB"]
+	path = externals/simpleMLB
+	url = https://gist.github.com/b6a9db46b14061d4c995.git
+[submodule "externals/simpleMacSerial"]
+	path = externals/simpleMacSerial
+	url = https://gist.github.com/616dc7a9b8a632060e7c.git
