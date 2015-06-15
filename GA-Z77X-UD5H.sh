@@ -22,7 +22,8 @@ git_update()
 
 decompile_dsdt()
 {
-	installerVolume=$(df / | grep "/dev/disk" | cut -d ' ' -f1)
+	diskutil unmount /Volumes/EFI
+	installerVolume=$(df /Volumes/Install\ OS\ X\ Yosemite/ | grep "/dev/disk" | cut -d ' ' -f1)
 	efiVolume=$(diskutil list "$installerVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
 	if [ -z "$(mount | grep $efiVolume | sed -e 's/^[ \t]*//')" ]; then
 		diskutil mount "$efiVolume" > /dev/null
@@ -39,6 +40,7 @@ decompile_dsdt()
 	echo "complete."
 	echo "Decompilation log available at logs/dsdt_decompile.log"
 	mv /$mountPoint/EFI/CLOVER/ACPI/origin/DSDT.dsl DSDT/decompiled/DSDT.dsl
+	sed -e s,//Volumes/EFI/EFI/CLOVER/ACPI/origin/,,g -i "" DSDT/decompiled/DSDT.dsl
 }
 
 patch_dsdt()
@@ -46,17 +48,41 @@ patch_dsdt()
 	cd "${REPO}"
 
 	echo "[DSDT]: Applying GA-Z77X-UD5H main patch"
-	tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/main.txt DSDT/decompiled/DSDT.dsl
+	tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/main.txt DSDT/decompiled/DSDT.dsl | tee logs/dsdt_patch_main.log
 
 	if [[ -z $(system_profiler -detailLevel mini | grep "GeForce") ]] && [[ -z $(system_profiler -detailLevel mini | grep "Radeon") ]]; then
 		echo "[DSDT]: No discrete GPU detected, assuming integrated GPU only"
 		echo "[DSDT]: Applying Intel HD Graphics 4000 patch"
-		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000.txt DSDT/decompiled/DSDT.dsl
+		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000.txt DSDT/decompiled/DSDT.dsl | tee logs/dsdt_patch_Intel-HD-Graphics-4000.log
 	else
 		echo "[DSDT]: Discrete GPU detected, assuming both integrated+discrete GPUs"
 		echo "[DSDT]: Applying Intel HD Graphics 4000 (AirPlay) patch"
-		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000-AirPlay.txt DSDT/decompiled/DSDT.dsl
+		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000-AirPlay.txt DSDT/decompiled/DSDT.dsl  | tee logs/dsdt_patch_Intel-HD-Graphics-4000-AirPlay.log
 	fi
+
+	echo "[DSDT] Compiling patched DSDT"
+	tools/iasl DSDT/decompiled/DSDT.dsl | tee logs/dsdt_compile.log
+	mv DSDT/decompiled/DSDT.aml DSDT/compiled/DSDT.aml
+
+	echo "Is your CPU overclocked?"
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes) overclock=true; break;;
+			No) overclock=false; break;;
+		esac
+	done
+	chmod +x externals/ssdtPRGen.sh/ssdtPRGen.sh
+	if [ "$overclock" == false ]; then
+		printf "[DSDT] Generating CPU SSDT for power management (stock frequency)..."
+		yes n | externals/ssdtPRGen.sh/ssdtPRGen.sh -c 1 -d 3 -w 2 -x 1 &> logs/SSDT_generate.log
+
+	else
+		frequency="$(bdmesg | grep Turbo: | cut -d '/' -f2)00"
+		printf "[DSDT] Generating CPU SSDT for power management ("$frequency"MHz turbo frequency)..."
+		yes n | externals/ssdtPRGen.sh/ssdtPRGen.sh -c 1 -d 3 -w 2 -x 1 -turbo $frequency &> logs/SSDT_generate.log
+	fi
+	cp ~/Library/ssdtPRGen/ssdt.aml DSDT/compiled/SSDT.aml
+	echo "complete."
 }
 
 inject_hda()
@@ -96,10 +122,58 @@ inject_hda()
 	/usr/libexec/plistbuddy -c "Merge audio/hdacd.plist ':IOKitPersonalities:HDA Hardware Config Resource'" $plist
 
 	echo "[HDA]: Installing created AppleHDA898.kext"
+	echo "NOTE: Root access is required."
 	sudo cp -R audio/AppleHDA898.kext /System/Library/Extensions
 
 	echo "[HDA]: Rebuilding kext caches"
 	sudo kextcache -prelinked-kernel
+}
+
+install_clover()
+{
+	cd "${REPO}"
+
+	diskutil unmount /Volumes/EFI
+	osVolume=$(df / | grep "/dev/disk" | cut -d ' ' -f1)
+	efiVolume=$(diskutil list "$osVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
+	if [ -z "$(mount | grep $efiVolume | sed -e 's/^[ \t]*//')" ]; then
+		diskutil mount "$efiVolume" > /dev/null
+		mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
+		echo "EFI partition ($efiVolume) mounted at $mountPoint."
+	else
+		mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
+		echo "EFI partition ($efiVolume) is already mounted at $mountPoint."
+	fi
+
+	echo "[EFI]: Installing Clover to EFI partition"
+	mkdir /Volumes/EFI/EFI/
+	cp -R EFI/BOOT/ /Volumes/EFI/EFI/BOOT/
+	cp -R EFI/CLOVER/ /Volumes/EFI/EFI/CLOVER/
+
+	echo "[EFI]: Generating serial number, MLB & SmUUID for Clover SMBIOS"
+	chmod +x externals/simpleMacSerial/simpleMacSerial.sh
+	chmod +x externals/simpleMLB/simpleMLB.sh
+	serialNumber=$(externals/simpleMacSerial/simpleMacSerial.sh iMac13,1)
+	MLB=$(externals/simpleMLB/simpleMLB.sh $serialNumber)
+	SmUUID=$(uuidgen)
+	plist=/Volumes/EFI/EFI/CLOVER/config.plist
+	/usr/libexec/plistbuddy -c "Set :SMBIOS:SerialNumber '$serialNumber'" $plist
+	/usr/libexec/plistbuddy -c "Set :RtVariables:MLB '$MLB'" $plist
+	/usr/libexec/plistbuddy -c "Set :SMBIOS:SmUUID '$SmUUID'" $plist
+
+	echo "[EFI]: Copying patched DSDT to EFI partition"
+	cp -R DSDT/compiled/DSDT.aml /Volumes/EFI/EFI/CLOVER/ACPI/patched/DSDT.aml
+}
+
+cleanup()
+{
+	cd "${REPO}"
+	printf "Deleting generated files in repo folders..."
+	rm -rf audio/*.kext 2&>/dev/null
+	rm DSDT/compiled/*.aml 2&>/dev/null
+	rm DSDT/decompiled/*.dsl 2&>/dev/null
+	rm logs/*.log 2&>/dev/null
+	echo "complete."
 }
 
 RETVAL=0
@@ -116,6 +190,12 @@ case "$1" in
 		RETVAL=1;;
 	--inject-hda)
 		inject_hda
+		RETVAL=1;;
+	--install-clover)
+		install_clover
+		RETVAL=1;;
+	--cleanup)
+		cleanup
 		RETVAL=1;;
 	*) echo "swag";;
 esac

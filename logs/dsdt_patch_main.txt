@@ -1,0 +1,2 @@
+patch complete: 125 patches, 189 changes, 0 rejects
+patched result written to 'DSDT/decompiled/DSDT.dsl'

@@ -1,0 +1,2 @@
+patch complete: 2 patches, 1 changes, 0 rejects
+patched result written to 'DSDT/decompiled/DSDT.dsl'
