@@ -22,7 +22,7 @@ git_update()
 
 decompile_dsdt()
 {
-	diskutil unmount /Volumes/EFI
+	diskutil unmount /Volumes/EFI &> /dev/null
 	installerVolume=$(df /Volumes/Install\ OS\ X\ Yosemite/ | grep "/dev/disk" | cut -d ' ' -f1)
 	efiVolume=$(diskutil list "$installerVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
 	if [ -z "$(mount | grep $efiVolume | sed -e 's/^[ \t]*//')" ]; then
@@ -133,7 +133,7 @@ install_clover()
 {
 	cd "${REPO}"
 
-	diskutil unmount /Volumes/EFI
+	diskutil unmount /Volumes/EFI &> /dev/null
 	osVolume=$(df / | grep "/dev/disk" | cut -d ' ' -f1)
 	efiVolume=$(diskutil list "$osVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
 	if [ -z "$(mount | grep $efiVolume | sed -e 's/^[ \t]*//')" ]; then
@@ -146,7 +146,7 @@ install_clover()
 	fi
 
 	echo "[EFI]: Installing Clover to EFI partition"
-	mkdir /Volumes/EFI/EFI/
+	mkdir -p /Volumes/EFI/EFI/CLOVER/ACPI/patched/
 	cp -R EFI/BOOT/ /Volumes/EFI/EFI/BOOT/
 	cp -R EFI/CLOVER/ /Volumes/EFI/EFI/CLOVER/
 
@@ -163,6 +163,9 @@ install_clover()
 
 	echo "[EFI]: Copying patched DSDT to EFI partition"
 	cp -R DSDT/compiled/DSDT.aml /Volumes/EFI/EFI/CLOVER/ACPI/patched/DSDT.aml
+
+	echo "[EFI]: Copying generated SSDT to EFI partition"
+	cp -R DSDT/compiled/SSDT.aml /Volumes/EFI/EFI/CLOVER/ACPI/patched/SSDT.aml
 }
 
 cleanup()
