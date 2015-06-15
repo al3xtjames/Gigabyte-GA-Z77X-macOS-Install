@@ -1,4 +1,1 @@
 [Main] GA-Z77X-UD5H		DSDT	DSDT/patches/main.txt
-[Graphics] AMD Radeon HD 7970 (Hamachi)		DSDT	externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/AMD-Radeon-HD-7970-Hamachi.txt
-[Graphics] Intel HD Graphics 4000		DSDT	externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000.txt
-[Graphics] Intel HD Graphics 4000 (AirPlay)	DSDT	externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000-AirPlay.txt
