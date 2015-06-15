@@ -30,7 +30,7 @@ git_update()
 	cd ${REPO}
 	echo "[GIT]: Updating local data to latest version"
 	
-	echo "[GIT]: Updating to latest Gigabyte-GA-Z77X-UD5H-DSDT-Patch git master"
+	echo "[GIT]: Updating to latest Gigabyte-GA-Z77X-DSDT-Patch git master"
 	git pull
 	
 	echo "[GIT]: Initializing Gigabyte-GA-Z77X-Graphics-DSDT-Patch"
