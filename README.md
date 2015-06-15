@@ -1,6 +1,6 @@
 # Gigabyte-GA-Z77X DSDT Patch
 
-DSDT Patches for Gigabyte GA-Z77X motherboards on OS X
+DSDT Patches for Gigabyte GA-Z77X motherboards on OS X.
 
 ### Supported Motherboards
 Currently, the following motherboards are supported by the GA-Z77X script and the manual DSDT patches in the repo:
