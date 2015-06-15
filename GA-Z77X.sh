@@ -176,8 +176,8 @@ install_clover()
 	rm /Volumes/EFI/EFI/CLOVER/*-config.plist
 
 	echo "[EFI]: Generating serial number, MLB & SmUUID for Clover SMBIOS"
-	chmod +x externals/simpleMacSerial/simpleMacSerial.sh
-	chmod +x externals/simpleMLB/simpleMLB.sh
+	# chmod +x externals/simpleMacSerial/simpleMacSerial.sh
+	# chmod +x externals/simpleMLB/simpleMLB.sh
 	serialNumber=$(externals/simpleMacSerial/simpleMacSerial.sh iMac13,1)
 	MLB=$(externals/simpleMLB/simpleMLB.sh $serialNumber)
 	SmUUID=$(uuidgen)
