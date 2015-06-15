@@ -1,6 +1,7 @@
 #/bin/bash
 #
 # GA-Z77X OS X Post Installation Script
+# Gigabyte GA-Z77X DSDT Patch Repo - http://git.io/vIatr
 
 REPO=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 GIT_DIR="${REPO}"
