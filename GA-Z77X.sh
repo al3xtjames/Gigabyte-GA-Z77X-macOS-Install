@@ -8,7 +8,7 @@ GIT_DIR="${REPO}"
 
 check_motherboard()
 {
-	motherboard=$(bdmesg | grep "Z77X" | cut -d '-' -f2 | strings)
+	motherboard=$(tools/bdmesg | grep "Z77X" | cut -d '-' -f2 | strings)
 	printf "Detected Gigabyte GA-Z77X-"$motherboard" motherboard"
 	case $motherboard in
 		D3H)
