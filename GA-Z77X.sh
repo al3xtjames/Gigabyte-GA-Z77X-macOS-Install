@@ -44,42 +44,16 @@ decompile_dsdt()
 {
 	cd "${REPO}"
 
-	if [ ! -f /$mountPoint/EFI/CLOVER/ACPI/origin/DSDT.aml ]; then
-		if [ ! -f DSDT/raw/DSDT.aml ]; then
-			echo "No DSDT found. Press F4 at the Clover boot screen to dump them using Clover, or place your original DSDT in the DSDT/raw folder."
-			exit 128
-		else
-			echo "[DSDT]: Using DSDT/raw/DSDT.aml as original DSDT to decompile"
-			printf "[DSDT]: Decompiling original DSDT..."
-			tools/iasl DSDT/raw/DSDT.aml &> logs/dsdt_decompile.log
-			echo "complete."
-			echo "Decompilation log available at logs/dsdt_decompile.log."
-			mv DSDT/raw/DSDT.dsl DSDT/decompiled/DSDT.dsl
-			sed -e s,DSDT/raw/,,g -i "" DSDT/decompiled/DSDT.dsl
-		fi
-	else
-		diskutil unmount /Volumes/EFI &> /dev/null
-		installerVolume=$(df /Volumes/Install\ OS\ X\ Yosemite/ | grep "/dev/disk" | cut -d ' ' -f1)
-		efiVolume=$(diskutil list "$installerVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
-		if [ -z "$(mount | grep $efiVolume | sed -e 's/^[ \t]*//')" ]; then
-			diskutil mount "$efiVolume" > /dev/null
-			mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
-			echo "EFI partition ($efiVolume) mounted at $mountPoint."
-		else
-			mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
-			echo "EFI partition ($efiVolume) is already mounted at $mountPoint."
-		fi
+	echo "[DSDT]: Extracting raw DSDT from IORegistry"
+	tools/patchmatic -extract
+	mv *.aml DSDT/raw/
+	rm *.aml 2&>/dev/null
 
-		echo "[DSDT]: Using "/$mountPoint/EFI/CLOVER/ACPI/origin/DSDT.aml" as original DSDT to decompile"
-		printf "[DSDT]: Decompiling original DSDT..."
-		tools/iasl /$mountPoint/EFI/CLOVER/ACPI/origin/DSDT.aml &> logs/dsdt_decompile.log
-		echo "complete."
-		echo "Decompilation log available at logs/dsdt_decompile.log."
-		mv /$mountPoint/EFI/CLOVER/ACPI/origin/DSDT.dsl DSDT/decompiled/DSDT.dsl
-		sed -e s,//Volumes/EFI/EFI/CLOVER/ACPI/origin/,,g -i "" DSDT/decompiled/DSDT.dsl
-	fi
-
-	diskutil unmount /Volumes/EFI &> /dev/null
+	printf "[DSDT]: Decompiling raw DSDT..."
+	tools/iasl DSDT/raw/DSDT.aml &> logs/dsdt_decompile.log
+	echo "complete."
+	echo "Decompilation log available at logs/dsdt_decompile.log."
+	mv DSDT/raw/DSDT.dsl DSDT/decompiled/DSDT.dsl
 }
 
 patch_dsdt()
@@ -225,6 +199,7 @@ cleanup()
 	rm -rf audio/*/*.kext 2&>/dev/null
 	rm DSDT/compiled/*.aml 2&>/dev/null
 	rm DSDT/decompiled/*.dsl 2&>/dev/null
+	rm DSDT/raw/*.aml 2&>/dev/null
 	rm logs/*.log 2&>/dev/null
 	echo "complete."
 }
