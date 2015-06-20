@@ -107,8 +107,7 @@ inject_hda()
 	echo " with "$codecName" audio codec."
 
 	echo "[HDA]: Creating AppleHDA injector kext for "$codecName
-	mkdir -p audio/$codecShortName/AppleHDA$codecModel.kext/Contents
-	mkdir audio/$codecShortName/AppleHDA$codecModel.kext/Contents/MacOS
+	mkdir -p audio/$codecShortName/AppleHDA$codecModel.kext/Contents/MacOS
 
 	echo "[HDA]: Creating symbolic link to AppleHDA binary in AppleHDA"$codecModel".kext"
 	ln -s /System/Library/Extensions/AppleHDA.kext/Contents/MacOS/AppleHDA audio/$codecShortName/AppleHDA$codecModel.kext/Contents/MacOS/AppleHDA
