@@ -6,6 +6,21 @@
 REPO=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 GIT_DIR="${REPO}"
 
+git_update()
+{
+	cd ${REPO}
+	echo "[GIT]: Updating local data to latest version"
+	
+	echo "[GIT]: Updating to latest Gigabyte-GA-Z77X-DSDT-Patch git master"
+	git pull
+	
+	echo "[GIT]: Initializing Gigabyte-GA-Z77X-Graphics-DSDT-Patch"
+	git submodule update --init --recursive
+	
+	echo "[GIT]: Updating Gigabyte-GA-Z77X-Graphics-DSDT-Patch"
+	git submodule foreach git pull origin master
+}
+
 check_motherboard()
 {
 	motherboard=$(tools/bdmesg | grep "Z77X" | cut -d '-' -f2 | strings)
@@ -23,21 +38,6 @@ check_motherboard()
 			echo "Motherboard "$board "is unsupported by this script."
 			exit 0;;
 	esac
-}
-
-git_update()
-{
-	cd ${REPO}
-	echo "[GIT]: Updating local data to latest version"
-	
-	echo "[GIT]: Updating to latest Gigabyte-GA-Z77X-DSDT-Patch git master"
-	git pull
-	
-	echo "[GIT]: Initializing Gigabyte-GA-Z77X-Graphics-DSDT-Patch"
-	git submodule update --init --recursive
-	
-	echo "[GIT]: Updating Gigabyte-GA-Z77X-Graphics-DSDT-Patch"
-	git submodule foreach git pull origin master
 }
 
 decompile_dsdt()
@@ -107,13 +107,13 @@ inject_hda()
 	echo " with "$codecName" audio codec."
 
 	echo "[HDA]: Creating AppleHDA injector kext for "$codecName
-	mkdir -p audio/$codecShortName/AppleHDA$codecModel.kext/Contents/MacOS
+	mkdir -p audio/$codecShortName/AppleHDA$codecModel.kext/Contents/MacOS/
 
 	echo "[HDA]: Creating symbolic link to AppleHDA binary in AppleHDA"$codecModel".kext"
 	ln -s /System/Library/Extensions/AppleHDA.kext/Contents/MacOS/AppleHDA audio/$codecShortName/AppleHDA$codecModel.kext/Contents/MacOS/AppleHDA
 
 	echo "[HDA]: Copying XML files to AppleHDA"$codecModel".kext"
-	mkdir audio/$codecShortName/AppleHDA$codecModel.kext/Contents/Resources
+	mkdir audio/$codecShortName/AppleHDA$codecModel.kext/Contents/Resources/
 	cp -R audio/$codecShortName/*.zlib audio/$codecShortName/AppleHDA$codecModel.kext/Contents/Resources/
 
 	echo "[HDA]: Modifying Info.plist in AppleHDA"$codecModel".kext"
@@ -139,10 +139,10 @@ inject_hda()
 
 	echo "[HDA]: Installing created AppleHDA"$codecModel".kext"
 	echo "NOTE: Root access is required."
-	sudo cp -R audio/$codecShortName/AppleHDA$codecModel.kext /System/Library/Extensions
+	sudo cp -R audio/$codecShortName/AppleHDA$codecModel.kext /System/Library/Extensions/
 
 	printf "[HDA]: Rebuilding kext caches..."
-	sudo kextcache -prelinked-kernel &> logs/hda_kextcache.log
+	sudo kextcache -prelinked-kernel 2&> logs/hda_kextcache.log
 	echo "complete."
 }
 
@@ -195,11 +195,11 @@ cleanup()
 {
 	cd "${REPO}"
 	printf "Deleting generated files in repo folders..."
-	rm -rf audio/*/*.kext 2&>/dev/null
-	rm DSDT/compiled/*.aml 2&>/dev/null
-	rm DSDT/decompiled/*.dsl 2&>/dev/null
-	rm DSDT/raw/*.aml 2&>/dev/null
-	rm logs/*.log 2&>/dev/null
+	rm -rf audio/*/*.kext 2&> /dev/null
+	rm DSDT/compiled/*.aml 2&> /dev/null
+	rm DSDT/decompiled/*.dsl 2&> /dev/null
+	rm DSDT/raw/*.aml 2&> /dev/null
+	rm logs/*.log 2&> /dev/null
 	echo "complete."
 }
 
