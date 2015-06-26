@@ -83,12 +83,10 @@ into_all method code_regex Notify\s+\(\\_TZ.* removeall_matched;
 into device label COPR set_label begin MATH end;
 into all code_regex COPR replaceall_matched begin MATH end;
 
-## Device (EC0) → Device (EC) // Embedded Controller
-into device label EC0 set_label begin EC end;
-into scope label EC0 set_label begin EC end;
-into all code_regex EC0 replaceall_matched begin EC end;
-into all code_regex 0x000EC00 replaceall_matched begin 0x000EC000 end;
-into all code_regex 0xFEC0000 replaceall_matched begin 0xFEC00000 end;
+## Device (H_EC) → Device (EC) // Embedded Controller
+into device label H_EC set_label begin EC end;
+into scope label H_EC set_label begin EC end;
+into_all all code_regex H_EC replaceall_matched begin EC end;
 
 ## Device (GFX0) → Device (IGPU) // Integrated Graphics
 into all code_regex GFX0\. replaceall_matched begin IGPU. end;
