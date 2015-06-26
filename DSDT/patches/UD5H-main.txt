@@ -59,13 +59,13 @@ into device label MVL2 parent_label RP05 remove_entry;
 into device label MVL3 parent_label PEG2 remove_entry;
 into device label MVL4 parent_label PEG2 remove_entry;
 
-## Remove PS2 Devices and related methods
-into device label PS2K remove_entry;
-into device label PS2M remove_entry;
-into method label SIOH remove_entry;
-into method label PS2M._PRW remove_entry;
-into method label PS2K._PRW remove_entry;
-into method label _L1D code_regex \\_SB\.PCI0\.LPCB\.SIOH\s+\(\) remove_matched;
+## Remove PS2 Devices and related methods (no PS2 port present)
+into device label PS2K parent_label LPCB remove_entry;
+into device label PS2M parent_label LPCB remove_entry;
+into method label SIOH parent_label _SB.PCI0.LPCB remove_entry;
+into method label PS2M._PRW parent_label LPCB remove_entry;
+into method label PS2K._PRW parent_label LPCB remove_entry;
+into method label _L1D parent_label \_GPE code_regex \\_SB\.PCI0\.LPCB\.SIOH\s+\(\) remove_matched;
 
 ## Remove TPM Devices
 into device label TPMX remove_entry;
@@ -128,7 +128,7 @@ into method label HPME parent_label RP08 code_regex PXSX replaceall_matched begi
 ## Device (SAT0) Device (SAT1) → Device (SATA) // SATA Controller (Intel 7-Series)
 into device label SAT0 set_label begin SATA end;
 into_all all code_regex SAT0 replaceall_matched begin SATA end;
-into device label SAT1 remove_entry end;
+into device label SAT1 remove_entry;
 
 ## Device (USBx) → Device (UHCx) // Universal Host Controller (USB 1.1)
 into device label USB1 set_label begin UHC1 end;
