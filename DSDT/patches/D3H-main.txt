@@ -72,6 +72,16 @@ into scope label _SB.PCI0.LPCB.TPM remove_entry;
 into scope label _TZ remove_entry;
 into_all method code_regex Notify\s+\(\\_TZ.* removeall_matched;
 
+## Remove Universal Host Controller Devices (USB 1.1) and related methods
+into device label USB1 remove_entry;
+into device label USB2 remove_entry;
+into device label USB3 remove_entry;
+into device label USB4 remove_entry;
+into device label USB5 remove_entry;
+into device label USB6 remove_entry;
+into device label USB7 remove_entry;
+into_all all code_regex USB([1-7]) remove_entry;
+
 # 2. Rename devices to Apple device names
 
 ## Device (COPR) → Device (MATH) // Math Coprocessor
@@ -116,16 +126,6 @@ into method label HPME parent_label RP08 code_regex PXSX replaceall_matched begi
 into device label SAT0 set_label begin SATA end;
 into all code_regex SAT0 replaceall_matched begin SATA end;
 into device label SAT1 remove_entry;
-
-## Device (USBx) → Device (UHCx) // Universal Host Controller (USB 1.1)
-into device label USB1 set_label begin UHC1 end;
-into device label USB2 set_label begin UHC2 end;
-into device label USB3 set_label begin UHC3 end;
-into device label USB4 set_label begin UHC4 end;
-into device label USB5 set_label begin UHC5 end;
-into device label USB6 set_label begin UHC6 end;
-into device label USB7 set_label begin UHC7 end;
-into all code_regex USB([1-7]) replaceall_matched begin UHC%1 end;
 
 ## Device (XHC) Device (XHC1) // eXtensible Host Controller (USB 3.0)
 into device label XHC set_label begin XHC1 end;

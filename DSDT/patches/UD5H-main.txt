@@ -80,6 +80,16 @@ into scope label _SB.PCI0.LPCB.TPM remove_entry;
 into scope label _TZ remove_entry;
 into_all method code_regex Notify\s+\(\\_TZ.* removeall_matched;
 
+## Remove Universal Host Controller Devices (USB 1.1) and related methods
+into device label USB1 remove_entry;
+into device label USB2 remove_entry;
+into device label USB3 remove_entry;
+into device label USB4 remove_entry;
+into device label USB5 remove_entry;
+into device label USB6 remove_entry;
+into device label USB7 remove_entry;
+into_all all code_regex USB([1-7]) remove_entry;
+
 # 2. Rename devices to Apple device names
 
 ## Device (COPR) → Device (MATH) // Math Coprocessor
