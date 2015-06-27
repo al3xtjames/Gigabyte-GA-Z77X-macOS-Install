@@ -40,6 +40,9 @@ into method label _DOD parent_label GFX0 code_regex .* replace_matched begin %8 
 ## 12119, 6035, _HID suffix must be all hex digits (GH)
 into all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (_HID, EisaId ("PNP0C15") end;
 
+## Remove Device (CWDT)
+into device label CWDT parent_label LPCB remove_entry;
+
 ## Remove Device (RMSC)
 into device label RMSC parent_label LPCB remove_entry;
 
@@ -221,7 +224,7 @@ Method (_DSM, 4, NotSerialized)\n
 }\n
 end;
 
-## Device (HDEF) // High Definition Audio - Needed to enable audio for Realtek ALC 898
+## Device (HDEF) // High Definition Audio - Needed to enable audio for VIA VT2021
 into method label _DSM parent_label HDEF remove_entry;
 into device label HDEF insert begin
 Method (_DSM, 4, NotSerialized)\n
