@@ -270,7 +270,7 @@ Method (_DSM, 4, NotSerialized)\n
 }\n
 end;
 
-# 6. Fix 7-Series USB 3.0 Multiplexing
+# 5. Fix 7-Series USB 3.0 Multiplexing
 # Maintained by: RehabMan for: Laptop Patches
 # usb_7-series-multiplex.txt
 
