@@ -1,37 +1,37 @@
-# Gigabyte GA-Z77X-UD5H DSDT Patch
-# UD5H-main.txt
+# Gigabyte GA-Z77X-UP5 TH DSDT Patch
+# UP5-TH-main.txt
 # Gigabyte GA-Z77X DSDT Patch Repo - http://git.io/vIatr
 #
 # Fixes various errors in the stock DSDT and makes it more compatible with OS X.
-# Compatible with GA-Z77X-UD5H (F16g BIOS)
+# Compatible with GA-Z77X-UD5H (F12 BIOS)
 # Apply a graphics patch after using this and look at the README.
 #
 # Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, SJ_Underwater & toleda for their original edits; this would not have been possible if not for their work.
 
 # 1. Fix errors/warnings in the stock DSDT
 
-## 2368, 3128, ResourceTag larger than Field (Size mismatch, Tag: 64 bits, Field: 32 bits)
+## 2301, 3128, ResourceTag larger than Field (Size mismatch, Tag: 64 bits, Field: 32 bits)
 into method label _CRS parent_label PCI0 code_regex CreateDWordField\s\(BUF0,\s\\_SB.PCI0._Y0F._LEN,\sMSLN\) replace_matched begin CreateQWordField (BUF0, \\_SB.PCI0._Y0F._LEN, MSLN) end;
 
-## 3553, 3130, Result is not used, possible operator timeout will be missed
+## 3486, 3130, Result is not used, possible operator timeout will be missed
 into_all all code_regex (Acquire\s\(MUT0,\s0x)....\) replace_matched begin %1FFFF) end;
 
 ## 2011, Use of compiler reserved name (_T_0)
 into_all all code_regex _T_([0-6]) replaceall_matched begin T_%1 end;
 
-## 8879, 2120, Control Method should be made Serialized (due to creation of named objects within)
+## 8036, 2120, Control Method should be made Serialized (due to creation of named objects within)
 into method label UXDV code_regex ([\s\S]*) store_%8;
 into method label UXDV remove_entry;
 into definitionblock code_regex . insert begin Method (UXDV, 1, Serialized)\n{\n\n} end;
 into method label UXDV code_regex .* replace_matched begin %8 end;
 
-## 8941, 2120, Control Method should be made Serialized (due to creation of named objects within)
+## 8098, 2120, Control Method should be made Serialized (due to creation of named objects within)
 into method label RRIO code_regex ([\s\S]*) store_%8;
 into method label RRIO remove_entry;
 into definitionblock code_regex . insert begin Method (RRIO, 4, Serialized)\n{\n\n} end;
 into method label RRIO code_regex .* replace_matched begin %8 end;
 
-## 9269, 2120, Control Method should be made Serialized (due to creation of named objects within)
+## 8426, 2120, Control Method should be made Serialized (due to creation of named objects within)
 into method label _DOD parent_label GFX0 code_regex ([\s\S]*) store_%8;
 into method label _DOD parent_label GFX0 remove_entry;
 into device label GFX0 insert begin Method (_DOD, 0, Serialized)\n{\n\n} end;
@@ -39,6 +39,12 @@ into method label _DOD parent_label GFX0 code_regex .* replace_matched begin %8 
 
 ## 10704, 6035, _HID suffix must be all hex digits (GH)
 into_all all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (_HID, EisaId ("PNP0C15") end;
+
+## 11270, 2120, Control Method should be made Serialized (due to creation of named objects within)
+into method label OL1X parent_label _GPE code_regex ([\s\S]*) store_%8;
+into method label OL1X parent_label _GPE remove_entry;
+into scope label _GPE insert begin Method (OL1X, 0, Serialized)\n{\n\n} end;
+into method label OL1X parent_label _GPE code_regex .* replace_matched begin %8 end;
 
 ## Remove Device (CWDT)
 into device label CWDT parent_label LPCB remove_entry;
@@ -114,13 +120,13 @@ into_all all label \_SB.PCI0.GFX0.DD02 set_label begin \_SB.PCI0.IGPU.DD02 end;
 into_all all label ^^GFX0 set_label begin ^^IGPU end;
 into_all all label ^GFX0 set_label begin ^IGPU end;
 
-## Device (GLAN) → Device (ETH0) // Gigabit Ethernet Controller (Intel 82579V)
-into device label GLAN set_label begin ETH0 end;
-into_all all code_regex GLAN replaceall_matched begin ETH0 end;
+## Device (GLAN) → Device (GIGE) // Gigabit Ethernet Controller (Intel 82579V)
+into device label GLAN set_label begin GIGE end;
+into_all all code_regex GLAN replaceall_matched begin GIGE end;
 
-## Device (PXSX) [RP02] → Device (SATA) // SATA Controller (Marvell 88SE9172)
-into device label PXSX parent_label RP02 set_label begin SATA end;
-into method label HPME parent_label RP02 code_regex PXSX replaceall_matched begin SATA end;
+## Device (PXSX) [RP01] → Device (UPSB) // Thunderbolt Controller (Intel DSL3510L)
+into device label PXSX parent_label RP01 set_label begin UPSB end;
+into method label HPME parent_label RP01 code_regex PXSX replaceall_matched begin UPSB end;
 
 ## Device (PXSX) [RP05] → Device (ARPT) // AirPort (WiFi + Bluetooth)
 into device label PXSX parent_label RP05 set_label begin ARPT end;
@@ -129,10 +135,6 @@ into method label HPME parent_label RP05 code_regex PXSX replaceall_matched begi
 ## Device (PXSX) [RP06] → Device (FRWR) // FireWire Host Controller
 into device label PXSX parent_label RP06 set_label begin FRWR end;
 into method label HPME parent_label RP06 code_regex PXSX replaceall_matched begin FRWR end;
-
-## Device (PXSX) [RP07] → Device (ETH1) // Gigabit Ethernet Controller (Qualcomm Atheros AR8161)
-into device label PXSX parent_label RP07 set_label begin ETH1 end;
-into method label HPME parent_label RP07 code_regex PXSX replaceall_matched begin ETH1 end;
 
 ## Device (PXSX) [RP08] → Device (SATA) // SATA Controller (Marvell 88SE9172)
 into device label PXSX parent_label RP08 set_label begin SATA end;
@@ -228,30 +230,15 @@ Method (_DSM, 4, NotSerialized)\n
 }\n
 end;
 
-## Device (ETH0) // Gigabit Ethernet Controller (Intel 82579V)
-into method label _DSM parent_label ETH0 remove_entry;
-into device label ETH0 insert begin
+## Device (GIGE) // Gigabit Ethernet Controller (Intel 82579V)
+into method label _DSM parent_label GIGE remove_entry;
+into device label GIGE insert begin
 Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package () {\n
 		"built-in", Buffer() { "0x01" },\n
-		"device_type", Buffer() { "Ethernet Controller" },\n
-		"location", Buffer() { "1" }\n
-	})\n
-}\n
-end;
-
-## Device (ETH1) // Gigabit Ethernet Controller (Qualcomm Atheros AR8161)
-into method label _DSM parent_label ETH1 remove_entry;
-into device label ETH1 insert begin
-Method (_DSM, 4, NotSerialized)\n
-{\n
-	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
-	Return (Package () {\n
-		"built-in", Buffer() { "0x01" },\n
-		"device_type", Buffer() { "Ethernet Controller" },\n
-		"location", Buffer() { "2" }\n
+		"device_type", Buffer() { "Ethernet Controller" }\n
 	})\n
 }\n
 end;
