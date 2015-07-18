@@ -24,6 +24,14 @@
 		<dict>
 			<key>DropOem</key>
 			<false/>
+			<key>EnableC2</key>
+			<true/>
+			<key>EnableC4</key>
+			<true/>
+			<key>EnableC6</key>
+			<true/>
+			<key>EnableC7</key>
+			<true/>
 			<key>Generate</key>
 			<dict>
 				<key>CStates</key>
