@@ -4,8 +4,8 @@ DSDT Patches for Gigabyte GA-Z77X motherboards on OS X.
 
 ### Supported Motherboards
 Currently, the following motherboards are supported by the GA-Z77X script and the manual DSDT patches in the repo:
-- GA-Z77X-D3H
 - GA-Z77X-UD5H
+- GA-Z77X-UP5 TH
 
 ### Full Post Installation with the GA-Z77X Script (recommended)
 Look [at the wiki](https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch/wiki) for full installation and post installation instructions for installing OS X.
@@ -14,6 +14,13 @@ Look [at the wiki](https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch
 These patches can be applied to a cleanly-extracted native DSDT from a Gigabyte GA-Z77X motherboard using an editor such as [MaciASL](http://maciasl.sourceforge.net). Add `https://raw.githubusercontent.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch/master` as a repo in MaciASL > Preferences > Sources. Graphics patches are available at the [Gigabyte GA-Z77X Graphics DSDT Patch repo](https://github.com/theracermaster/Gigabyte-GA-Z77X-Graphics-DSDT-Patch) (MaciASL repo: `https://raw.githubusercontent.com/theracermaster/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/master`)
 
 ![MaciASL Preferences Screenshot](http://i.imgur.com/7H53wEk.png)
+
+### Changelog
+2015-07-18
+- Removed GA-Z77X-D3H support (temporarily)
+- Added GA-Z77X-UP5 TH support
+- Updated script to use OEM SSDTs instead of generating them
+- Updated script to add El Capitan support
 
 ### Credits
 Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, SJ_Underwater, the-darkvoid, and toleda for their original edits; this would not have been possible if not for their work.
