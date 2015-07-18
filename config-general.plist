@@ -31,6 +31,8 @@
 				<key>PStates</key>
 				<false/>
 			</dict>
+			<key>PluginType</key>
+			<integer>1</integer>
 		</dict>
 	</dict>
 	<key>Boot</key>
