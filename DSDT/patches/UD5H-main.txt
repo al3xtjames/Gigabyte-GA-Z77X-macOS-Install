@@ -178,11 +178,16 @@ Device (BUS0)\n
 {\n
 	Name (_CID, "smbus")\n
 	Name (_ADR, Zero)\n
-}\n
-Device (BUS1)\n
-{\n
-	Name (_CID, "smbus")\n
-	Name (_ADR, One)\n
+	Device (DVL0)\n
+	{\n
+		Name (_ADR, 0x57)\n
+		Name (_CID, "diagsvault")\n
+		Method (_DSM, 4, NotSerialized)\n
+		{\n
+			If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+			Return (Package() { "address", 0x57 })\n
+		}\n
+	}\n
 }\n
 end;
 
@@ -376,7 +381,7 @@ into_all all code_regex XHC(?=\W) replaceall_matched begin XHC1 end;
 into method label _WAK code_regex \_SB.PCI0.XHC1.XWAK replace_matched begin _SB.PCI0.XHC1._INI end;
 
 ## Rewrite XHC/XHC1 device
-into device label XHC1 replace_content 
+into device label XHC1 replace_content
 begin
 Name (_ADR, 0x00140000)\n
 Name (_S3D, 0x02)\n
