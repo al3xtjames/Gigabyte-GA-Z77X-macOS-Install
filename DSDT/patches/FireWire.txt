@@ -1,0 +1,28 @@
+# FireWire Patch
+# Address of FireWire device needs to manually corrected based off dspci output
+into device label FRWR parent_label FWBR remove_entry;
+into device label FWBR insert begin
+Device (FRWR)\n
+{\n
+	Name (_ADR, 0x00000000)\n
+	Name (_GPE, 0x1A)\n
+	Method (_DSM, 4, NotSerialized)\n
+	{\n
+		If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+		Return (Package () {\n
+			"fwports", Buffer() { 0x02, 0x00, 0x00, 0x00 },\n
+			"fws0", Buffer() { 0x01, 0x00, 0x00, 0x00 },\n
+			"fwswappedbib", Buffer () { 0x01, 0x00, 0x00, 0x00 }\n
+		})\n
+	}\n
+}\n
+end;
+
+into method label _L1A parent_label _GPE remove_entry;
+into scope label _GPE insert begin
+Method (_L1A, 0, NotSerialized)\n
+{\n
+	Notify (\_SB.PCI0.RP06.FWBR.FRWR, 0x02)\n
+	Notify (\_SB.PWRB, 0x02)\n
+}\n
+end;

@@ -40,12 +40,6 @@ into method label _DOD parent_label GFX0 code_regex .* replace_matched begin %8 
 ## 10704, 6035, _HID suffix must be all hex digits (GH)
 into_all all code_regex (Name\s\(_HID,\s"ABCDEFGH") replace_matched begin Name (_HID, EisaId ("PNP0C15") end;
 
-## 11270, 2120, Control Method should be made Serialized (due to creation of named objects within)
-into method label OL1X parent_label _GPE code_regex ([\s\S]*) store_%8;
-into method label OL1X parent_label _GPE remove_entry;
-into scope label _GPE insert begin Method (OL1X, 0, Serialized)\n{\n\n} end;
-into method label OL1X parent_label _GPE code_regex .* replace_matched begin %8 end;
-
 ## Fix IRQs (RehabMan)
 into device name_hid PNP0000 code_regex IRQNoFlags\s\(\)\n\s+\{(\d+)\} remove_matched;
 into device name_hid PNP0100 code_regex IRQNoFlags\s\(\)\n\s+\{(\d+)\} remove_matched;
@@ -146,9 +140,9 @@ into method label HPME parent_label RP01 code_regex PXSX replaceall_matched begi
 into device label PXSX parent_label RP05 set_label begin ARPT end;
 into method label HPME parent_label RP05 code_regex PXSX replaceall_matched begin ARPT end;
 
-## Device (PXSX) [RP06] → Device (FRWR) // FireWire Host Controller
-into device label PXSX parent_label RP06 set_label begin FRWR end;
-into method label HPME parent_label RP06 code_regex PXSX replaceall_matched begin FRWR end;
+## Device (PXSX) [RP06] → Device (FWBR) // FireWire Host Controller (VIA VT6308)
+into device label PXSX parent_label RP06 set_label begin FWBR end;
+into method label HPME parent_label RP06 code_regex PXSX replaceall_matched begin FWBR end;
 
 ## Device (PXSX) [RP08] → Device (SATA) // SATA Controller (Marvell 88SE9172)
 into device label PXSX parent_label RP08 set_label begin SATA end;
@@ -176,6 +170,14 @@ into method label _INI code_regex \{(\s+)(If\s\(_OSI\s\("Windows\s2001"\)\)) rep
 						$2
 end;
 
+## Device (IMEI) // Intel Management Engine Interface
+into device label IMEI parent_label PCI0 remove_entry;
+into device label PCI0 insert begin
+Device (IMEI)\n
+{\n
+	Name (_ADR, 0x00160000)\n
+}\n
+end;
 
 ## Device (MCHC) // Memory Controller Hub
 into device label MCHC parent_label PCI0 remove_entry;
@@ -202,6 +204,126 @@ Device (BUS0)\n
 		{\n
 			If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 			Return (Package() { "address", 0x57 })\n
+		}\n
+	}\n
+}\n
+end;
+
+## Thunderbolt
+into method label HRU4 parent_label _GPE remove_entry;
+into device label UPSB insert begin
+Method (_RMV, 0, NotSerialized)\n
+{\n
+	Return (Zero)\n
+}\n
+Device (DSB0)\n
+{\n
+	Name (_ADR, Zero)\n
+	Method (_RMV, 0, NotSerialized)\n
+	{\n
+		Return (Zero)\n
+	}\n
+	Device (NHI0)\n
+	{\n
+		Name (_ADR, Zero)\n
+		Name (_GPE, 0x1E)\n
+		Name (_STR, Unicode ("Thunderbolt"))\n
+		Method (_STA, 0, NotSerialized)\n
+		{\n
+			Return (0x0F)\n
+		}\n
+		Method (_DSM, 4, NotSerialized)\n
+		{\n
+			If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+			Return (Package () {\n
+				"power-save", One, Buffer() { 0x00 }\n
+			})\n
+		}\n
+	}\n
+}\n
+Device (DSB1)\n
+{\n
+	Name (_ADR, 0x00030000)\n
+	Name (_SUN, 0x05)\n
+	Method (_RMV, 0, NotSerialized)\n
+	{\n
+		Return (Zero)\n
+	}\n
+}\n
+Device (DSB2)\n
+{\n
+	Name (_ADR, 0x00040000)\n
+	Name (_SUN, 0x06)\n
+	Method (_RMV, 0, NotSerialized)\n
+	{\n
+		Return (Zero)\n
+	}\n
+}\n
+Device (DSB3)\n
+{\n
+	Name (_ADR, 0x00050000)\n
+	Name (_SUN, 0x07)\n
+	Method (_RMV, 0, NotSerialized)\n
+	{\n
+		Return (Zero)\n
+	}\n
+	Device (UPS0)\n
+	{\n
+		Name (_ADR, Zero)\n
+		Method (_RMV, 0, NotSerialized)\n
+		{\n
+			Return (One)\n
+		}\n
+		Device (DSB3)\n
+		{\n
+			Name (_ADR, 0x00030000)\n
+			Method (_RMV, 0, NotSerialized)\n
+			{\n
+				Return (One)\n
+			}\n
+			Device (DEV0)\n
+			{\n
+				Name (_ADR, Zero)\n
+				Method (_RMV, 0, NotSerialized)\n
+				{\n
+					Return (One)\n
+				}\n
+			}\n
+		}\n
+	}\n
+}\n
+Device (DSB4)\n
+{\n
+	Name (_ADR, 0x00060000)\n
+	Name (_SUN, 0x08)\n
+	Method (_RMV, 0, NotSerialized)\n
+	{\n
+		Return (Zero)\n
+	}\n
+}\n
+Method (_DSM, 4, NotSerialized)\n
+{\n
+	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
+	Return (Package () {\n
+		"PCI-Thunderbolt", One\n
+	})\n
+}\n
+end;
+into method label OL1X parent_label _GPE remove_entry;
+into method label _E1E parent_label _GPE remove_entry;
+into scope label _GPE insert begin
+Method (_E1E, 0, Serialized)\n
+{\n
+	Name (TSNE, 0x03)\n
+	If (LNotEqual (TSNE, 0xFF))\n
+	{\n
+		If (LAnd (TSNE, One))\n
+		{\n
+			Store (TBSW, SSMP)\n
+		}\n
+		If (LAnd (TSNE, 0x02))\n
+		{\n
+			Notify (\_SB.PCI0.RP01, Zero)\n
 		}\n
 	}\n
 }\n
@@ -269,7 +391,7 @@ Method (_DSM, 4, NotSerialized)\n
 {\n
 	If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }\n
 	Return (Package () {\n
-		"layout-id", Buffer() { 0x03, 0x00, 0x00, 0x00 },\n
+		"layout-id", Buffer() { 0x01, 0x00, 0x00, 0x00 },\n
 		"hda-gfx", Buffer() { "onboard-1" },\n
 		"PinConfigurations", Buffer(Zero) {}\n
 	})\n

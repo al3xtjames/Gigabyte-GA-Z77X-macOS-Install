@@ -27,10 +27,10 @@ check_motherboard()
 	motherboard=$(tools/bdmesg | grep "Z77X" | cut -d '-' -f2 | strings)
 	#printf "Detected Gigabyte GA-Z77X-"$motherboard" motherboard"
 	case $motherboard in
-		UD5H);;
+		'UD5H');;
 		'UP5 TH');;
 		*)
-			echo "ERROR: Motherboard "$board "is unsupported by this script."
+			echo "ERROR: Motherboard "$motherboard" is unsupported by this script. Exiting..."
 			exit 1;;
 	esac
 }
@@ -107,13 +107,13 @@ decompile_dsdt()
 	echo
 
 	echo "[DSDT]: Decompiling raw ACPI tables"
-	tools/iasl -da -dl DSDT/raw/*.aml >> logs/dsdt_decompile.log 2>&1
+	tools/iasl DSDT/raw/*.aml >> logs/dsdt_decompile.log 2>&1
 	printf "[$(date +"%T")] " >> logs/dsdt_decompile.log
 	echo "Decompilation complete. Output written to $REPO/DSDT/decompiled." | tee -a logs/dsdt_decompile.log
 
 	rm -f refs.txt
 	mv DSDT/raw/*.dsl DSDT/decompiled
-	sed -i -e 's,DSDT/raw/DSDT.aml,DSDT.aml,g' DSDT/decompiled/DSDT.dsl
+	sed -i -e 's,DSDT/raw/,,g' DSDT/decompiled/*.dsl
 	rm -f DSDT/decompiled/*.dsl-e
 }
 
@@ -128,6 +128,7 @@ patch_dsdt()
 	if [ ! -f $REPO/DSDT/decompiled/DSDT.dsl ]; then
 		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
 		echo "ERROR: Decompiled DSDT not found! Exiting..." | tee -a logs/dsdt_patch.log
+		echo "Log available at $REPO/logs/dsdt_patch.log."
 		exit 1
 	fi
 
@@ -137,24 +138,59 @@ patch_dsdt()
 	echo "[$(date +"%T")] patchmatic: applying DSDT/patches/$motherboard-main.txt" >> logs/dsdt_patch.log
 	echo "[DSDT]: Applying general patch for GA-Z77X-"$motherboard" motherboard"
 	printf "[$(date +"%T")] " >> logs/dsdt_patch.log
-	tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/$motherboard-main.txt DSDT/decompiled/DSDT.dsl | tee logs/dsdt_patch_main.log
+	tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/$motherboard-main.txt DSDT/decompiled/DSDT.dsl | tee -a logs/dsdt_patch.log
+
+	if [[ ! -z $(tools/dspci | grep "1106:3044") ]]; then
+		fwAddr=$(tools/dspci | grep "1106:3044" | cut -d ' ' -f1 | tr -d '[:alpha:]')
+		dsdtFWAddr=$(echo 0x$(echo $fwAddr | tr -d '[:punct:]')000)
+		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
+		printf "[DSDT]: "
+		echo "FireWire device located at $fwAddr in PCIe bus" | tee -a logs/dsdt_patch.log
+		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
+		printf "[DSDT]: "
+		echo "Applying FireWire patch to device located at $dsdtFWAddr in DSDT" | tee -a logs/dsdt_patch.log
+		echo "[$(date +"%T")] patchmatic: applying DSDT/patches/FireWire.txt" >> logs/dsdt_patch.log
+		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
+		tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/FireWire-$fwPatch.txt DSDT/decompiled/DSDT.dsl | tee -a logs/dsdt_patch.log
+		echo "[$(date +"%T")] sed: manually fixing FireWire device address" >> logs/dsdt_patch.log
+		changes=$(awk 'END{print t, "substitutions"} {t+=gsub(old,new)}1' old="Name (_ADR, 0x00000000)" new="Name (_ADR, $dsdtFWAddr)" DSDT/decompiled/DSDT.dsl | grep "substitutions" | cut -d ' ' -f 1)
+		sed -i -e "s/Name (_ADR, 0x00000000)/Name (_ADR, $dsdtFWAddr)/g" DSDT/decompiled/DSDT.dsl
+		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
+		echo "patch complete: 1 patches, $changes changes, 0 rejects" | tee -a logs/dsdt_patch.log
+	fi
 
 	if [[ -z $(tools/dspci | grep "AMD") ]] && [[ -z $(tools/dspci | grep "NVIDIA") ]]; then
+		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
+		printf "[DSDT]: "
+		echo "No discrete GPU detected, assuming integrated GPU only" | tee -a logs/dsdt_patch.log
+		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
+		printf "[DSDT]: "
+		echo "Injecting ig-platform-id into IGPU device for Intel HD Graphics 4000" | tee -a logs/dsdt_patch.log
 		echo "[$(date +"%T")] patchmatic: applying externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000.txt" >> logs/dsdt_patch.log
-		echo "[DSDT]: No discrete GPU detected, assuming integrated GPU only"
-		echo "[DSDT]: Injecting ig-platform-id into IGPU device for Intel HD Graphics 4000"
 		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
-		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000.txt DSDT/decompiled/DSDT.dsl | tee logs/dsdt_patch_Intel-HD-Graphics-4000.log
+		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000.txt DSDT/decompiled/DSDT.dsl | tee -a logs/dsdt_patch.log
+		if [[ -z $(ioreg -rxn IOHDACodecDevice | grep VendorID | awk '{ print $4 }' | sed 's/ffffffff//' | grep '0x10ec') ]]; then
+			echo "[$(date +"%T")] sed: manually changing HDEF layout-id" >> logs/dsdt_patch.log
+			changes=$(awk 'END{print t, "substitutions"} {t+=gsub(old,new)}1' old='"layout-id", Buffer() { 0x01, 0x00, 0x00, 0x00 },' new='"layout-id", Buffer() { 0x03, 0x00, 0x00, 0x00 },' DSDT/decompiled/DSDT.dsl | grep "substitutions" | cut -d ' ' -f 1)
+			sed -i -e "s/"layout-id", Buffer() { 0x01, 0x00, 0x00, 0x00 },/"layout-id", Buffer() { 0x03, 0x00, 0x00, 0x00 },/g" DSDT/decompiled/DSDT.dsl
+			printf "[$(date +"%T")] " >> logs/dsdt_patch.log
+			echo "patch complete: 1 patches, $changes changes, 0 rejects" | tee -a logs/dsdt_patch.log
+		fi
 	else
-		echo "[$(date +"%T")] patchmatic: applying externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000-AirPlay.txt" >> logs/dsdt_patch.log
-		echo "[DSDT]: Discrete GPU detected, assuming IGPU is for AirPlay Mirroring only"
-		echo "[DSDT]: Injecting ig-platform-id into IGPU device for AirPlay Mirroring"
 		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
-		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000-AirPlay.txt DSDT/decompiled/DSDT.dsl | tee logs/dsdt_patch_Intel-HD-Graphics-4000-AirPlay.log
+		printf "[DSDT]: "
+		echo "Discrete GPU detected, assuming IGPU is for AirPlay Mirroring only" | tee -a logs/dsdt_patch.log
+		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
+		printf "[DSDT]: "
+		echo "Injecting ig-platform-id into IGPU device for AirPlay Mirroring" | tee -a logs/dsdt_patch.log
+		echo "[$(date +"%T")] patchmatic: applying externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000-AirPlay.txt" >> logs/dsdt_patch.log
+		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
+		tools/patchmatic DSDT/decompiled/DSDT.dsl externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch/Intel-HD-Graphics-4000-AirPlay.txt DSDT/decompiled/DSDT.dsl | tee -a logs/dsdt_patch.log
 	fi
 
 	echo "[$(date +"%T")] DSDT patching complete. Output written to $REPO/DSDT/decompiled/DSDT.dsl (will be moved to DSDT/patched)." >> logs/dsdt_patch.log
 
+	rm -f DSDT/decompiled/DSDT.dsl-e
 	mv DSDT/decompiled/*.dsl DSDT/patched
 
 	echo "Patching complete. Output written to $REPO/DSDT/patched."
@@ -172,6 +208,7 @@ patch_dsdt()
 	if [ ! $dsdtErrors = 0 ]; then
 		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
 		echo "ERROR: DSDT failed to compile! Exiting..." | tee -a logs/dsdt_patch.log
+		echo "Log available at $REPO/logs/dsdt_patch.log."
 		exit 1
 	fi
 
@@ -179,7 +216,6 @@ patch_dsdt()
 	echo "[$(date +"%T")] DSDT compilation complete. Output written to $REPO/DSDT/patched/DSDT.aml." >> logs/dsdt_compile.log
 	echo "Output written to $REPO/DSDT/compiled."
 	echo "Log available at $REPO/logs/dsdt_compile.log."
-
 }
 
 inject_hda()
@@ -199,12 +235,14 @@ inject_hda()
 				codec="VIA VT2021";;
 			*)
 				printf "[$(date +"%T")] " >> logs/hda_inject.log
-				echo "ERROR: Unsupported audio codec ($hexAudioCodec / $decRealtekCodec)!" | tee -a logs/hda_inject.log
+				echo "ERROR: Unsupported audio codec ($hexAudioCodec / $decAudioCodec)! Exiting..." | tee -a logs/hda_inject.log
+				echo "Log available at $REPO/logs/hda_inject.log."
 				exit 1;;
 		esac
 	else
 		printf "[$(date +"%T")] " >> logs/hda_inject.log
-		echo "ERROR: No audio codec present in IORegistry!" | tee -a logs/hda_inject.log
+		echo "ERROR: No audio codec present in IORegistry! Exiting..." | tee -a logs/hda_inject.log
+		echo "Log available at $REPO/logs/hda_inject.log."
 		exit 1
 	fi
 
@@ -284,7 +322,14 @@ install_clover()
 
 	echo "[$(date +"%T")] Script version $VERSION" > logs/clover_install.log
 	printf "[$(date +"%T")] " >> logs/clover_install.log
-	echo "Arguments: $REPO/Inspiron-3x43.sh --install-clover" >> logs/clover_install.log
+	echo "Arguments: $REPO/GA-Z77X.sh --install-clover" >> logs/clover_install.log
+
+	if [ ! -f DSDT/compiled/*.aml ]; then
+		printf "[$(date +"%T")] " >> logs/clover_install.log
+		echo "ERROR: Patched DSDT not found! Exiting..." | tee -a logs/clover_install.log
+		echo "Log available at $REPO/logs/clover_install.log."
+		exit 1
+	fi
 
 	mkdir /tmp/io.theracermaster.z77x
 
@@ -300,7 +345,8 @@ install_clover()
 
 	if [ ! -f Clover*.pkg ]; then
 		printf "[$(date +"%T")] " >> logs/clover_install.log
-		echo "ERROR: Clover failed to download!" | tee -a logs/clover_install.log
+		echo "ERROR: Clover failed to download! Exiting..." | tee -a logs/clover_install.log
+		echo "Log available at $REPO/logs/clover_install.log."
 		exit 1
 	fi
 
@@ -308,7 +354,8 @@ install_clover()
 	md5=$(cat Clover*.pkg.md5 | cut -d ' ' -f4)
 	if [ ! $pkgmd5 = $md5 ]; then
 		printf "[$(date +"%T")] " >> logs/clover_install.log
-		echo "ERROR: Downloaded Clover package has invalid checksum!" | tee -a logs/clover_install.log
+		echo "ERROR: Downloaded Clover package has invalid checksum! Exiting..." | tee -a logs/clover_install.log
+		echo "Log available at $REPO/logs/clover_install.log."
 		exit 1
 	fi
 
@@ -326,6 +373,13 @@ install_clover()
 	else
 		mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
 		echo "EFI partition ($efiVolume) is already mounted at $mountPoint." | tee -a "${REPO}"/logs/clover_install.log
+	fi
+
+	if [ -d "$mountPoint/EFI" ]; then
+		printf "[$(date +"%T")] " >> "${REPO}"/logs/clover_install.log
+		printf "[EFI]: "
+		echo "Existing EFI folder detected, backing up."
+		mv "$mountPoint/EFI" "$mountPoint/EFI2"
 	fi
 
 	printf "[$(date +"%T")] " >> "${REPO}"/logs/clover_install.log
@@ -459,6 +513,7 @@ cleanup()
 	rm -f DSDT/raw/*.aml
 	rm -f logs/*.log
 	rm -f /tmp/*.zip
+	rm -rf /tmp/io.theracermaster.z77x
 	echo "complete."
 }
 
