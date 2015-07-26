@@ -151,7 +151,7 @@ patch_dsdt()
 		echo "Applying FireWire patch to device located at $dsdtFWAddr in DSDT" | tee -a logs/dsdt_patch.log
 		echo "[$(date +"%T")] patchmatic: applying DSDT/patches/FireWire.txt" >> logs/dsdt_patch.log
 		printf "[$(date +"%T")] " >> logs/dsdt_patch.log
-		tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/FireWire-$fwPatch.txt DSDT/decompiled/DSDT.dsl | tee -a logs/dsdt_patch.log
+		tools/patchmatic DSDT/decompiled/DSDT.dsl DSDT/patches/FireWire.txt DSDT/decompiled/DSDT.dsl | tee -a logs/dsdt_patch.log
 		echo "[$(date +"%T")] sed: manually fixing FireWire device address" >> logs/dsdt_patch.log
 		changes=$(awk 'END{print t, "substitutions"} {t+=gsub(old,new)}1' old="Name (_ADR, 0x00000000)" new="Name (_ADR, $dsdtFWAddr)" DSDT/decompiled/DSDT.dsl | grep "substitutions" | cut -d ' ' -f 1)
 		sed -i -e "s/Name (_ADR, 0x00000000)/Name (_ADR, $dsdtFWAddr)/g" DSDT/decompiled/DSDT.dsl
@@ -212,7 +212,7 @@ patch_dsdt()
 		exit 1
 	fi
 
-	mv DSDT/patched/iASL*.aml DSDT/compiled/DSDT.aml
+	mv DSDT/patched/DSDT.aml DSDT/compiled/DSDT.aml
 	echo "[$(date +"%T")] DSDT compilation complete. Output written to $REPO/DSDT/patched/DSDT.aml." >> logs/dsdt_compile.log
 	echo "Output written to $REPO/DSDT/compiled."
 	echo "Log available at $REPO/logs/dsdt_compile.log."
