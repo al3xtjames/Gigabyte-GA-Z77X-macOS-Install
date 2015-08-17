@@ -1,11 +1,9 @@
-[submodule "externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch"]
-	path = externals/Gigabyte-GA-Z77X-Graphics-DSDT-Patch
-	url = https://github.com/theracermaster/Gigabyte-GA-Z77X-Graphics-DSDT-Patch
-[submodule "externals/simpleMLB"]
-	path = externals/simpleMLB
-	url = https://gist.github.com/b6a9db46b14061d4c995.git
-	ignore = dirty
-[submodule "externals/simpleMacSerial"]
-	path = externals/simpleMacSerial
-	url = https://gist.github.com/616dc7a9b8a632060e7c.git
-	ignore = dirty
+[submodule "externals/hdaInjector.sh"]
+	path = externals/hdaInjector.sh
+	url = https://github.com/theracermaster/hdaInjector.sh
+[submodule "externals/simpleMacSerial.sh"]
+	path = externals/simpleMacSerial.sh
+	url = https://gist.github.com/theracermaster/616dc7a9b8a632060e7c
+[submodule "externals/simpleMLB.sh"]
+	path = externals/simpleMLB.sh
+	url = https://gist.github.com/theracermaster/b6a9db46b14061d4c995
