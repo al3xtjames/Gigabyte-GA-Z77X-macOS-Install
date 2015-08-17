@@ -305,6 +305,8 @@ function _cleanup()
 	printf "Deleting generated files in repo folders..."
 	rm -f EFI/CLOVER/ACPI/patched/*.aml
 	rm -f EFI/CLOVER/config.plist
+	rm -f /tmp/*.aml
+	rm -f /tmp/*.dsl
 	sudo rm -rf /tmp/*.plist
 	echo "complete."
 }
