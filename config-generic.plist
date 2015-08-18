@@ -85,8 +85,6 @@
 	</dict>
 	<key>KernelAndKextPatches</key>
 	<dict>
-		<key>AppleRTC</key>
-		<false/>
 		<key>KextsToPatch</key>
 		<array/>
 	</dict>
