@@ -193,6 +193,23 @@ function _genSMBIOSData()
 
 
 #-------------------------------------------------------------------------------#
+function _gitUpdate()
+{
+	# Make sure we're in the repo folder
+	cd "$gRepo"
+
+	# Update the repo files
+	echo "Updating local data to latest version"
+	echo "Updating to latest Gigabyte-GA-Z77X-DSDT-Patch git master"
+	git pull
+
+	# Update the external repos
+	echo "Initializing external repos"
+	git submodule update --init --recursive
+	echo "Updating external repos"
+	git submodule foreach git pull origin master
+}
+
 function _installSSDT()
 {
 	clear
@@ -211,7 +228,7 @@ function _installSSDT()
 function _injectHDA()
 {
 	# Initialize variables
-	plist="$gRepo/config-generic.plist"
+	plist="$gRepo/EFI/CLOVER/config.plist"
 
 	# Load AppleHDA.kext so we can ID the codec
 	sudo kextload "/System/Library/Extensions/AppleHDA.kext"
@@ -220,7 +237,7 @@ function _injectHDA()
 	sudo "$gRepo/externals/hdaInjector.sh/hdaInjector.sh"
 
 	# Copy config.plist and add the kext patches to it
-	cp "$gRepo/config-generic.plist" "$gRepo/EFI/CLOVER/config.plist"
+	cp "$gRepo/config-generic.plist" "$plist"
 	/usr/libexec/PlistBuddy -c "Merge /tmp/ktp.plist ':KernelAndKextPatches:KextsToPatch'" $plist
 }
 
@@ -284,8 +301,8 @@ function _installClover()
 	echo "complete." && echo
 
 	# We're done here, let's prompt the user to reboot
-	echo "Installation complete. You must reboot in order for OS X to work properly."
-	printf "Do you want to reboot (y/n)? "
+	echo "Installation complete. You must reboot in order for the changes to apply."
+	printf "Do you want to reboot now (y/n)? "
 	read choice
 	case "$choice" in
 		y|Y)
