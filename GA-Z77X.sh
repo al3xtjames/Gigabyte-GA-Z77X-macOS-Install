@@ -422,7 +422,7 @@ case "$1" in
 		echo
 		echo "Usage: ./GA-Z77X.sh <command>, where <command> is one of the following:"
 		echo
-		echo "     --update             Update the repo & helper files to the latest version"
+		echo "     --git-update         Update the repo & helper files to the latest version"
 		echo "     --install-ssdt       Install the SSDT for your motherboard"
 		echo "     --inject-hda         Install injector kext for your audio codec"
 		echo "     --install-clover     Install Clover to your EFI partition"
