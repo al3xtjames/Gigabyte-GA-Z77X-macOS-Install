@@ -17,6 +17,11 @@ Currently, the following motherboards are supported by the GA-Z77X script and th
 - GA-Z77X-UP7
 
 ### Changelog
+2015-08-18
+- Fix motherboard detection bugs (thanks to sreda2013 for reporting them)
+- Added styling to main script
+- Added detection of other UEFI bootloaders on the ESP
+
 2015-08-17
 - Near-complete rewrite of the GA-Z77X.sh script
 - Reworked repository to use custom SSDTs
