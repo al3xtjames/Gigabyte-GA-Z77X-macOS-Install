@@ -1,6 +1,5 @@
 #!/bin/bash
-#
-# GA-Z77X OS X Post Installation Script
+# Gigabyte GA-Z77X OS X Post-Install Script by theracermaster
 # Supports various Gigabyte GA-Z77X motherboards
 # Gigabyte GA-Z77X DSDT Patch Repo - http://git.io/vIatr
 
@@ -417,7 +416,7 @@ case "$1" in
 		_cleanup
 		RETVAL=1;;
 	*)
-		echo "GA-Z77X.sh OS X Post-Installation Script v$gScriptVersion"
+		echo "Gigabyte GA-Z77X.sh Post-Install Script v$gScriptVersion by theracermaster"
 		echo "Supports various Gigabye GA-Z77X motherboards"
 		echo
 		echo "Usage: ./GA-Z77X.sh <command>, where <command> is one of the following:"
