@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.6"
+gScriptVersion="1.7"
 
 ## The user ID
 gID=$(id -u)
@@ -17,7 +17,7 @@ gMotherboard="Unknown"
 ## The folder containing the repo
 gRepo=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-## The SMBIOS product name
+## The SMBIOS product name, can be changed (recommended: iMac13,1 or iMac13,2)
 gProductName="iMac13,2"
 
 ## The location where the EFI partition is mounted
@@ -28,7 +28,7 @@ STYLE_RESET="\e[0m"
 STYLE_BOLD="\e[1m"
 STYLE_UNDERLINED="\e[4m"
 
-## Colors
+## Color stuff
 COLOR_BLACK="\e[1m"
 COLOR_RED="\e[1;31m"
 COLOR_GREEN="\e[32m"
@@ -75,7 +75,7 @@ function _printHeader()
 	echo "Gigabyte GA-Z77X.sh Post-Install Script v$gScriptVersion by theracermaster"
 	echo "Updates & Info: https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch"
 	echo "--------------------------------------------------------------------------------"
-	printf "Detected motherboard: Gigabyte ${STYLE_BOLD}GA-${COLOR_CYAN}Z77X-${COLOR_DARK_YELLOW}$gMotherboard${STYLE_RESET}\n"
+	printf "Detected motherboard: Gigabyte ${STYLE_BOLD}GA-Z77X-${COLOR_CYAN}$gMotherboard${STYLE_RESET}\n"
 	printf "Script arguments: ./GA-Z77X.sh $args\n"
 	echo "--------------------------------------------------------------------------------"
 }
@@ -200,7 +200,8 @@ function _genSMBIOSData()
 		exit 1
 	fi
 
-	serialNumber=$(externals/simpleMacSerial.sh/simpleMacSerial.sh iMac13,2)
+	# TODO: Better error handling if simpleMLB.sh says the serial number is invalid
+	serialNumber=$(externals/simpleMacSerial.sh/simpleMacSerial.sh $gProductName)
 	MLB=$(externals/simpleMLB.sh/simpleMLB.sh $serialNumber)
 	SmUUID=$(uuidgen)
 
@@ -208,8 +209,6 @@ function _genSMBIOSData()
 	echo " - Serial Number: $serialNumber"
 	echo " - MLB Serial Number: $MLB"
 	echo " - System UUID: $SmUUID"
-
-	# TODO: If plist doesn't exist, exit with error
 
 	# Copy the generated data to the plist
 	/usr/libexec/plistbuddy -c "Set :SMBIOS:ProductName '$gProductName'" $plist
@@ -219,6 +218,7 @@ function _genSMBIOSData()
 
 	printf "\n${STYLE_BOLD}Press enter to continue...${STYLE_RESET}\n" && read
 }
+
 #-------------------------------------------------------------------------------#
 
 
@@ -241,10 +241,10 @@ function _gitUpdate()
 	git submodule foreach git pull origin master
 }
 
-function _installSSDT()
+function _compileSSDT()
 {
 	# Clear the output and print the header
-	_printHeader "${STYLE_BOLD}--install-ssdt: ${COLOR_GREEN}Downloading Custom SSDT${STYLE_RESET}"
+	_printHeader "${STYLE_BOLD}--install-ssdt: ${COLOR_BLUE}Compiling Custom SSDT${STYLE_RESET}"
 
 	# Initialize variables
 	fileName="SSDT-GA-Z77X-$gMotherboard.dsl"
@@ -262,7 +262,7 @@ function _installSSDT()
 	iasl "/tmp/$fileName"
 	mv "/tmp/SSDT-GA-Z77X-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT.aml"
 
-	printf "\n${STYLE_BOLD}Compilation complete.${STYLE_RESET} Exiting...\n"
+	printf "\n${STYLE_BOLD}SSDT compilation complete.${STYLE_RESET} Exiting...\n"
 	exit 0
 }
 
@@ -359,7 +359,7 @@ function _installClover()
 	sudo kextcache -system-caches
 
 	# We're done here, let's prompt the user to reboot
-	printf "\n${STYLE_BOLD}Installation complete. Do you want to reboot now (y/n)?${STYLE_RESET} "
+	printf "\n${STYLE_BOLD}Clover installation complete. Do you want to reboot now (y/n)?${STYLE_RESET} "
 	read choice
 	case "$choice" in
 		y|Y) # User said yes, so let's reboot
@@ -373,7 +373,7 @@ function _installClover()
 
 function _cleanup()
 {
-	_printHeader "${STYLE_BOLD}--cleanup: ${COLOR_GREEN}Deleting Generated Repo Files${STYLE_RESET}"
+	_printHeader "${STYLE_BOLD}--cleanup: ${COLOR_RED}Deleting Generated Repo Files${STYLE_RESET}"
 
 	# Make sure we're in the repo folder
 	cd "$gRepo"
@@ -387,27 +387,27 @@ function _cleanup()
 	sudo rm -rf /tmp/*.plist
 
 	# Exit once it's done
-	printf "\n${STYLE_BOLD}Cleaning complete.${STYLE_RESET} Exiting...\n"
+	printf "\n${STYLE_BOLD}Cleanup complete.${STYLE_RESET} Exiting...\n"
 	exit 0
 }
 #-------------------------------------------------------------------------------#
 
 RETVAL=0
 
+_identifyMotherboard
+
 case "$1" in
 	--git-update)
 		_gitUpdate
 		RETVAL=1;;
-	--install-ssdt)
-		_identifyMotherboard
-		_installSSDT
+	--compile-ssdt)
+		_compileSSDT
 		RETVAL=1;;
 	--inject-hda)
 		_checkRoot
 		_injectHDA
 		RETVAL=1;;
 	--install-clover)
-		_identifyMotherboard
 		_checkRoot
 		_installClover
 		RETVAL=1;;
@@ -422,9 +422,9 @@ case "$1" in
 		echo "Usage: ./GA-Z77X.sh <command>, where <command> is one of the following:"
 		echo
 		echo "     --git-update         Update the repo & helper files to the latest version"
-		echo "     --install-ssdt       Install the SSDT for your motherboard"
-		echo "     --inject-hda         Install injector kext for your audio codec"
-		echo "     --install-clover     Install Clover to your EFI partition"
+		echo "     --compile-ssdt       Download & compile the SSDT for your motherboard"
+		echo "     --inject-hda         Install the injector kext for your audio codec"
+		echo "     --install-clover     Install Clover UEFI to your EFI system partition"
 		echo "     --cleanup            Delete files generated by this script in repo folders"
 		echo
 		echo "Updates & Info: https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch"
