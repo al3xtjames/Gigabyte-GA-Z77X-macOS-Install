@@ -45,7 +45,7 @@ COLOR_END="\e[0m"
 function _identifyMotherboard()
 {
 	# Initialize variables
-	motherboard=$(tools/bdmesg | grep "Z77X" | cut -d '-' -f2 | sed 's/[[:space:]]//g')
+	motherboard=$("$gRepo/tools/bdmesg" | grep "Z77X" | cut -d '-' -f2 | sed 's/[[:space:]]//g')
 
 	# Identify the motherboard
 	case $motherboard in
@@ -259,7 +259,7 @@ function _compileSSDT()
 
 	# Compile the SSDT and move it to the right directory
 	printf "${STYLE_BOLD}Compiling $fileName${STYLE_RESET}:\n"
-	iasl "/tmp/$fileName"
+	"$gRepo/tools/iasl "/tmp/$fileName"
 	mv "/tmp/SSDT-GA-Z77X-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT.aml"
 
 	printf "\n${STYLE_BOLD}SSDT compilation complete.${STYLE_RESET} Exiting...\n"
