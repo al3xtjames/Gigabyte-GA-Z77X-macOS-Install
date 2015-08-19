@@ -17,14 +17,18 @@ Currently, the following motherboards are supported by the GA-Z77X script and th
 - GA-Z77X-UP7
 
 ### Changelog
-2015-08-18
-- Fix motherboard detection bugs (thanks to sreda2013 for reporting them)
+Version 1.7.1 (2015-08-19)
+- Fixed more bugs related to kext installation & iasl (thanks to sreda2013 again for reporting them)
+- Fixed more typos in the script
+
+Version 1.7 (2015-08-18)
+- Fixed motherboard detection bugs (thanks to sreda2013 for reporting them)
 - Added styling to main script
 - Added detection of other UEFI bootloaders on the ESP
 - Fixed bugs related to simpleMacSerial & simpleMLB
 - Fixed typos in script
 
-2015-08-17
+Version 1.5 (2015-08-17)
 - Near-complete rewrite of the GA-Z77X.sh script
 - Reworked repository to use custom SSDTs
 - Removed DSDT patches
