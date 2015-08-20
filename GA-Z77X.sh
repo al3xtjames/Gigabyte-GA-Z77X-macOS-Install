@@ -184,8 +184,8 @@ function _detectPS2()
 		"D3H" | "UD3H" | "UP7") # Motherboards that have a PS/2 port
 			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
 			_installKextEFI "$gRepo/kexts/VoodooPS2Controller.kext"
-			cp org.rehabman.voodoo.driver.Daemon.plist /Library/LaunchDaemons
-			cp VoodooPS2Controller /usr/bin
+			sudo cp "$gRepo/patches/org.rehabman.voodoo.driver.Daemon.plist" /Library/LaunchDaemons
+			sudo cp "$gRepo/patches/VoodooPS2Controller" /usr/bin
 	esac	
 }
 
