@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.7.1"
+gScriptVersion="1.7.2"
 
 ## The user ID
 gID=$(id -u)
@@ -155,8 +155,34 @@ function _detectMarvellSATA()
 
 	# Install AHCI_3rdParty_SATA if Marvell SATA controllers are detected
 	if [[ ! -z $marvellSATA ]]; then
-		echo " - Marvell SATA controller detected, installing AHCI_3rdParty_SATA.kext..."
+		echo " - Marvell SATA controller(s) detected, installing AHCI_3rdParty_SATA.kext..."
 		_installKextEFI "$gRepo/kexts/AHCI_3rdParty_SATA.kext"
+	fi
+}
+
+function _detectEHCI()
+{
+	# Check if OS X version is 10.11 (El Capitan)
+	if [ $(sw_vers -productVersion) = "10.11" ]; then
+		# Create an injector kext to bypass the USB 2.0 port restrictions if the OS X version is 10.11
+		echo " - OS X 10.11 detected, installing AppleUSBEHCIPortInjector.kext..."
+		mkdir -p "$gRepo/AppleUSBEHCIPortInjector.kext/Contents/MacOS"
+		cp /System/Library/Extensions/IOUSBHostFamily.kext/Contents/PlugIns/AppleUSBEHCIPCI.kext/Contents/Info.plist "$gRepo/AppleUSBEHCIPortInjector.kext/Contents"
+		ln -s /System/Library/Extensions/IOUSBHostFamily.kext/Contents/PlugIns/AppleUSBEHCIPCI.kext/Contents/MacOS/AppleUSBEHCIPCI "$gRepo/AppleUSBEHCIPortInjector.kext/Contents/MacOS"
+		plist="$gRepo/AppleUSBEHCIPortInjector.kext/Contents/Info.plist"
+		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleGetInfoString" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
+		/usr/libexec/plistbuddy -c "Set :CFBundleGetInfoString '$replace'" $plist
+		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleVersion" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
+		/usr/libexec/plistbuddy -c "Set :CFBundleVersion '$replace'" $plist
+		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleShortVersionString" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
+		/usr/libexec/plistbuddy -c "Set :CFBundleShortVersionString '$replace'" $plist
+		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-EHC1:IOProviderMergeProperties:port-count'" $plist
+		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-EHC1:IOProviderMergeProperties:ports'" $plist
+		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-EHC2:IOProviderMergeProperties:port-count'" $plist
+		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-EHC2:IOProviderMergeProperties:ports'" $plist
+		sudo chmod -R 755 "$gRepo/AppleUSBEHCIPortInjector.kext"
+		sudo chown -R 0:0 "$gRepo/AppleUSBEHCIPortInjector.kext"
+		sudo mv "$gRepo/AppleUSBEHCIPortInjector.kext" /Library/Extensions
 	fi
 }
 
@@ -167,6 +193,7 @@ function _detectXHCI()
 	xhciList=$("$gRepo/tools/dspci" | grep "xHCI Host Controller\|USB 3.0 Host Controller")
 	nonIntelXHCI=$(echo $xhciList | grep -Fv "Intel")
 
+	# Make sure config.plist exists
 	if [ ! -f "$plist" ]; then
 		printf "${COLOR_RED}${STYLE_BOLD}ERROR: ${STYLE_RESET}${STYLE_BOLD}config.plist not found!${STYLE_RESET} Exiting...\n"
 		exit 1
@@ -174,6 +201,7 @@ function _detectXHCI()
 
 	# Add the kext patches to the plist if non-Intel XHCI controllers are detected
 	if [[ ! -z $nonIntelXHCI ]]; then
+		echo " - Non-Intel XHCI contoller(s) detected, enabling AppleUSBXHCI kext patches..."
 		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
 	fi
 }
@@ -185,7 +213,7 @@ function _detectPS2()
 			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
 			_installKextEFI "$gRepo/kexts/VoodooPS2Controller.kext"
 			sudo cp "$gRepo/patches/org.rehabman.voodoo.driver.Daemon.plist" /Library/LaunchDaemons
-			sudo cp "$gRepo/patches/VoodooPS2Controller" /usr/bin
+			sudo cp "$gRepo/patches/VoodooPS2Daemon" /usr/bin;;
 	esac	
 }
 
@@ -195,6 +223,7 @@ function _genSMBIOSData()
 	printf "${STYLE_BOLD}Generating SMBIOS data${STYLE_RESET}:\n"
 	plist="$gEFIMount/EFI/CLOVER/config.plist"
 
+	# Make sure config.plist exists
 	if [ ! -f "$plist" ]; then
 		printf "${COLOR_RED}${STYLE_BOLD}ERROR: ${STYLE_RESET}${STYLE_BOLD}config.plist not found!${STYLE_RESET} Exiting...\n"
 		exit 1
@@ -211,10 +240,10 @@ function _genSMBIOSData()
 	echo " - System UUID: $SmUUID"
 
 	# Copy the generated data to the plist
-	/usr/libexec/plistbuddy -c "Set :SMBIOS:ProductName '$gProductName'" $plist
-	/usr/libexec/plistbuddy -c "Set :SMBIOS:SerialNumber '$serialNumber'" $plist
-	/usr/libexec/plistbuddy -c "Set :RtVariables:MLB '$MLB'" $plist
-	/usr/libexec/plistbuddy -c "Set :SMBIOS:SmUUID '$SmUUID'" $plist
+	/usr/libexec/plistbuddy -c "Set :SMBIOS:ProductName '$gProductName'" "$plist"
+	/usr/libexec/plistbuddy -c "Set :SMBIOS:SerialNumber '$serialNumber'" "$plist"
+	/usr/libexec/plistbuddy -c "Set :RtVariables:MLB '$MLB'" "$plist"
+	/usr/libexec/plistbuddy -c "Set :SMBIOS:SmUUID '$SmUUID'" "$plist"
 
 	printf "\n${STYLE_BOLD}Press enter to continue...${STYLE_RESET}\n" && read
 }
@@ -305,26 +334,18 @@ function _installClover()
 	gEFIMount="$mountPoint"
 
 	# Check if there is an existing bootloader install; if so, ask the user if it can be overwritten
-	if [ -d "$gEFIMount/EFI" ]; then
-		
-		efiBoot=$(ls "$gEFIMount/EFI"| grep -Fv 'APPLE' | grep -Fv 'BOOT')
-		case $efiBoot in 
-			CLOVER)
-				efiBoot=$(printf ${COLOR_GREEN}${STYLE_BOLD}$efiBoot${STYLE_RESET});;
-			Microsoft)
-				efiBoot=$(printf ${COLOR_BLUE}${STYLE_BOLD}$efiBoot${STYLE_RESET});;
-		esac
-
-		echo "An existing UEFI bootloader ($efiBoot) was found on the EFI system partition."
+	if [ -d "$gEFIMount/EFI/CLOVER" ]; then
+		echo "An existing installation of Clover UEFI was found on the EFI system partition."
 		printf "${STYLE_BOLD}Do you want to overwrite it (y/n)?${STYLE_RESET} "
 		read choice
 		case "$choice" in
 			y|Y)
-				echo "Removing existing $efiBoot UEFI bootloader..."
+				echo "Removing existing Clover UEFI bootloader install..."
 				rm -rf "$gEFIMount/EFI";;
 			n|N)
-				echo "Renaming EFI directory to EFIbackup..."
-				mv "$gEFIMount/EFI" "$gEFIMount/EFIbackup";;
+				echo "Backing up existing Clover UEFI bootloader install..."
+				mv "$gEFIMount/EFI/BOOT" "$gEFIMount/BOOTbackup"
+				mv "$gEFIMount/EFI/CLOVER" "$gEFIMount/CLOVERbackup";;
 		esac
 	fi
 
@@ -332,7 +353,9 @@ function _installClover()
 	_printHeader "${STYLE_BOLD}--install-clover: ${COLOR_GREEN}Installing Clover Bootloader${STYLE_RESET}"
 
 	# Copy the directories to the EFI partition & create the kext directory
-	cp -R "$gRepo/EFI" "$gEFIMount"
+	mkdir -p "$gEFIMount/EFI/BOOT"
+	cp -R "$gRepo/EFI/BOOT" "$gEFIMount/EFI"
+	cp -R "$gRepo/EFI/CLOVER" "$gEFIMount/EFI"
 	mkdir -p "$gEFIMount/EFI/CLOVER/kexts/Other"
 
 	# Install the required kexts to the EFI partition
@@ -344,6 +367,7 @@ function _installClover()
 	_detectIntelNIC
 	_detectRealtekNIC
 	_detectMarvellSATA
+	_detectEHCI
 	_detectXHCI
 	_detectPS2
 

@@ -17,6 +17,11 @@ Currently, the following motherboards are supported by the GA-Z77X script and th
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.7.2 (2015-08-22)
+- Fixed more bugs reported by sreda2013 (thanks again for your patience)
+- Fixed more typos in the script
+- Added AppleUSBEHCIPortInjector.kext creation for OS X 10.11
+
 Version 1.7.1 (2015-08-19)
 - Fixed more bugs related to kext installation & iasl (thanks to sreda2013 again for reporting them)
 - Fixed more typos in the script

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>15A244d</string>
+	<string>15A263e</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
@@ -53,7 +53,7 @@
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
 			<key>Model</key>
-			<string>AR8131 Gigabit Ethernet</string>
+			<string>AR8131 PCI Express Gigabit Ethernet</string>
 			<key>Vendor</key>
 			<string>Qualcomm Atheros</string>
 		</dict>
@@ -72,7 +72,7 @@
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
 			<key>Model</key>
-			<string>AR8151 v1.0 Gigabit Ethernet</string>
+			<string>AR8151 v1.0 PCI Express Gigabit Ethernet</string>
 			<key>Vendor</key>
 			<string>Qualcomm Atheros</string>
 		</dict>
@@ -91,7 +91,7 @@
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
 			<key>Model</key>
-			<string>AR8151 v2.0 Gigabit Ethernet</string>
+			<string>AR8151 v2.0 PCI Express Gigabit Ethernet</string>
 			<key>Vendor</key>
 			<string>Qualcomm Atheros</string>
 		</dict>
@@ -110,7 +110,7 @@
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
 			<key>Model</key>
-			<string>AR8132 Fast Ethernet</string>
+			<string>AR8132 PCI Express Fast Ethernet</string>
 			<key>Vendor</key>
 			<string>Qualcomm Atheros</string>
 		</dict>
@@ -129,7 +129,7 @@
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
 			<key>Model</key>
-			<string>AR8152 v1.1 Fast Ethernet</string>
+			<string>AR8152 v1.1 PCI Express Fast Ethernet</string>
 			<key>Vendor</key>
 			<string>Qualcomm Atheros</string>
 		</dict>
@@ -148,13 +148,13 @@
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
 			<key>Model</key>
-			<string>AR8152 v2.0 Fast Ethernet</string>
+			<string>AR8152 v2.0 PCI Express Fast Ethernet</string>
 			<key>Vendor</key>
 			<string>Qualcomm Atheros</string>
 		</dict>
 	</dict>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright Shailua © 2012. All rights reserved.</string>
+	<string>Copyright © 2012 Shailua. All rights reserved.</string>
 	<key>OSBundleLibraries</key>
 	<dict>
 		<key>com.apple.iokit.IONetworkingFamily</key>
