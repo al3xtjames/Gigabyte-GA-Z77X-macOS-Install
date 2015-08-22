@@ -5,7 +5,7 @@ Support files for Gigabyte GA-Z77X motherboards running OS X.
 These support files can help you configure the post-installation process on Gigabyte GA-Z77X motherboards. The current repository uses a custom SSDT (customized for each motherboard) as well as config.plist edits to patch everything on the fly regardless of differing BIOS versions. Manual DSDT edits are no longer needed and are no longer included in this repo.
 
 ### Usage
-[![asciicast](https://asciinema.org/a/44g85bgoyiswbikkrbmhcuzd6.png)](https://asciinema.org/a/44g85bgoyiswbikkrbmhcuzd6)
+[![asciicast](https://asciinema.org/a/0xufcqxd6jm3qwo1ss0asegd6.png)](https://asciinema.org/a/0xufcqxd6jm3qwo1ss0asegd6)
 Please refer [to the wiki](https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch/wiki) for more information as well as detailed instructions.
 
 ### Supported Motherboards
