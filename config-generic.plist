@@ -4,6 +4,113 @@
 <dict>
 	<key>ACPI</key>
 	<dict>
+		<key>DSDT</key>
+		<dict>
+			<key>Fixes</key>
+			<dict>
+				<key>AddMCHC_0008</key>
+				<true/>
+				<key>AddIMEI_80000</key>
+				<true/>
+				<key>FixSUBS_0080</key>
+				<true/>
+				<key>FixRegions_10000000</key>
+				<true/>
+				<key>NewWay_80000000</key>
+				<true/>
+			</dict>
+			<key>Patches</key>
+			<array>
+				<dict>
+					<key>Comment</key>
+					<string>Rename GFX0 to IGPU</string>
+					<key>Find</key>
+					<data>R0ZYMA==</data>
+					<key>Replace</key>
+					<data>SUdQVQ==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename PEGP to GFX0</string>
+					<key>Find</key>
+					<data>UEVHUA==</data>
+					<key>Replace</key>
+					<data>R0ZYMA==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename SAT0 to SATA</string>
+					<key>Find</key>
+					<data>U0FUMA==</data>
+					<key>Replace</key>
+					<data>U0FUQQ==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename XHC to XHC1 (1 of 8)</string>
+					<key>Find</key>
+					<data>AoNBcA==</data>
+					<key>Replace</key>
+					<data>AiFBcA==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename XHC to XHC1 (2 of 8)</string>
+					<key>Find</key>
+					<data>X0NVSQ==</data>
+					<key>Replace</key>
+					<data>MUNVSQ==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename XHC to XHC1 (3 of 8)</string>
+					<key>Find</key>
+					<data>X1BPUw==</data>
+					<key>Replace</key>
+					<data>MVBPUw==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename XHC to XHC1 (4 of 8)</string>
+					<key>Find</key>
+					<data>X1hTRQ==</data>
+					<key>Replace</key>
+					<data>MVhTRQ==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename XHC to XHC1 (5 of 8)</string>
+					<key>Find</key>
+					<data>XwhfQQ==</data>
+					<key>Replace</key>
+					<data>MQhfQQ==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename XHC to XHC1 (6 of 8)</string>
+					<key>Find</key>
+					<data>X1hXQQ==</data>
+					<key>Replace</key>
+					<data>MVhXQQ==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename XHC to XHC1 (7 of 8)</string>
+					<key>Find</key>
+					<data>XwoCoA==</data>
+					<key>Replace</key>
+					<data>MQoCoA==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename XHC to XHC1 (8 of 8)</string>
+					<key>Find</key>
+					<data>X1BNRQ==</data>
+					<key>Replace</key>
+					<data>MVBNRQ==</data>
+				</dict>
+			</array>
+		</dict>
 		<key>SSDT</key>
 		<dict>
 			<key>DropOem</key>

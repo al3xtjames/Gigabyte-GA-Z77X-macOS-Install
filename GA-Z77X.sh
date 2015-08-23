@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.7.2"
+gScriptVersion="1.7.3"
 
 ## The user ID
 gID=$(id -u)
