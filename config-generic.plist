@@ -12,8 +12,16 @@
 				<true/>
 				<key>AddIMEI_80000</key>
 				<true/>
-				<key>FixSUBS_0080</key>
+				<key>FixSBUS_0080</key>
 				<true/>
+				<key>FIX_TMR_40000</key>
+				<true/>
+				<key>FIX_RTC_20000</key>
+				<true/>
+				<key>FixIPIC_0040</key>
+				<false/>
+				<key>FixHPET_0010</key>
+				<false/>
 				<key>FixRegions_10000000</key>
 				<true/>
 				<key>NewWay_80000000</key>
