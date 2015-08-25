@@ -11,12 +11,18 @@ Please refer [to the wiki](https://github.com/theracermaster/Gigabyte-GA-Z77X-DS
 ### Supported Motherboards
 Currently, the following motherboards are supported by the GA-Z77X script and the custom SSDTs in the repo:
 - GA-Z77X-D3H
-- GA-Z77X-UD3H
-- GA-Z77X-UD5H
+- GA-Z77X-UD3H (-WB WIFI)
+- GA-Z77X-UD5H (-WB WIFI)
 - GA-Z77X-UP5 TH
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.7.4 (2015-08-24)
+- Refined motherboard detection (uses OEMBoard property injected by Clover in `IODeviceTree` instead of `bdmesg`)
+- Added AppleUSBXHCIPortInjector.kext creation for OS X 10.11 (experimental)
+- Fixed GA-Z77X-UP5 TH & GA-Z77X-UP7 motherboard detection
+- Slight code refactoring
+
 Version 1.7.3 (2015-08-23)
 - Added Clover DSDT patches to generic config to make SSDTs smaller
 

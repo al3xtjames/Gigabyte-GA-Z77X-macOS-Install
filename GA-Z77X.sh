@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.7.3"
+gScriptVersion="1.7.4"
 
 ## The user ID
 gID=$(id -u)
@@ -42,25 +42,39 @@ COLOR_GREY="\e[37m"
 COLOR_END="\e[0m"
 
 #-------------------------------------------------------------------------------#
+function _printError()
+{
+	# Initialize variables
+	text="$1"
+
+	# Print the error text and exit
+	printf "${COLOR_RED}${STYLE_BOLD}ERROR: ${STYLE_RESET}${STYLE_BOLD}$text${STYLE_RESET} Exiting...\n"
+	exit 1
+}
+
 function _identifyMotherboard()
 {
 	# Initialize variables
-	motherboard=$("$gRepo/tools/bdmesg" | grep "Z77X" | cut -d '-' -f2 | sed 's/[[:space:]]//g')
+	motherboard=$(ioreg -lw0 -p IODeviceTree | grep "OEMBoard" | awk '{ print $4 }' | sed 's/<"//g' | sed 's/">//g')
 
 	# Identify the motherboard
 	case $motherboard in
-		'D3H')
-			gMotherboard="D3H";;
-		'UD3H')
-			gMotherboard="UD3H";;
-		'UD5H')
-			gMotherboard="UD5H";;
-		'UP5 TH')
-			gMotherboard="UP5-TH";;
-		'UP7')
-			gMotherboard="UP5-TH";;
-		*)
-			echo "ERROR: "$motherboard" motherboard is unsupported by this script. Exiting..." && exit 1;;
+		'Z77X-D3H') gMotherboard="D3H";;
+		'Z77X-UD3H') gMotherboard="UD3H";;
+		'Z77X-UD5H') gMotherboard="UD5H";;
+		'Z77X-UP5 TH-CF') gMotherboard="UP5-TH";;
+		'Z77X-UP7') gMotherboard="UP7";;
+		*) _printError "$motherboard is unsupported by this script!";;
+	esac
+}
+
+function _checkOSVersion()
+{
+	osVersion=$(sw_vers -productVersion)
+
+	case "$osVersion" in
+		10.9 | 10.10 | 10.11);; # Supported OS version detected, so do nothing
+		*) printError "OS X Version $osVersion is unsupported by this script!";;
 	esac
 }
 
@@ -195,7 +209,7 @@ function _detectXHCI()
 
 	# Make sure config.plist exists
 	if [ ! -f "$plist" ]; then
-		printf "${COLOR_RED}${STYLE_BOLD}ERROR: ${STYLE_RESET}${STYLE_BOLD}config.plist not found!${STYLE_RESET} Exiting...\n"
+		printError "config.plist not found!"
 		exit 1
 	fi
 
@@ -203,6 +217,27 @@ function _detectXHCI()
 	if [[ ! -z $nonIntelXHCI ]]; then
 		echo " - Non-Intel XHCI contoller(s) detected, enabling AppleUSBXHCI kext patches..."
 		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
+	fi
+
+	# Check if OS X version is 10.11 (El Capitan)
+	if [ $(sw_vers -productVersion) = "10.11" ]; then
+		# Create an injector kext to bypass the USB 2.0 port restrictions if the OS X version is 10.11
+		echo " - OS X 10.11 detected, installing AppleUSBXHCIPortInjector.kext..."
+		mkdir -p "$gRepo/AppleUSBXHCIPortInjector.kext/Contents/MacOS"
+		cp /System/Library/Extensions/IOUSBHostFamily.kext/Contents/PlugIns/AppleUSBXHCIPCI.kext/Contents/Info.plist "$gRepo/AppleUSBXHCIPortInjector.kext/Contents"
+		ln -s /System/Library/Extensions/IOUSBHostFamily.kext/Contents/PlugIns/AppleUSBXHCIPCI.kext/Contents/MacOS/AppleUSBXHCIPCI "$gRepo/AppleUSBXHCIPortInjector.kext/Contents/MacOS"
+		plist="$gRepo/AppleUSBXHCIPortInjector.kext/Contents/Info.plist"
+		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleGetInfoString" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
+		/usr/libexec/plistbuddy -c "Set :CFBundleGetInfoString '$replace'" $plist
+		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleVersion" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
+		/usr/libexec/plistbuddy -c "Set :CFBundleVersion '$replace'" $plist
+		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleShortVersionString" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
+		/usr/libexec/plistbuddy -c "Set :CFBundleShortVersionString '$replace'" $plist
+		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-XHC1:IOProviderMergeProperties:port-count'" $plist
+		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-XHC1:IOProviderMergeProperties:ports'" $plist
+		sudo chmod -R 755 "$gRepo/AppleUSBXHCIPortInjector.kext"
+		sudo chown -R 0:0 "$gRepo/AppleUSBXHCIPortInjector.kext"
+		sudo mv "$gRepo/AppleUSBXHCIPortInjector.kext" /Library/Extensions
 	fi
 }
 
@@ -225,7 +260,7 @@ function _genSMBIOSData()
 
 	# Make sure config.plist exists
 	if [ ! -f "$plist" ]; then
-		printf "${COLOR_RED}${STYLE_BOLD}ERROR: ${STYLE_RESET}${STYLE_BOLD}config.plist not found!${STYLE_RESET} Exiting...\n"
+		printError "config.plist not found!"
 		exit 1
 	fi
 
@@ -247,7 +282,6 @@ function _genSMBIOSData()
 
 	printf "\n${STYLE_BOLD}Press enter to continue...${STYLE_RESET}\n" && read
 }
-
 #-------------------------------------------------------------------------------#
 
 
@@ -283,9 +317,6 @@ function _compileSSDT()
 	printf "${STYLE_BOLD}Downloading $fileName${STYLE_RESET}:\n"
 	curl --output "/tmp/$fileName" --progress-bar --location "$url"
 
-	# Download the file
-	# _download $url "SSDT-GA-Z77X-$gMotherboard.dsl" /tmp/SSDT.dsl
-
 	# Compile the SSDT and move it to the right directory
 	printf "${STYLE_BOLD}Compiling $fileName${STYLE_RESET}:\n"
 	"$gRepo/tools/iasl" "/tmp/$fileName"
@@ -309,6 +340,8 @@ function _injectHDA()
 	# Copy config.plist and add the kext patches to it
 	cp "$gRepo/config-generic.plist" "$plist"
 	/usr/libexec/PlistBuddy -c "Merge /tmp/ktp.plist ':KernelAndKextPatches:KextsToPatch'" $plist
+
+	exit 0
 }
 
 function _installClover()
@@ -404,6 +437,7 @@ function _cleanup()
 
 	# Delete the generated files
 	printf "${STYLE_BOLD}Deleting generated files in repo folders${STYLE_RESET}:\n"
+	sudo rm -rf *.kext
 	rm -f EFI/CLOVER/ACPI/patched/*.aml
 	rm -f EFI/CLOVER/config.plist
 	rm -f /tmp/*.aml
@@ -416,32 +450,26 @@ function _cleanup()
 }
 #-------------------------------------------------------------------------------#
 
-RETVAL=0
-
 _identifyMotherboard
+_checkOSVersion
 
 case "$1" in
 	--git-update)
-		_gitUpdate
-		RETVAL=1;;
+		_gitUpdate;;
 	--compile-ssdt)
-		_compileSSDT
-		RETVAL=1;;
+		_compileSSDT;;
 	--inject-hda)
 		_checkRoot
-		_injectHDA
-		RETVAL=1;;
+		_injectHDA;;
 	--install-clover)
 		_checkRoot
-		_installClover
-		RETVAL=1;;
+		_installClover;;
 	--cleanup)
 		_checkRoot
-		_cleanup
-		RETVAL=1;;
+		_cleanup;;
 	*)
 		echo "Gigabyte GA-Z77X.sh Post-Install Script v$gScriptVersion by theracermaster"
-		echo "Supports various Gigabye GA-Z77X motherboards"
+		echo "Supports various Gigabye GA-Z77X motherboards running OS X 10.9+"
 		echo
 		echo "Usage: ./GA-Z77X.sh <command>, where <command> is one of the following:"
 		echo
@@ -454,4 +482,4 @@ case "$1" in
 		echo "Updates & Info: https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch"
 esac
 
-exit $RETVAL
+exit 0
