@@ -1,6 +1,6 @@
 # Gigabyte-GA-Z77X DSDT Patch
 
-Support files for Gigabyte GA-Z77X motherboards running OS X.
+Support files for Gigabyte GA-Z77X motherboards running OS X 10.9+.
 
 These support files can help you configure the post-installation process on Gigabyte GA-Z77X motherboards. The current repository uses a custom SSDT (customized for each motherboard) as well as config.plist edits to patch everything on the fly regardless of differing BIOS versions. Manual DSDT edits are no longer needed and are no longer included in this repo.
 
@@ -17,6 +17,12 @@ Currently, the following motherboards are supported by the GA-Z77X script and th
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.7.5 (2015-08-28)
+- Updated Mieze's IntelMausiEthernet driver
+- Updated Clover to r3262
+- Replaced AppleUSBEHCIPortInjector.kext & AppleUSBXHCIPortInjector.kext with GA-Z77X_USBPortInjector.kext
+- Added FreqVectorInjector.kext to suppress `X86PlatformShim::start - Failed to send stepper` errors in kernel logs
+
 Version 1.7.4 (2015-08-24)
 - Refined motherboard detection (uses OEMBoard property injected by Clover in `IODeviceTree` instead of `bdmesg`)
 - Added AppleUSBXHCIPortInjector.kext creation for OS X 10.11 (experimental)

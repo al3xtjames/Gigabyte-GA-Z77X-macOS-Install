@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.7.4"
+gScriptVersion="1.7.5"
 
 ## The user ID
 gID=$(id -u)
@@ -73,7 +73,7 @@ function _checkOSVersion()
 	osVersion=$(sw_vers -productVersion)
 
 	case "$osVersion" in
-		10.9 | 10.10 | 10.11);; # Supported OS version detected, so do nothing
+		10.9* | 10.10* | 10.11*);; # Supported OS version detected, so do nothing
 		*) printError "OS X Version $osVersion is unsupported by this script!";;
 	esac
 }
@@ -174,33 +174,7 @@ function _detectMarvellSATA()
 	fi
 }
 
-function _detectEHCI()
-{
-	# Check if OS X version is 10.11 (El Capitan)
-	if [ $(sw_vers -productVersion) = "10.11" ]; then
-		# Create an injector kext to bypass the USB 2.0 port restrictions if the OS X version is 10.11
-		echo " - OS X 10.11 detected, installing AppleUSBEHCIPortInjector.kext..."
-		mkdir -p "$gRepo/AppleUSBEHCIPortInjector.kext/Contents/MacOS"
-		cp /System/Library/Extensions/IOUSBHostFamily.kext/Contents/PlugIns/AppleUSBEHCIPCI.kext/Contents/Info.plist "$gRepo/AppleUSBEHCIPortInjector.kext/Contents"
-		ln -s /System/Library/Extensions/IOUSBHostFamily.kext/Contents/PlugIns/AppleUSBEHCIPCI.kext/Contents/MacOS/AppleUSBEHCIPCI "$gRepo/AppleUSBEHCIPortInjector.kext/Contents/MacOS"
-		plist="$gRepo/AppleUSBEHCIPortInjector.kext/Contents/Info.plist"
-		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleGetInfoString" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
-		/usr/libexec/plistbuddy -c "Set :CFBundleGetInfoString '$replace'" $plist
-		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleVersion" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
-		/usr/libexec/plistbuddy -c "Set :CFBundleVersion '$replace'" $plist
-		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleShortVersionString" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
-		/usr/libexec/plistbuddy -c "Set :CFBundleShortVersionString '$replace'" $plist
-		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-EHC1:IOProviderMergeProperties:port-count'" $plist
-		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-EHC1:IOProviderMergeProperties:ports'" $plist
-		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-EHC2:IOProviderMergeProperties:port-count'" $plist
-		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-EHC2:IOProviderMergeProperties:ports'" $plist
-		sudo chmod -R 755 "$gRepo/AppleUSBEHCIPortInjector.kext"
-		sudo chown -R 0:0 "$gRepo/AppleUSBEHCIPortInjector.kext"
-		sudo mv "$gRepo/AppleUSBEHCIPortInjector.kext" /Library/Extensions
-	fi
-}
-
-function _detectXHCI()
+function _detectUSB()
 {
 	# Initialize variables
 	plist="$gEFIMount/EFI/CLOVER/config.plist"
@@ -220,24 +194,12 @@ function _detectXHCI()
 	fi
 
 	# Check if OS X version is 10.11 (El Capitan)
-	if [ $(sw_vers -productVersion) = "10.11" ]; then
-		# Create an injector kext to bypass the USB 2.0 port restrictions if the OS X version is 10.11
-		echo " - OS X 10.11 detected, installing AppleUSBXHCIPortInjector.kext..."
-		mkdir -p "$gRepo/AppleUSBXHCIPortInjector.kext/Contents/MacOS"
-		cp /System/Library/Extensions/IOUSBHostFamily.kext/Contents/PlugIns/AppleUSBXHCIPCI.kext/Contents/Info.plist "$gRepo/AppleUSBXHCIPortInjector.kext/Contents"
-		ln -s /System/Library/Extensions/IOUSBHostFamily.kext/Contents/PlugIns/AppleUSBXHCIPCI.kext/Contents/MacOS/AppleUSBXHCIPCI "$gRepo/AppleUSBXHCIPortInjector.kext/Contents/MacOS"
-		plist="$gRepo/AppleUSBXHCIPortInjector.kext/Contents/Info.plist"
-		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleGetInfoString" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
-		/usr/libexec/plistbuddy -c "Set :CFBundleGetInfoString '$replace'" $plist
-		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleVersion" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
-		/usr/libexec/plistbuddy -c "Set :CFBundleVersion '$replace'" $plist
-		replace=`/usr/libexec/plistbuddy -c "Print :CFBundleShortVersionString" $plist | perl -Xpi -e 's/(\d*\.\d*)/9\1/'`
-		/usr/libexec/plistbuddy -c "Set :CFBundleShortVersionString '$replace'" $plist
-		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-XHC1:IOProviderMergeProperties:port-count'" $plist
-		/usr/libexec/PlistBuddy -c "Delete ':IOKitPersonalities:$gProductName-XHC1:IOProviderMergeProperties:ports'" $plist
-		sudo chmod -R 755 "$gRepo/AppleUSBXHCIPortInjector.kext"
-		sudo chown -R 0:0 "$gRepo/AppleUSBXHCIPortInjector.kext"
-		sudo mv "$gRepo/AppleUSBXHCIPortInjector.kext" /Library/Extensions
+	if [ $(sw_vers -productVersion) = 10.11* ]; then
+		# If so, install an injector kext to bypass the EHCI/XHCI port restrictions
+		echo " - OS X 10.11 detected, installing GA-Z77X_USBPortInjector.kext..."
+		sudo cp -R "$gRepo/kexts/GA-Z77X_USBPortInjector.kext" /Library/Extensions
+		sudo chmod -R 755  "/Library/Extensions/GA-Z77X_USBPortInjector.kext"
+		sudo chown -R 0:0 "/Library/Extensions/GA-Z77X_USBPortInjector.kext"
 	fi
 }
 
@@ -391,17 +353,20 @@ function _installClover()
 	cp -R "$gRepo/EFI/CLOVER" "$gEFIMount/EFI"
 	mkdir -p "$gEFIMount/EFI/CLOVER/kexts/Other"
 
-	# Install the required kexts to the EFI partition
-	printf "${STYLE_BOLD}Installing kexts to EFI partition${STYLE_RESET}:\n"
-	## Install FakeSMC
+	# Install the required kexts
+	printf "${STYLE_BOLD}Installing required kexts${STYLE_RESET}:\n"
+	## Install FakeSMC.kext
 	_installKextEFI "$gRepo/kexts/FakeSMC.kext"
+	## Install FreqVectorInjector.kext
+	sudo cp -R "$gRepo/kexts/FreqVectorInjector.kext" /Library/Extensions
+	sudo chmod -R 755  "/Library/Extensions/FreqVectorInjector.kext"
+	sudo chown -R 0:0 "/Library/Extensions/FreqVectorInjector.kext"
 	## Check what other kexts/patches are needed and install them
 	_detectAtherosNIC
 	_detectIntelNIC
 	_detectRealtekNIC
 	_detectMarvellSATA
-	_detectEHCI
-	_detectXHCI
+	_detectUSB
 	_detectPS2
 
 	# Generate the SMBIOS data
