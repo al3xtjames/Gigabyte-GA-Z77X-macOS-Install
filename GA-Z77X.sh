@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.7.6"
+gScriptVersion="1.7.7"
 
 ## The user ID
 gID=$(id -u)
@@ -192,9 +192,8 @@ function _detectUSB()
 		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
 	fi
 
-	# Install FakePCIID+FakePCIID_XHCIMux.kext to fix USB muxing
+	# Install FakePCIID.kext+FakePCIID_XHCIMux to fix USB muxing
 	_installKextEFI "$gRepo/kexts/usb/FakePCIID.kext"
-	_installKextEFI "$gRepo/kexts/usb/FakePCIID_XHCIMux.kext"
 }
 
 function _detectPS2()
@@ -349,7 +348,7 @@ function _installClover()
 
 	# Install the required kexts
 	printf "${STYLE_BOLD}Installing required kexts${STYLE_RESET}:\n"
-	## Install FakeSMC.kext
+	## Install FakeSMC.kext+HWSensors
 	_installKextEFI "$gRepo/kexts/misc/FakeSMC.kext"
 	## Install FVInjector.kext
 	sudo cp -R "$gRepo/kexts/misc/FVInjector.kext" /Library/Extensions

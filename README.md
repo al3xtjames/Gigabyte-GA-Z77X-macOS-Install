@@ -17,6 +17,12 @@ Currently, the following motherboards are supported by the GA-Z77X script and th
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.7.7 (2015-09-04)
+- Updated SSDTs with IGPU primary & discrete GPU secondary support
+- Updated SSDTs with `device_type` property injection for discrete GPU device (GFX0) & HDMI audio device (HDAU)
+- ACPI OS is now simulated as `Windows 2012` (Windows 8) with SSDT XOSI method & Clover DSDT binpatch (thanks to RehabMan)
+- Disable Clover's USB injection since it's already done in the SSDTs
+
 Version 1.7.6 (2015-09-04)
 - Renamed USB devices (EHCx, XHCx → EH0x, XH0x) using config.plist DSDT patches to bypass Apple's port restrictions
 - Removed GA-Z77X_USBPortInjector.kext
@@ -80,4 +86,4 @@ If you run into an issue while running the GA-Z77X.sh post-installation script o
 
 ### Credits
 Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, Shailua, SJ_Underwater, the-darkvoid, and toleda for their original works; this would not have been possible if not for their work.
-Also, special thanks to [AustinSMU](https://github.com/AustinSMU); the repo design and large parts of the script were based off his [PRECISION-M3800-OSX repo](https://github.com/AustinSMU/PRECISION-M3800-OSX). 
+Also, special thanks to [AustinSMU](https://github.com/AustinSMU); the repo design and large parts of the script were based off his [PRECISION-M3800-OSX repo](https://github.com/AustinSMU/PRECISION-M3800-OSX).

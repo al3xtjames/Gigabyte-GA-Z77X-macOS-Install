@@ -130,6 +130,11 @@
 			<key>ResetHDA</key>
 			<true/>
 		</dict>
+		<key>USB</key>
+		<dict>
+			<key>Inject</key>
+			<false/>
+		</dict>
 	</dict>
 	<key>GUI</key>
 	<dict>
