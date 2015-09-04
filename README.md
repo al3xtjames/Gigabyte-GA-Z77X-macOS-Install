@@ -17,6 +17,13 @@ Currently, the following motherboards are supported by the GA-Z77X script and th
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.7.6 (2015-09-04)
+- Renamed USB devices (EHCx, XHCx → EH0x, XH0x) using config.plist DSDT patches to bypass Apple's port restrictions
+- Removed GA-Z77X_USBPortInjector.kext
+- Fixed non-Intel XHCI controller kext patching
+- Fixed FakePCIID.kext+FakePCIID_XHCIMux.kext installation
+- Fixed various minor bugs in the script
+
 Version 1.7.5 (2015-08-28)
 - Updated Mieze's IntelMausiEthernet driver
 - Updated Clover to r3262

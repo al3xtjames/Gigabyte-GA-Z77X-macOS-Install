@@ -12,16 +12,14 @@
 				<true/>
 				<key>AddIMEI_80000</key>
 				<true/>
-				<key>FixSBUS_0080</key>
-				<true/>
 				<key>FIX_TMR_40000</key>
 				<true/>
 				<key>FIX_RTC_20000</key>
 				<true/>
 				<key>FixIPIC_0040</key>
-				<false/>
+				<true/>
 				<key>FixHPET_0010</key>
-				<false/>
+				<true/>
 				<key>FixRegions_10000000</key>
 				<true/>
 				<key>NewWay_80000000</key>
@@ -29,6 +27,30 @@
 			</dict>
 			<key>Patches</key>
 			<array>
+				<dict>
+					<key>Comment</key>
+					<string>Rename _OSI to XOSI</string>
+					<key>Find</key>
+					<data>X09TSQ==</data>
+					<key>Replace</key>
+					<data>WE9TSQ==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename EHC1 to EH01</string>
+					<key>Find</key>
+					<data>RUhDMQ==</data>
+					<key>Replace</key>
+					<data>RUgwMQ==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>Rename EHC2 to EH02</string>
+					<key>Find</key>
+					<data>RUhDMg==</data>
+					<key>Replace</key>
+					<data>RUgwMg==</data>
+				</dict>
 				<dict>
 					<key>Comment</key>
 					<string>Rename GFX0 to IGPU</string>
@@ -55,67 +77,19 @@
 				</dict>
 				<dict>
 					<key>Comment</key>
-					<string>Rename XHC to XHC1 (1 of 8)</string>
+					<string>Rename XHC to XH01 (1 of 2)</string>
 					<key>Find</key>
-					<data>AoNBcA==</data>
+					<data>AhBBcA==</data>
 					<key>Replace</key>
-					<data>AiFBcA==</data>
+					<data>AllBcA==</data>
 				</dict>
 				<dict>
 					<key>Comment</key>
-					<string>Rename XHC to XHC1 (2 of 8)</string>
+					<string>Rename XHC to XH01 (2 of 2)</string>
 					<key>Find</key>
-					<data>X0NVSQ==</data>
+					<data>WEhDXw==</data>
 					<key>Replace</key>
-					<data>MUNVSQ==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename XHC to XHC1 (3 of 8)</string>
-					<key>Find</key>
-					<data>X1BPUw==</data>
-					<key>Replace</key>
-					<data>MVBPUw==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename XHC to XHC1 (4 of 8)</string>
-					<key>Find</key>
-					<data>X1hTRQ==</data>
-					<key>Replace</key>
-					<data>MVhTRQ==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename XHC to XHC1 (5 of 8)</string>
-					<key>Find</key>
-					<data>XwhfQQ==</data>
-					<key>Replace</key>
-					<data>MQhfQQ==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename XHC to XHC1 (6 of 8)</string>
-					<key>Find</key>
-					<data>X1hXQQ==</data>
-					<key>Replace</key>
-					<data>MVhXQQ==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename XHC to XHC1 (7 of 8)</string>
-					<key>Find</key>
-					<data>XwoCoA==</data>
-					<key>Replace</key>
-					<data>MQoCoA==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename XHC to XHC1 (8 of 8)</string>
-					<key>Find</key>
-					<data>X1BNRQ==</data>
-					<key>Replace</key>
-					<data>MVBNRQ==</data>
+					<data>WEgwMQ==</data>
 				</dict>
 			</array>
 		</dict>
@@ -206,7 +180,7 @@
 	<key>RtVariables</key>
 	<dict>
 		<key>CsrActiveConfig</key>
-		<string>0x1</string>
+		<string>0x11</string>
 		<key>MLB</key>
 		<string></string>
 		<key>ROM</key>

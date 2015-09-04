@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.7.5"
+gScriptVersion="1.7.6"
 
 ## The user ID
 gID=$(id -u)
@@ -74,7 +74,7 @@ function _checkOSVersion()
 
 	case "$osVersion" in
 		10.9* | 10.10* | 10.11*);; # Supported OS version detected, so do nothing
-		*) printError "OS X Version $osVersion is unsupported by this script!";;
+		*) _printError "OS X Version $osVersion is unsupported by this script!";;
 	esac
 }
 
@@ -124,10 +124,10 @@ function _detectAtherosNIC()
 		case $atherosNIC in
 			1083) # Atheros AR8151 v2.0 GbE - use AtherosL1cEthernet
 				echo " - Atheros AR8151 v2.0 [1969:1083] detected, installing AtherosL1cEthernet.kext..."
-				_installKextEFI "$gRepo/kexts/AtherosL1cEthernet.kext";;
+				_installKextEFI "$gRepo/kexts/lan/AtherosL1cEthernet.kext";;
 			1091) # Atheros AR8161 GbE - use AtherosE2200Ethernet
 				echo " - Atheros AR8161 [1969:1091] detected, installing AtherosE2200Ethernet.kext..."
-				_installKextEFI "$gRepo/kexts/AtherosE2200Ethernet.kext";;
+				_installKextEFI "$gRepo/kexts/lan/AtherosE2200Ethernet.kext";;
 		esac
 	fi
 }
@@ -142,7 +142,7 @@ function _detectIntelNIC()
 		case $intelNIC in
 			1503) # Intel 82579V GbE
 				echo " - Intel 82579V [8086:1503] detected, installing IntelMausiEthernet.kext..."
-				_installKextEFI "$gRepo/kexts/IntelMausiEthernet.kext";;
+				_installKextEFI "$gRepo/kexts/lan/IntelMausiEthernet.kext";;
 		esac
 	fi
 }
@@ -157,7 +157,7 @@ function _detectRealtekNIC()
 		case $realtekNIC in
 			8168) # Realtek RTL8168/RTL8111 GbE
 				echo " - Realtek RTL8168/RTL8111 [10ec:8168] detected, installing RealtekRTL8111.kext..."
-				_installKextEFI "$gRepo/kexts/RealtekRTL8111.kext";;
+				_installKextEFI "$gRepo/kexts/lan/RealtekRTL8111.kext";;
 		esac
 	fi
 }
@@ -170,37 +170,31 @@ function _detectMarvellSATA()
 	# Install AHCI_3rdParty_SATA if Marvell SATA controllers are detected
 	if [[ ! -z $marvellSATA ]]; then
 		echo " - Marvell SATA controller(s) detected, installing AHCI_3rdParty_SATA.kext..."
-		_installKextEFI "$gRepo/kexts/AHCI_3rdParty_SATA.kext"
+		_installKextEFI "$gRepo/kexts/sata/AHCI_3rdParty_SATA.kext"
 	fi
 }
 
 function _detectUSB()
 {
-	# Initialize variables
+	# Add AppleUSBXHCI kext patches for non-Intel xHCI controllers to config.plist
+	## Initialize variables
 	plist="$gEFIMount/EFI/CLOVER/config.plist"
-	xhciList=$("$gRepo/tools/dspci" | grep "xHCI Host Controller\|USB 3.0 Host Controller")
-	nonIntelXHCI=$(echo $xhciList | grep -Fv "Intel")
-
-	# Make sure config.plist exists
+	xhciList=$("$gRepo/tools/dspci" | grep "xHCI\|USB 3.0")
+	nonIntelXHCI=$(echo $xhciList | grep -Fv "8086")
+	## Make sure config.plist exists
 	if [ ! -f "$plist" ]; then
-		printError "config.plist not found!"
+		_printError "config.plist not found!"
 		exit 1
 	fi
-
-	# Add the kext patches to the plist if non-Intel XHCI controllers are detected
+	## Add the kext patches to config.plist
 	if [[ ! -z $nonIntelXHCI ]]; then
-		echo " - Non-Intel XHCI contoller(s) detected, enabling AppleUSBXHCI kext patches..."
+		echo " - Non-Intel xHCI contoller(s) detected, enabling AppleUSBXHCI kext patches..."
 		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
 	fi
 
-	# Check if OS X version is 10.11 (El Capitan)
-	if [ $(sw_vers -productVersion) = 10.11* ]; then
-		# If so, install an injector kext to bypass the EHCI/XHCI port restrictions
-		echo " - OS X 10.11 detected, installing GA-Z77X_USBPortInjector.kext..."
-		sudo cp -R "$gRepo/kexts/GA-Z77X_USBPortInjector.kext" /Library/Extensions
-		sudo chmod -R 755  "/Library/Extensions/GA-Z77X_USBPortInjector.kext"
-		sudo chown -R 0:0 "/Library/Extensions/GA-Z77X_USBPortInjector.kext"
-	fi
+	# Install FakePCIID+FakePCIID_XHCIMux.kext to fix USB muxing
+	_installKextEFI "$gRepo/kexts/usb/FakePCIID.kext"
+	_installKextEFI "$gRepo/kexts/usb/FakePCIID_XHCIMux.kext"
 }
 
 function _detectPS2()
@@ -208,7 +202,7 @@ function _detectPS2()
 	case $gMotherboard in
 		"D3H" | "UD3H" | "UP7") # Motherboards that have a PS/2 port
 			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
-			_installKextEFI "$gRepo/kexts/VoodooPS2Controller.kext"
+			_installKextEFI "$gRepo/kexts/misc/VoodooPS2Controller.kext"
 			sudo cp "$gRepo/patches/org.rehabman.voodoo.driver.Daemon.plist" /Library/LaunchDaemons
 			sudo cp "$gRepo/patches/VoodooPS2Daemon" /usr/bin;;
 	esac	
@@ -222,7 +216,7 @@ function _genSMBIOSData()
 
 	# Make sure config.plist exists
 	if [ ! -f "$plist" ]; then
-		printError "config.plist not found!"
+		_printError "config.plist not found!"
 		exit 1
 	fi
 
@@ -356,11 +350,11 @@ function _installClover()
 	# Install the required kexts
 	printf "${STYLE_BOLD}Installing required kexts${STYLE_RESET}:\n"
 	## Install FakeSMC.kext
-	_installKextEFI "$gRepo/kexts/FakeSMC.kext"
-	## Install FreqVectorInjector.kext
-	sudo cp -R "$gRepo/kexts/FreqVectorInjector.kext" /Library/Extensions
-	sudo chmod -R 755  "/Library/Extensions/FreqVectorInjector.kext"
-	sudo chown -R 0:0 "/Library/Extensions/FreqVectorInjector.kext"
+	_installKextEFI "$gRepo/kexts/misc/FakeSMC.kext"
+	## Install FVInjector.kext
+	sudo cp -R "$gRepo/kexts/misc/FVInjector.kext" /Library/Extensions
+	sudo chmod -R 755  "/Library/Extensions/FVInjector.kext"
+	sudo chown -R 0:0 "/Library/Extensions/FVInjector.kext"
 	## Check what other kexts/patches are needed and install them
 	_detectAtherosNIC
 	_detectIntelNIC
