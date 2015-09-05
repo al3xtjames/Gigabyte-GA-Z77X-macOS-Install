@@ -12,16 +12,25 @@ Please refer [to the wiki](https://github.com/theracermaster/Gigabyte-GA-Z77X-DS
 Currently, the following motherboards are supported by the GA-Z77X script and the custom SSDTs in the repo:
 - GA-Z77X-D3H
 - GA-Z77X-UD3H (-WB WIFI)
+- GA-Z77X-UD4H
 - GA-Z77X-UD5H (-WB WIFI)
 - GA-Z77X-UP5 TH
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.7.8 (2015-09-05)
+- Updated iasl
+- Updated Mieze's RealtekRTL8111 driver (compiled from RehabMan's fork)
+- Moved COPR → MATH device renaming to Clover config.plist DSDT binpatch
+- Disabled Clover AppleRTC patch
+- Simplified non-Intel AppleUSBXHCI USB 3.0 controller kext patches
+- Added experimental support for the GA-Z77X-UD4H motherboard
+
 Version 1.7.7 (2015-09-04)
 - Updated SSDTs with IGPU primary & discrete GPU secondary support
 - Updated SSDTs with `device_type` property injection for discrete GPU device (GFX0) & HDMI audio device (HDAU)
 - ACPI OS is now simulated as `Windows 2012` (Windows 8) with SSDT XOSI method & Clover DSDT binpatch (thanks to RehabMan)
-- Disable Clover's USB injection since it's already done in the SSDTs
+- Disabled Clover's USB injection since it's already done in the SSDTs
 
 Version 1.7.6 (2015-09-04)
 - Renamed USB devices (EHCx, XHCx → EH0x, XH0x) using config.plist DSDT patches to bypass Apple's port restrictions

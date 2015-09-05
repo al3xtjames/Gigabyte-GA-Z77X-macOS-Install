@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.7.7"
+gScriptVersion="1.7.8"
 
 ## The user ID
 gID=$(id -u)
@@ -61,6 +61,8 @@ function _identifyMotherboard()
 	case $motherboard in
 		'Z77X-D3H') gMotherboard="D3H";;
 		'Z77X-UD3H') gMotherboard="UD3H";;
+		'Z77X-UD4H') gMotherboard="UD4H";;
+		# 'Z77X-UP4 TH') gMotherboard="UP4-TH";; # Not sure about this one...
 		'Z77X-UD5H') gMotherboard="UD5H";;
 		'Z77X-UP5 TH-CF') gMotherboard="UP5-TH";;
 		'Z77X-UP7') gMotherboard="UP7";;

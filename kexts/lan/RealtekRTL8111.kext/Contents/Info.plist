@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>15A263e</string>
+	<string>15A279b</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
@@ -54,10 +54,6 @@
 			<string>IOPCIDevice</string>
 			<key>Model</key>
 			<string>RTL8111</string>
-			<key>RM,Build</key>
-			<string>Release-alexjames</string>
-			<key>RM,Version</key>
-			<string>RealtekRTL8111 2.0.0</string>
 			<key>Vendor</key>
 			<string>Realtek</string>
 			<key>disableASPM</key>
