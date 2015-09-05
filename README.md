@@ -25,6 +25,7 @@ Version 1.7.8 (2015-09-05)
 - Disabled Clover AppleRTC patch
 - Simplified non-Intel AppleUSBXHCI USB 3.0 controller kext patches
 - Added experimental support for the GA-Z77X-UD4H motherboard
+- Removed VoodooPS2Daemon (not needed on desktops)
 
 Version 1.7.7 (2015-09-04)
 - Updated SSDTs with IGPU primary & discrete GPU secondary support
