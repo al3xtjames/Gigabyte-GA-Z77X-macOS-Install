@@ -2,14 +2,14 @@
 
 Support files for Gigabyte GA-Z77X motherboards running OS X 10.9+.
 
-These support files can help you configure the post-installation process on Gigabyte GA-Z77X motherboards. The current repository uses a custom SSDT (customized for each motherboard) as well as config.plist edits to patch everything on the fly regardless of differing BIOS versions. Manual DSDT edits are no longer needed and are no longer included in this repo.
+These support files can help you configure the post-installation process on Gigabyte GA-Z77X motherboards. The current repository uses custom SSDTs for each motherboard along with the GA-Z77X.sh post-installation script to create a working OS X installation.
 
 ### Usage
 [![asciicast](https://asciinema.org/a/0xufcqxd6jm3qwo1ss0asegd6.png)](https://asciinema.org/a/0xufcqxd6jm3qwo1ss0asegd6)
 Please refer [to the wiki](https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch/wiki) for more information as well as detailed instructions.
 
 ### Supported Motherboards
-Currently, the following motherboards are supported by the GA-Z77X script and the custom SSDTs in the repo:
+Currently, the following motherboards are supported by the GA-Z77X.sh script and the custom SSDTs in the repo:
 - GA-Z77X-D3H
 - GA-Z77X-UD3H (-WB WIFI)
 - GA-Z77X-UD4H
@@ -90,10 +90,9 @@ Version 1.5 (2015-08-17)
 - Updated script to use OEM SSDTs instead of generating them
 - Updated script to add El Capitan support
 
-
 ### Issue Reporting
 If you run into an issue while running the GA-Z77X.sh post-installation script or have an issue with the custom SSDTs, please report it on [GitHub Issues](https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch/issues).
 
 ### Credits
-Special thanks to Mieze, Piker-Alpha, PJALM, RampageDev, RehabMan, Shailua, SJ_Underwater, the-darkvoid, and toleda for their original works; this would not have been possible if not for their work.
+Special thanks to Mieze, Mirone, Piker-Alpha, PJALM, RampageDev, RehabMan, Shailua, SJ_Underwater, the-darkvoid, and toleda for their original works; this would not have been possible if not for their work.
 Also, special thanks to [AustinSMU](https://github.com/AustinSMU); the repo design and large parts of the script were based off his [PRECISION-M3800-OSX repo](https://github.com/AustinSMU/PRECISION-M3800-OSX).
