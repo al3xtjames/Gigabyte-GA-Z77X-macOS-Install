@@ -203,7 +203,7 @@ function _detectPS2()
 	case $gMotherboard in
 		"D3H" | "UD3H" | "UP7") # Motherboards that have a PS/2 port
 			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
-			_installKextEFI "$gRepo/kexts/misc/VoodooPS2Controller.kext"
+			_installKextEFI "$gRepo/kexts/misc/VoodooPS2Controller.kext";;
 	esac	
 }
 
