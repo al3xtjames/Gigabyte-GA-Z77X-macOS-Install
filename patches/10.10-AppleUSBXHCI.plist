@@ -48,7 +48,7 @@
 		<key>Find</key>
 		<data>xoDIAAAAAQ==</data>
 		<key>Name</key>
-		<string>AppleUSBXHCI</string>
+		<string>disabled:AppleUSBXHCI</string>
 		<key>Replace</key>
 		<data>xoDIAAAAAA==</data>
 	</dict>

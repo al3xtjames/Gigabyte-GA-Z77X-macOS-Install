@@ -18,6 +18,11 @@ Currently, the following motherboards are supported by the GA-Z77X.sh script and
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.7.9 (2015-09-25)
+- Added GA-Z77X_USB.kext for USB port injection on OS X 10.11
+- Fixed AppleUSBXHCI kext patches on OS X 10.9 (note: no OS X 10.11 AppleUSBXHCI patches yet)
+- Fixed FVInjector.kext on OS X 10.9/10.10
+
 Version 1.7.8 (2015-09-05)
 - Updated iasl
 - Updated Mieze's RealtekRTL8111 driver (compiled from RehabMan's fork)

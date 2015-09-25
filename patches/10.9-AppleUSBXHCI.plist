@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>Comment</key>
+		<string>10.9-Disable Intel &amp; Fresco Logic xHCI Controller Check</string>
+		<key>Find</key>
+		<data>9oDUAAAAgHU6</data>
+		<key>Name</key>
+		<string>AppleUSBXHCI</string>
+		<key>Replace</key>
+		<data>9oDUAAAAgOs0</data>
+	</dict>
+	<dict>
+		<key>Comment</key>
+		<string>10.9-Disable xHCI 1.0 Controller Check</string>
+		<key>Find</key>
+		<data>Zj0AAQ==</data>
+		<key>Name</key>
+		<string>AppleUSBXHCI</string>
+		<key>Replace</key>
+		<data>Zj0AAA==</data>
+	</dict>
+	<dict>
+		<key>Comment</key>
+		<string>10.9-Patch xHCI MSI &amp; Pin Interrupts (1 of 2)</string>
+		<key>Find</key>
+		<data>gUkIAABAAA==</data>
+		<key>Name</key>
+		<string>AppleUSBXHCI</string>
+		<key>Replace</key>
+		<data>gUkIAAAAAA==</data>
+	</dict>
+	<dict>
+		<key>Comment</key>
+		<string>10.9-Patch xHCI MSI &amp; Pin Interrupts (2 of 2)</string>
+		<key>Find</key>
+		<data>QcdHCAAAQAA=</data>
+		<key>Name</key>
+		<string>AppleUSBXHCI</string>
+		<key>Replace</key>
+		<data>QcdHCAAAAAA=</data>
+	</dict>
+	<dict>
+		<key>Comment</key>
+		<string>10.9-Disable xHCI Controller Sleep Code</string>
+		<key>Find</key>
+		<data>xoDIAAAAAQ==</data>
+		<key>Name</key>
+		<string>disabled:AppleUSBXHCI</string>
+		<key>Replace</key>
+		<data>xoDIAAAAAA==</data>
+	</dict>
+	<dict>
+		<key>Comment</key>
+		<string>10.9-Enable PCI Power Management for xHCI Controller</string>
+		<key>Find</key>
+		<data>dU1Ii7voAQAA</data>
+		<key>Name</key>
+		<string>AppleUSBXHCI</string>
+		<key>Replace</key>
+		<data>601Ii7voAQAA</data>
+	</dict>
+</array>
+</plist>

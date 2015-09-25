@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.7.8"
+gScriptVersion="1.7.9"
 
 ## The user ID
 gID=$(id -u)
@@ -153,7 +153,7 @@ function _detectRealtekNIC()
 {
 	# Initialize variables
 	realtekNIC=$("$gRepo/tools/dspci" | grep "Ethernet controller" | grep "10ec" | cut -d ':' -f 4 | cut -d ']' -f 1)
-	
+
 	# Install RealtekRTL8111.kext if a Realtek NIC is detected
 	if [[ ! -z $realtekNIC ]]; then
 		case $realtekNIC in
@@ -178,11 +178,13 @@ function _detectMarvellSATA()
 
 function _detectUSB()
 {
-	# Add AppleUSBXHCI kext patches for non-Intel xHCI controllers to config.plist
-	## Initialize variables
+	# Initialize variables
 	plist="$gEFIMount/EFI/CLOVER/config.plist"
 	xhciList=$("$gRepo/tools/dspci" | grep "xHCI\|USB 3.0")
 	nonIntelXHCI=$(echo $xhciList | grep -Fv "8086")
+	osVersion=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
+
+	# Add AppleUSBXHCI kext patches for non-Intel xHCI controllers to config.plist
 	## Make sure config.plist exists
 	if [ ! -f "$plist" ]; then
 		_printError "config.plist not found!"
@@ -191,11 +193,16 @@ function _detectUSB()
 	## Add the kext patches to config.plist
 	if [[ ! -z $nonIntelXHCI ]]; then
 		echo " - Non-Intel xHCI contoller(s) detected, enabling AppleUSBXHCI kext patches..."
-		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
+		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/$osVersion-AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
 	fi
 
-	# Install FakePCIID.kext+FakePCIID_XHCIMux to fix USB muxing
+	# Install FakePCIID.kext+FakePCIID_XHCIMux to fix EHCI/XHCI muxing
 	_installKextEFI "$gRepo/kexts/usb/FakePCIID.kext"
+
+	# 10.11 needs USB port injection (done in SSDT with EHCx/XHC → EH0x/XH0x + GA-Z77X_USB.kext)
+	if [ $osVersion == "10.11" ]; then
+		_installKextEFI "$gRepo/kexts/usb/GA-Z77X_USB.kext"
+	fi
 }
 
 function _detectPS2()
@@ -204,7 +211,7 @@ function _detectPS2()
 		"D3H" | "UD3H" | "UP7") # Motherboards that have a PS/2 port
 			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
 			_installKextEFI "$gRepo/kexts/misc/VoodooPS2Controller.kext";;
-	esac	
+	esac
 }
 
 function _genSMBIOSData()

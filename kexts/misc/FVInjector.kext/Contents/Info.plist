@@ -89,9 +89,7 @@
 		<key>com.apple.iokit.IOACPIFamily</key>
 		<string>1.0.0d1</string>
 		<key>com.apple.iokit.IOUSBFamily</key>
-		<string>8.0</string>
-		<key>com.apple.iokit.IOUSBHostFamily</key>
-		<string>1.0.1</string>
+		<string>5.2.5b7</string>
 		<key>com.apple.kpi.bsd</key>
 		<string>11.0.0</string>
 		<key>com.apple.kpi.iokit</key>
