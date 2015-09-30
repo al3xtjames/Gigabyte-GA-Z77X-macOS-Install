@@ -37,14 +37,6 @@
 				</dict>
 				<dict>
 					<key>Comment</key>
-					<string>Rename COPR to MATH</string>
-					<key>Find</key>
-					<data>Q09QUg==</data>
-					<key>Replace</key>
-					<data>TUFUSA==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
 					<string>Rename EHC1 to EH01</string>
 					<key>Find</key>
 					<data>RUhDMQ==</data>
@@ -108,9 +100,9 @@
 			<key>Generate</key>
 			<dict>
 				<key>CStates</key>
-				<true/>
+				<false/>
 				<key>PStates</key>
-				<true/>
+				<false/>
 			</dict>
 		</dict>
 	</dict>
@@ -187,8 +179,6 @@
 	</dict>
 	<key>KernelAndKextPatches</key>
 	<dict>
-		<key>AppleRTC</key>
-		<false/>
 		<key>KextsToPatch</key>
 		<array/>
 	</dict>

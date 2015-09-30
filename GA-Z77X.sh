@@ -6,13 +6,15 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.7.9"
+gScriptVersion="1.8.0"
 
 ## The user ID
 gID=$(id -u)
 
 ## The motherboard, will be properly initialized later
 gMotherboard="Unknown"
+## The motherboard series, will be properly initialized later
+gMotherboardSeries=""
 
 ## The folder containing the repo
 gRepo=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
@@ -20,7 +22,7 @@ gRepo=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 ## The SMBIOS product name, can be changed (recommended: iMac13,1 or iMac13,2)
 gProductName="iMac13,2"
 
-## The location where the EFI partition is mounted
+## The location where the EFI partition is mounted, will be properly initialized later
 gEFIMount="Unknown"
 
 ## Styling stuff
@@ -59,13 +61,30 @@ function _identifyMotherboard()
 
 	# Identify the motherboard
 	case $motherboard in
-		'Z77X-D3H') gMotherboard="D3H";;
-		'Z77X-UD3H') gMotherboard="UD3H";;
-		'Z77X-UD4H') gMotherboard="UD4H";;
-		# 'Z77X-UP4 TH') gMotherboard="UP4-TH";; # Not sure about this one...
-		'Z77X-UD5H') gMotherboard="UD5H";;
-		'Z77X-UP5 TH-CF') gMotherboard="UP5-TH";;
-		'Z77X-UP7') gMotherboard="UP7";;
+		'B75M-D3H')
+			gMotherboard="D3H"
+			gMotherboardSeries="B75M";;
+		'Z77X-D3H')
+			gMotherboard="D3H"
+			gMotherboardSeries="Z77X";;
+		'Z77X-UD3H')
+			gMotherboard="UD3H"
+			gMotherboardSeries="Z77X";;
+		'Z77X-UD4H')
+			gMotherboard="UD4H"
+			gMotherboardSeries="Z77X";;
+		#'Z77X-UP4')
+		#	gMotherboard="UP4-TH" # Not sure about this one...
+		#	gMotherboardSeries="Z77X";;
+		'Z77X-UD5H')
+			gMotherboard="UD5H"
+			gMotherboardSeries="Z77X";;
+		'Z77X-UP5')
+			gMotherboard="UP5-TH"
+			gMotherboardSeries="Z77X";;
+		'Z77X-UP7')
+			gMotherboard="UP7"
+			gMotherboardSeries="Z77X";;
 		*) _printError "$motherboard is unsupported by this script!";;
 	esac
 }
@@ -91,7 +110,7 @@ function _printHeader()
 	echo "Gigabyte GA-Z77X.sh Post-Install Script v$gScriptVersion by theracermaster"
 	echo "Updates & Info: https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch"
 	echo "--------------------------------------------------------------------------------"
-	printf "Detected motherboard: Gigabyte ${STYLE_BOLD}GA-Z77X-${COLOR_CYAN}$gMotherboard${STYLE_RESET}\n"
+	printf "Detected motherboard: Gigabyte ${STYLE_BOLD}GA-$gMotherboardSeries-${COLOR_CYAN}$gMotherboard${STYLE_RESET}\n"
 	printf "Script arguments: ./GA-Z77X.sh $args\n"
 	echo "--------------------------------------------------------------------------------"
 }
@@ -244,6 +263,21 @@ function _genSMBIOSData()
 
 	printf "\n${STYLE_BOLD}Press enter to continue...${STYLE_RESET}\n" && read
 }
+
+function _generateSSDT_PR()
+{
+	# Initialize variables
+	printf "${STYLE_BOLD}Generating SSDT for power management${STYLE_RESET}:\n"
+	maxTurboFreq="$(bdmesg | grep Turbo: | cut -d '/' -f2)00"
+
+	# Generate an SSDT for power management
+	yes n | "$gRepo/externals/ssdtPRGen.sh/ssdtPRGen.sh" -turbo "$maxTurboFreq" -w 3 -x 1
+
+	# Copy the generated SSDT to the Clover ACPI/patched folder on the EFI partition
+	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT_PR.aml"
+
+	printf "${STYLE_BOLD}Press enter to continue...${STYLE_RESET}\n" && read
+}
 #-------------------------------------------------------------------------------#
 
 
@@ -272,7 +306,7 @@ function _compileSSDT()
 	_printHeader "${STYLE_BOLD}--install-ssdt: ${COLOR_BLUE}Compiling Custom SSDT${STYLE_RESET}"
 
 	# Initialize variables
-	fileName="SSDT-GA-Z77X-$gMotherboard.dsl"
+	fileName="SSDT-GA-$gMotherboardSeries-$gMotherboard.dsl"
 	url="https://raw.githubusercontent.com/theracermaster/DSDT/master/$fileName"
 
 	# Download the file
@@ -282,7 +316,7 @@ function _compileSSDT()
 	# Compile the SSDT and move it to the right directory
 	printf "${STYLE_BOLD}Compiling $fileName${STYLE_RESET}:\n"
 	"$gRepo/tools/iasl" "/tmp/$fileName"
-	mv "/tmp/SSDT-GA-Z77X-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT.aml"
+	mv "/tmp/SSDT-GA-$gMotherboardSeries-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT.aml"
 
 	printf "\n${STYLE_BOLD}SSDT compilation complete.${STYLE_RESET} Exiting...\n"
 	exit 0
@@ -371,6 +405,9 @@ function _installClover()
 
 	# Generate the SMBIOS data
 	_genSMBIOSData
+
+	# Generate an SSDT for power management using ssdtPRGen.sh
+	_generateSSDT_PR
 
 	# Clear the output and reprint the header
 	_printHeader "${STYLE_BOLD}--install-clover: ${COLOR_GREEN}Installing Clover Bootloader${STYLE_RESET}"

@@ -9,7 +9,8 @@ These support files can help you configure the post-installation process on Giga
 Please refer [to the wiki](https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch/wiki) for more information as well as detailed instructions.
 
 ### Supported Motherboards
-Currently, the following motherboards are supported by the GA-Z77X.sh script and the custom SSDTs in the repo:
+Currently, the following motherboards are supported by the GA-Z77X.sh script and the custom SSDTs in the [ACPI table repo](https://github.com/theracermaster/DSDT):
+- GA-B75M-D3H
 - GA-Z77X-D3H
 - GA-Z77X-UD3H (-WB WIFI)
 - GA-Z77X-UD4H
@@ -18,6 +19,12 @@ Currently, the following motherboards are supported by the GA-Z77X.sh script and
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.8.0 (2015-09-30)
+- Fixed GA-Z77X-UP5 TH motherboard detection (thanks to vodkaflip on GitHub Issues for reporting!)
+- Updated FakeSMC.kext+HWSensors with Maxwell GPU monitoring support
+- Added SSDT generation using the beta version of ssdtPRGen.sh by Piker-Alpha, as Clover SSDT generation didn't always work properly
+- Added experimental support for the GA-B75M-D3H motherboard
+
 Version 1.7.9 (2015-09-25)
 - Added GA-Z77X_USB.kext for USB port injection on OS X 10.11
 - Fixed AppleUSBXHCI kext patches on OS X 10.9 (note: no OS X 10.11 AppleUSBXHCI patches yet)
