@@ -381,6 +381,11 @@ function _installClover()
 	# Clear the output and reprint the header
 	_printHeader "${STYLE_BOLD}--install-clover: ${COLOR_GREEN}Installing Clover Bootloader${STYLE_RESET}"
 
+	# Copy the config.plist if wasn't automatically copied by the HDA injection step
+	if [ ! -f "$gRepo/config.plist" ]; then
+		cp "$gRepo/config-generic.plist" "$gRepo/config.plist"
+	fi
+
 	# Copy the directories to the EFI partition & create the kext directory
 	mkdir -p "$gEFIMount/EFI/BOOT"
 	cp -R "$gRepo/EFI/BOOT" "$gEFIMount/EFI"
