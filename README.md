@@ -1,8 +1,8 @@
 # Gigabyte-GA-Z77X DSDT Patch
 
-Support files for Gigabyte GA-Z77X motherboards running OS X 10.9+.
+Support files for Gigabyte 7 Series motherboards running OS X 10.9+.
 
-These support files can help you configure the post-installation process on Gigabyte GA-Z77X motherboards. The current repository uses custom SSDTs for each motherboard along with the GA-Z77X.sh post-installation script to create a working OS X installation.
+These support files can help you configure the post-installation process on Gigabyte 7 Series motherboards. The current repository uses custom SSDTs for each motherboard along with the GA-Z77X.sh post-installation script to create a working OS X installation.
 
 ### Usage
 [![asciicast](https://asciinema.org/a/0xufcqxd6jm3qwo1ss0asegd6.png)](https://asciinema.org/a/0xufcqxd6jm3qwo1ss0asegd6)
@@ -19,6 +19,10 @@ Currently, the following motherboards are supported by the GA-Z77X.sh script and
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.8.1 (2015-10-01)
+- Fixed FakeSMC.kext+HWSensors (HWSensors didn't load due to version errors)
+- Fixed config.plist failing to rename when HDA injection wasn't used (thanks to iHedgehog on GitHub Issues for reporting!)
+
 Version 1.8.0 (2015-09-30)
 - Fixed GA-Z77X-UP5 TH motherboard detection (thanks to vodkaflip on GitHub Issues for reporting!)
 - Updated FakeSMC.kext+HWSensors with Maxwell GPU monitoring support
