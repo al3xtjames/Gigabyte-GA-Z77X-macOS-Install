@@ -13,8 +13,6 @@ gID=$(id -u)
 
 ## The motherboard, will be properly initialized later
 gMotherboard="Unknown"
-## The motherboard series, will be properly initialized later
-gMotherboardSeries=""
 
 ## The folder containing the repo
 gRepo=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
@@ -61,30 +59,15 @@ function _identifyMotherboard()
 
 	# Identify the motherboard
 	case $motherboard in
-		'B75M-D3H')
-			gMotherboard="D3H"
-			gMotherboardSeries="B75M";;
-		'Z77X-D3H')
-			gMotherboard="D3H"
-			gMotherboardSeries="Z77X";;
-		'Z77X-UD3H')
-			gMotherboard="UD3H"
-			gMotherboardSeries="Z77X";;
-		'Z77X-UD4H')
-			gMotherboard="UD4H"
-			gMotherboardSeries="Z77X";;
+		'B75M-D3H') gMotherboard="B75M-D3H";;
+		'Z77X-D3H') gMotherboard="Z77X-D3H";;
+		'Z77X-UD3H') gMotherboard="Z77X-UD3H";;
+		'Z77X-UD4H') gMotherboard="Z77X-UD4H";;
 		#'Z77X-UP4')
 		#	gMotherboard="UP4-TH" # Not sure about this one...
-		#	gMotherboardSeries="Z77X";;
-		'Z77X-UD5H')
-			gMotherboard="UD5H"
-			gMotherboardSeries="Z77X";;
-		'Z77X-UP5')
-			gMotherboard="UP5-TH"
-			gMotherboardSeries="Z77X";;
-		'Z77X-UP7')
-			gMotherboard="UP7"
-			gMotherboardSeries="Z77X";;
+		'Z77X-UD5H') gMotherboard="Z77X-UD5H";;
+		'Z77X-UP5') gMotherboard="Z77X-UP5-TH";;
+		'Z77X-UP7') gMotherboard="Z77X-UP7";;
 		*) _printError "$motherboard is unsupported by this script!";;
 	esac
 }
@@ -103,6 +86,8 @@ function _printHeader()
 {
 	# Initialize variables
 	args="$1"
+	boardSeries=$(echo $gMotherboard | cut -d '-' -f 1)
+	board=$(echo "${gMotherboard/$boardSeries-}")
 
 	clear
 
@@ -110,7 +95,7 @@ function _printHeader()
 	echo "Gigabyte GA-Z77X.sh Post-Install Script v$gScriptVersion by theracermaster"
 	echo "Updates & Info: https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch"
 	echo "--------------------------------------------------------------------------------"
-	printf "Detected motherboard: Gigabyte ${STYLE_BOLD}GA-$gMotherboardSeries-${COLOR_CYAN}$gMotherboard${STYLE_RESET}\n"
+	printf "Detected motherboard: Gigabyte ${STYLE_BOLD}GA-$boardSeries-${COLOR_CYAN}$board${STYLE_RESET}\n"
 	printf "Script arguments: ./GA-Z77X.sh $args\n"
 	echo "--------------------------------------------------------------------------------"
 }
@@ -227,7 +212,7 @@ function _detectUSB()
 function _detectPS2()
 {
 	case $gMotherboard in
-		"D3H" | "UD3H" | "UP7") # Motherboards that have a PS/2 port
+		"B75M-D3H" | "Z77-DS3H" | "Z77X-D3H" | "Z77X-UD3H" | "Z77X-UP7") # Motherboards that have a PS/2 port
 			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
 			_installKextEFI "$gRepo/kexts/misc/VoodooPS2Controller.kext";;
 	esac
@@ -306,7 +291,7 @@ function _compileSSDT()
 	_printHeader "${STYLE_BOLD}--install-ssdt: ${COLOR_BLUE}Compiling Custom SSDT${STYLE_RESET}"
 
 	# Initialize variables
-	fileName="SSDT-GA-$gMotherboardSeries-$gMotherboard.dsl"
+	fileName="SSDT-GA-$gMotherboard.dsl"
 	url="https://raw.githubusercontent.com/theracermaster/DSDT/master/$fileName"
 
 	# Download the file
@@ -316,7 +301,7 @@ function _compileSSDT()
 	# Compile the SSDT and move it to the right directory
 	printf "${STYLE_BOLD}Compiling $fileName${STYLE_RESET}:\n"
 	"$gRepo/tools/iasl" "/tmp/$fileName"
-	mv "/tmp/SSDT-GA-$gMotherboardSeries-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT.aml"
+	mv "/tmp/SSDT-GA-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT.aml"
 
 	printf "\n${STYLE_BOLD}SSDT compilation complete.${STYLE_RESET} Exiting...\n"
 	exit 0
@@ -380,6 +365,11 @@ function _installClover()
 
 	# Clear the output and reprint the header
 	_printHeader "${STYLE_BOLD}--install-clover: ${COLOR_GREEN}Installing Clover Bootloader${STYLE_RESET}"
+
+	# Copy the config.plist if wasn't automatically copied during HDA injection
+	if [ ! -f "$gRepo/EFI/CLOVER/config.plist" ]; then
+		cp "$gRepo/config-generic.plist" "$gRepo/EFI/CLOVER/config.plist"
+	fi
 
 	# Copy the directories to the EFI partition & create the kext directory
 	mkdir -p "$gEFIMount/EFI/BOOT"
