@@ -30,7 +30,7 @@ Version 1.8.0 (2015-09-30)
 - Added experimental support for the GA-B75M-D3H motherboard
 
 Version 1.7.9 (2015-09-25)
-- Added GA-Z77X_USB.kext for USB port injection on OS X 10.11
+- Added GA-Z77X_USB.kext for USB port injection on OS X 10.11 (thanks to RehabMan, heavily based off his work)
 - Fixed AppleUSBXHCI kext patches on OS X 10.9 (note: no OS X 10.11 AppleUSBXHCI patches yet)
 - Fixed FVInjector.kext on OS X 10.9/10.10
 
