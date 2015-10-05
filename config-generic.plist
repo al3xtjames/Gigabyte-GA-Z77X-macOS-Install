@@ -77,15 +77,7 @@
 				</dict>
 				<dict>
 					<key>Comment</key>
-					<string>Rename XHC to XH01 (1 of 2)</string>
-					<key>Find</key>
-					<data>AhBBcA==</data>
-					<key>Replace</key>
-					<data>AllBcA==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename XHC to XH01 (2 of 2)</string>
+					<string>Rename XHC to XH01</string>
 					<key>Find</key>
 					<data>WEhDXw==</data>
 					<key>Replace</key>
