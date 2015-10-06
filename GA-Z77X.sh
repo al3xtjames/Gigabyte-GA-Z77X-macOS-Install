@@ -255,8 +255,14 @@ function _generateSSDT_PR()
 	printf "${STYLE_BOLD}Generating SSDT for power management${STYLE_RESET}:\n"
 	maxTurboFreq="$(bdmesg | grep Turbo: | cut -d '/' -f2)00"
 
+	# Download ssdtPRGen.sh & the CPU data
+	curl -o ~/Library/ssdtPRGen.zip https://codeload.github.com/Piker-Alpha/ssdtPRGen.sh/zip/Beta
+	unzip -qu ~/Library/ssdtPRGen.zip -d ~/Library/
+	mv ~/Library/ssdtPRGen.sh-Beta ~/Library/ssdtPRGen
+	rm ~/Library/ssdtPRGen.zip
+
 	# Generate an SSDT for power management
-	yes n | "$gRepo/externals/ssdtPRGen.sh/ssdtPRGen.sh" -turbo "$maxTurboFreq" -w 3 -x 1
+	yes n | ~/Library/ssdtPRGen/ssdtPRGen.sh -turbo "$maxTurboFreq" -x 1
 
 	# Copy the generated SSDT to the Clover ACPI/patched folder on the EFI partition
 	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT_PR.aml"
