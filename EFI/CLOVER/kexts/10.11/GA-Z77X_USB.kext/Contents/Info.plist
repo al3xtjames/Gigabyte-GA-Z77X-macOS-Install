@@ -11,7 +11,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>1.0.1, Copyright © 2000-2014 RehabMan. All Rights Reserved.</string>
 	<key>CFBundleName</key>
-	<string>Gigabyte GA-Z77X USB Port Injector</string>
+	<string>Gigabyte 7 Series USB Port Injector</string>
 	<key>CFBundlePackageType</key>
 	<string>KEXT</string>
 	<key>CFBundleShortVersionString</key>

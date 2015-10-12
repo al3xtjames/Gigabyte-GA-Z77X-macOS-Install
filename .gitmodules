@@ -7,7 +7,3 @@
 [submodule "externals/simpleMLB.sh"]
 	path = externals/simpleMLB.sh
 	url = https://gist.github.com/theracermaster/b6a9db46b14061d4c995
-[submodule "externals/ssdtPRGen.sh"]
-	path = externals/ssdtPRGen.sh
-	url = https://github.com/Piker-Alpha/ssdtPRGen.sh
-	branch = Beta

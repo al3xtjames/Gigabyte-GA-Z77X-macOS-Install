@@ -19,6 +19,12 @@ Currently, the following motherboards are supported by the GA-Z77X.sh script and
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.8.2 (2015-10-12)
+- Updated Clover to custom build of r3280: this version injects kexts from kexts/Other & kexts/10.11 at the same time
+- Updated Mieze's IntelMausiEthernet driver to 2.0.2.d5
+- Removed ssdtPRGen.sh as a submodule, as it is downloaded instead
+- Updated SSDTs
+
 Version 1.8.1 (2015-10-01)
 - Fixed FakeSMC.kext+HWSensors (HWSensors didn't load due to version errors)
 - Fixed config.plist failing to rename when HDA injection wasn't used (thanks to iHedgehog on GitHub Issues for reporting!)

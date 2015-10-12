@@ -4,6 +4,11 @@
 <dict>
 	<key>ACPI</key>
 	<dict>
+		<key>SortedOrder</key>
+		<array>
+			<string>SSDT.aml</string>
+			<string>SSDT-TINY.aml</string>
+		</array>
 		<key>DSDT</key>
 		<dict>
 			<key>Fixes</key>
@@ -180,7 +185,18 @@
 	<key>KernelAndKextPatches</key>
 	<dict>
 		<key>KextsToPatch</key>
-		<array/>
+		<array>
+			<dict>
+				<key>Comment</key>
+				<string>[10.10+] Fix Boot Graphics Glitch</string>
+				<key>Find</key>
+				<data>AQAAdRc=</data>
+				<key>Name</key>
+				<string>IOGraphicsFamiliy</string>
+				<key>Replace</key>
+				<data>AQAAdBc=</data>
+			</dict>
+		</array>
 	</dict>
 	<key>RtVariables</key>
 	<dict>

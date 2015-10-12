@@ -6,7 +6,7 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.8.1"
+gScriptVersion="1.8.2"
 
 ## The user ID
 gID=$(id -u)
@@ -109,6 +109,27 @@ function _checkRoot()
 	fi
 }
 
+function _mountEFI()
+{
+	# Find the BSD device name for the current OS disk
+	osVolume=$(df / | grep "/dev/disk" | cut -d ' ' -f1)
+
+	# Find the EFI partition of the disk
+	efiVolume=$(diskutil list "$osVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
+
+	# Check if the EFI partition is already mounted; if not, mount it
+	if [ -z "$(mount | grep $efiVolume | sed -e 's/^[ \t]*//')" ]; then
+		diskutil mount "$efiVolume" > /dev/null
+		mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
+		echo "EFI system partition ($efiVolume) mounted at $mountPoint."
+	else
+		mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
+		echo "EFI system partition ($efiVolume) is already mounted at $mountPoint."
+	fi
+
+	gEFIMount="$mountPoint"
+}
+
 function _installKextEFI()
 {
 	# Initialize variables
@@ -148,7 +169,13 @@ function _detectIntelNIC()
 		case $intelNIC in
 			1503) # Intel 82579V GbE
 				echo " - Intel 82579V [8086:1503] detected, installing IntelMausiEthernet.kext..."
-				_installKextEFI "$gRepo/kexts/lan/IntelMausiEthernet.kext";;
+				_installKextEFI "$gRepo/kexts/lan/IntelMausiEthernet.kext"
+				case $gMotherboard in
+					"Z77X-UD5H" | "Z77X-UP7") # Motherboards that have dual NICs
+						/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/DualNIC_GLAN-ETH1.plist ':ACPI:DSDT:Patches'" "$gEFIMount/EFI/CLOVER/config.plist";;
+					*) Otherwise assume that the motherboard has a single Intel NIC
+						/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/SingleNIC_GLAN-GIGE.plist ':ACPI:DSDT:Patches'" "$gEFIMount/EFI/CLOVER/config.plist";;
+				esac;;
 		esac
 	fi
 }
@@ -186,7 +213,6 @@ function _detectUSB()
 	plist="$gEFIMount/EFI/CLOVER/config.plist"
 	xhciList=$("$gRepo/tools/dspci" | grep "xHCI\|USB 3.0")
 	nonIntelXHCI=$(echo $xhciList | grep -Fv "8086")
-	osVersion=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
 
 	# Add AppleUSBXHCI kext patches for non-Intel xHCI controllers to config.plist
 	## Make sure config.plist exists
@@ -199,20 +225,12 @@ function _detectUSB()
 		echo " - Non-Intel xHCI contoller(s) detected, enabling AppleUSBXHCI kext patches..."
 		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/$osVersion-AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
 	fi
-
-	# Install FakePCIID.kext+FakePCIID_XHCIMux to fix EHCI/XHCI muxing
-	_installKextEFI "$gRepo/kexts/usb/FakePCIID.kext"
-
-	# 10.11 needs USB port injection (done in SSDT with EHCx/XHC → EH0x/XH0x + GA-Z77X_USB.kext)
-	if [ $osVersion == "10.11" ]; then
-		_installKextEFI "$gRepo/kexts/usb/GA-Z77X_USB.kext"
-	fi
 }
 
 function _detectPS2()
 {
 	case $gMotherboard in
-		"B75M-D3H" | "Z77-DS3H" | "Z77X-D3H" | "Z77X-UD3H" | "Z77X-UP7") # Motherboards that have a PS/2 port
+		"B75M-D3H" | "Z77X-D3H" | "Z77X-UD3H" | "Z77X-UD4H" | "Z77X-UP7") # Motherboards that have a PS/2 port
 			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
 			_installKextEFI "$gRepo/kexts/misc/VoodooPS2Controller.kext";;
 	esac
@@ -265,7 +283,7 @@ function _generateSSDT_PR()
 	yes n | ~/Library/ssdtPRGen/ssdtPRGen.sh -turbo "$maxTurboFreq" -x 1
 
 	# Copy the generated SSDT to the Clover ACPI/patched folder on the EFI partition
-	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT_PR.aml"
+	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT.aml"
 
 	printf "${STYLE_BOLD}Press enter to continue...${STYLE_RESET}\n" && read
 }
@@ -296,6 +314,9 @@ function _compileSSDT()
 	# Clear the output and print the header
 	_printHeader "${STYLE_BOLD}--install-ssdt: ${COLOR_BLUE}Compiling Custom SSDT${STYLE_RESET}"
 
+	# Mount the EFI partition
+	_mountEFI
+
 	# Initialize variables
 	fileName="SSDT-GA-$gMotherboard.dsl"
 	url="https://raw.githubusercontent.com/theracermaster/DSDT/master/$fileName"
@@ -307,7 +328,7 @@ function _compileSSDT()
 	# Compile the SSDT and move it to the right directory
 	printf "${STYLE_BOLD}Compiling $fileName${STYLE_RESET}:\n"
 	"$gRepo/tools/iasl" "/tmp/$fileName"
-	mv "/tmp/SSDT-GA-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT.aml"
+	mv "/tmp/SSDT-GA-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT-TINY.aml"
 
 	printf "\n${STYLE_BOLD}SSDT compilation complete.${STYLE_RESET} Exiting...\n"
 	exit 0
@@ -381,12 +402,9 @@ function _installClover()
 	mkdir -p "$gEFIMount/EFI/BOOT"
 	cp -R "$gRepo/EFI/BOOT" "$gEFIMount/EFI"
 	cp -R "$gRepo/EFI/CLOVER" "$gEFIMount/EFI"
-	mkdir -p "$gEFIMount/EFI/CLOVER/kexts/Other"
 
 	# Install the required kexts
 	printf "${STYLE_BOLD}Installing required kexts${STYLE_RESET}:\n"
-	## Install FakeSMC.kext+HWSensors
-	_installKextEFI "$gRepo/kexts/misc/FakeSMC.kext"
 	## Install FVInjector.kext
 	sudo cp -R "$gRepo/kexts/misc/FVInjector.kext" /Library/Extensions
 	sudo chmod -R 755  "/Library/Extensions/FVInjector.kext"
@@ -396,7 +414,6 @@ function _installClover()
 	_detectIntelNIC
 	_detectRealtekNIC
 	_detectMarvellSATA
-	_detectUSB
 	_detectPS2
 
 	# Generate the SMBIOS data
