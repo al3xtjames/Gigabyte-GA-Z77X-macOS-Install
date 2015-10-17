@@ -9,7 +9,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleGetInfoString</key>
-	<string>1.0.1, Copyright © 2000-2014 RehabMan. All Rights Reserved.</string>
+	<string>1.0.1, Copyright © 2015 RehabMan &amp; TheRacerMaster. All Rights Reserved.</string>
 	<key>CFBundleName</key>
 	<string>Gigabyte 7 Series USB Port Injector</string>
 	<key>CFBundlePackageType</key>
@@ -42,7 +42,7 @@
 				<data>AQAAAA==</data>
 				<key>ports</key>
 				<dict>
-					<key>PR01</key>
+					<key>RHUB</key>
 					<dict>
 						<key>UsbConnector</key>
 						<integer>255</integer>
@@ -54,7 +54,7 @@
 			<key>model</key>
 			<string>iMac13,1</string>
 		</dict>
-		<key>iMac13,1-EH01-PR01-hub</key>
+		<key>iMac13,1-EH01-hub</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>com.apple.driver.AppleUSBMergeNub</string>
@@ -114,7 +114,7 @@
 			<key>model</key>
 			<string>iMac13,1</string>
 		</dict>
-		<key>iMac13,1-EH01-PR01-PRT8-hub</key>
+		<key>iMac13,1-EH01-PRT8-hub</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>com.apple.driver.AppleUSBMergeNub</string>
@@ -183,7 +183,7 @@
 				<true/>
 				<key>ports</key>
 				<dict>
-					<key>PR01</key>
+					<key>RHUB</key>
 					<dict>
 						<key>UsbConnector</key>
 						<integer>255</integer>
@@ -195,7 +195,7 @@
 			<key>model</key>
 			<string>iMac13,1</string>
 		</dict>
-		<key>iMac13,1-EH02-PR01-hub</key>
+		<key>iMac13,1-EH02-hub</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>com.apple.driver.AppleUSBMergeNub</string>
@@ -333,7 +333,7 @@
 				<data>AQAAAA==</data>
 				<key>ports</key>
 				<dict>
-					<key>PR01</key>
+					<key>RHUB</key>
 					<dict>
 						<key>UsbConnector</key>
 						<integer>255</integer>
@@ -345,7 +345,7 @@
 			<key>model</key>
 			<string>iMac13,2</string>
 		</dict>
-		<key>iMac13,2-EH01-PR01-hub</key>
+		<key>iMac13,2-EH01-hub</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>com.apple.driver.AppleUSBMergeNub</string>
@@ -405,7 +405,7 @@
 			<key>model</key>
 			<string>iMac13,2</string>
 		</dict>
-		<key>iMac13,2-EH01-PR01-PRT8-hub</key>
+		<key>iMac13,2-EH01-PRT8-hub</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>com.apple.driver.AppleUSBMergeNub</string>
@@ -474,7 +474,7 @@
 				<true/>
 				<key>ports</key>
 				<dict>
-					<key>PR01</key>
+					<key>RHUB</key>
 					<dict>
 						<key>UsbConnector</key>
 						<integer>255</integer>
@@ -486,7 +486,7 @@
 			<key>model</key>
 			<string>iMac13,2</string>
 		</dict>
-		<key>iMac13,2-EH02-PR01-hub</key>
+		<key>iMac13,2-EH02-hub</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>com.apple.driver.AppleUSBMergeNub</string>
