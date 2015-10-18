@@ -328,7 +328,7 @@ function _compileSSDT()
 	# Compile the SSDT and move it to the right directory
 	printf "${STYLE_BOLD}Compiling $fileName${STYLE_RESET}:\n"
 	"$gRepo/tools/iasl" "/tmp/$fileName"
-	mv "/tmp/SSDT-GA-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT-TINY.aml"
+	mv "/tmp/SSDT-GA-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT-HACK.aml"
 
 	printf "\n${STYLE_BOLD}SSDT compilation complete.${STYLE_RESET} Exiting...\n"
 	exit 0

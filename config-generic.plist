@@ -7,7 +7,7 @@
 		<key>SortedOrder</key>
 		<array>
 			<string>SSDT.aml</string>
-			<string>SSDT-TINY.aml</string>
+			<string>SSDT-HACK.aml</string>
 		</array>
 		<key>DSDT</key>
 		<dict>
@@ -192,7 +192,7 @@
 				<key>Find</key>
 				<data>AQAAdRc=</data>
 				<key>Name</key>
-				<string>IOGraphicsFamiliy</string>
+				<string>IOGraphicsFamily</string>
 				<key>Replace</key>
 				<data>AQAAdBc=</data>
 			</dict>
