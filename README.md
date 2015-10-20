@@ -19,6 +19,11 @@ Currently, the following motherboards are supported by the GA-Z77X.sh script and
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.8.3 (2015-10-20)
+- Fixed GA-Z77X-UP5 TH SSDT (thanks to ch0w7 on GitHub Issues for reporting!)
+- Finally fixed PCIe GPU detection, kernel panics when using IGPU only are now fixed
+- Updated Clover to r3295 (built with Xcode 7.1 & clang)
+
 Version 1.8.2 (2015-10-12)
 - Updated Clover to custom build of r3280: this version injects kexts from kexts/Other & kexts/10.11 at the same time
 - Updated Mieze's IntelMausiEthernet driver to 2.0.2.d5

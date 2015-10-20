@@ -82,6 +82,14 @@
 				</dict>
 				<dict>
 					<key>Comment</key>
+					<string>Change GFX0._ADR to Zero</string>
+					<key>Find</key>
+					<data>X0FEUgv//w==</data>
+					<key>Replace</key>
+					<data>X0FEUgAAAA==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
 					<string>Rename SAT0 to SATA</string>
 					<key>Find</key>
 					<data>U0FUMA==</data>
