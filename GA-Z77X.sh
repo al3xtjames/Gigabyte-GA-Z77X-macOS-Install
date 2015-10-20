@@ -340,7 +340,7 @@ function _injectHDA()
 	plist="$gRepo/EFI/CLOVER/config.plist"
 
 	# Load AppleHDA.kext so we can ID the codec
-	sudo kextload "/System/Library/Extensions/AppleHDA.kext"
+	sudo kextload "/System/Library/Extensions/AppleHDA.kext" > /dev/null
 
 	# Run the HDA injector script
 	sudo "$gRepo/externals/hdaInjector.sh/hdaInjector.sh"
