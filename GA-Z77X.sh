@@ -251,18 +251,15 @@ function _genSMBIOSData()
 	# TODO: Better error handling if simpleMLB.sh says the serial number is invalid
 	serialNumber=$(externals/simpleMacSerial.sh/simpleMacSerial.sh $gProductName)
 	MLB=$(externals/simpleMLB.sh/simpleMLB.sh $serialNumber)
-	SmUUID=$(uuidgen)
 
 	echo " - Product Name: $gProductName"
 	echo " - Serial Number: $serialNumber"
 	echo " - MLB Serial Number: $MLB"
-	echo " - System UUID: $SmUUID"
 
 	# Copy the generated data to the plist
 	/usr/libexec/plistbuddy -c "Set :SMBIOS:ProductName '$gProductName'" "$plist"
 	/usr/libexec/plistbuddy -c "Set :SMBIOS:SerialNumber '$serialNumber'" "$plist"
 	/usr/libexec/plistbuddy -c "Set :RtVariables:MLB '$MLB'" "$plist"
-	/usr/libexec/plistbuddy -c "Set :SMBIOS:SmUUID '$SmUUID'" "$plist"
 
 	printf "\n${STYLE_BOLD}Press enter to continue...${STYLE_RESET}\n" && read
 }
@@ -274,6 +271,7 @@ function _generateSSDT_PR()
 	maxTurboFreq="$(bdmesg | grep Turbo: | cut -d '/' -f2)00"
 
 	# Download ssdtPRGen.sh & the CPU data
+	rm -rf ~/Library/ssdtPRGen > /dev/null
 	curl -o ~/Library/ssdtPRGen.zip https://codeload.github.com/Piker-Alpha/ssdtPRGen.sh/zip/Beta
 	unzip -qu ~/Library/ssdtPRGen.zip -d ~/Library/
 	mv ~/Library/ssdtPRGen.sh-Beta ~/Library/ssdtPRGen

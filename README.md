@@ -1,4 +1,4 @@
-# Gigabyte-GA-Z77X DSDT Patch
+# Gigabyte GA-Z77X DSDT Patch
 
 Support files for Gigabyte 7 Series motherboards running OS X 10.9+.
 

@@ -221,8 +221,6 @@
 		<string></string>
 		<key>SerialNumber</key>
 		<string></string>
-		<key>SmUUID</key>
-		<string></string>
 		<key>Trust</key>
 		<false/>
 	</dict>
