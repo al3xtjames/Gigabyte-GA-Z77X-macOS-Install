@@ -6,10 +6,13 @@
 # Initialize global variables
 
 ## The script version
-gScriptVersion="1.8.3"
+gScriptVersion="1.8.4"
 
 ## The user ID
 gID=$(id -u)
+
+## The major version of OS X running
+gOSXVersion="10.0"
 
 ## The motherboard, will be properly initialized later
 gMotherboard="Unknown"
@@ -22,6 +25,10 @@ gProductName="iMac13,2"
 
 ## The location where the EFI partition is mounted, will be properly initialized later
 gEFIMount="Unknown"
+
+## The CPU microarchitecture
+## 2 = Sandy Bridge, 3 = Ivy Bridge
+gCoreBridgeType=$(sysctl -n machdep.cpu.brand_string | cut -d '-' -f 2 | cut -c 1)
 
 ## Styling stuff
 STYLE_RESET="\e[0m"
@@ -55,7 +62,7 @@ function _printError()
 function _identifyMotherboard()
 {
 	# Initialize variables
-	motherboard=$(ioreg -lw0 -p IODeviceTree | grep "OEMBoard" | awk '{ print $4 }' | sed 's/<"//g' | sed 's/">//g')
+	motherboard=$(ioreg -lw0 -p IODeviceTree | awk '/OEMBoard/ {print $4}' | tr -d '<"">')
 
 	# Identify the motherboard
 	case $motherboard in
@@ -74,11 +81,11 @@ function _identifyMotherboard()
 
 function _checkOSVersion()
 {
-	osVersion=$(sw_vers -productVersion)
+	gOSXVersion=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
 
-	case "$osVersion" in
-		10.9* | 10.10* | 10.11*);; # Supported OS version detected, so do nothing
-		*) _printError "OS X Version $osVersion is unsupported by this script!";;
+	case "$gOSXVersion" in
+		10.9 | 10.10 | 10.11);; # Supported OS version detected, so do nothing
+		*) _printError "OS X Version $gOSXVersion is unsupported by this script!";;
 	esac
 }
 
@@ -112,22 +119,32 @@ function _checkRoot()
 function _mountEFI()
 {
 	# Find the BSD device name for the current OS disk
-	osVolume=$(df / | grep "/dev/disk" | cut -d ' ' -f1)
+	osVolume=$(df / | awk '/disk/ {print $1}')
 
-	# Find the EFI partition of the disk
-	efiVolume=$(diskutil list "$osVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
+	# Find the EFI partition of the disk from the OS disk
+	efiVolume=$(diskutil list "$osVolume" | awk '/EFI/ {print $6}')
 
-	# Check if the EFI partition is already mounted; if not, mount it
-	if [ -z "$(mount | grep $efiVolume | sed -e 's/^[ \t]*//')" ]; then
-		diskutil mount "$efiVolume" > /dev/null
-		mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
-		echo "EFI system partition ($efiVolume) mounted at $mountPoint."
-	else
-		mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
-		echo "EFI system partition ($efiVolume) is already mounted at $mountPoint."
+	# Make sure the EFI partition actually exists
+	if [ -z $efiVolume ]; then
+		## Check if the OS is installed on a Core Storage (CS) logical volume
+		if [ ! -z $(diskutil info "$osVolume" | grep "Core Storage") ]; then ## CS volume detected
+			## We can find the recovery volume in the diskutil output, and then use that to find the EFI partition
+			recoveryVolume=$(diskutil info "$osVolume" | awk '/Recovery Disk:/ {print $3}')
+			efiVolume=$(diskutil list "$recoveryVolume" | awk '/EFI/ {print $6}')
+		else ## No CS volume present, so assume no EFI partition
+			_printError "No EFI partition present on OS volume ($osVolume)!"
+		fi
 	fi
 
-	gEFIMount="$mountPoint"
+	# Check if the EFI partition is already mounted; if not, mount it
+	if [ -z $(mount | awk '/'$efiVolume'/ {print $1}') ]; then
+		diskutil mount "$efiVolume" > /dev/null
+		gEFIMount=$(diskutil info "$efiVolume" | awk '/Mount Point/ {print $3}')
+		echo "EFI system partition ($efiVolume) mounted at $gEFIMount."
+	else
+		gEFIMount=$(diskutil info "$efiVolume" | awk '/Mount Point/ {print $3}')
+		echo "EFI system partition ($efiVolume) is already mounted at $gEFIMount."
+	fi
 }
 
 function _installKextEFI()
@@ -142,7 +159,7 @@ function _installKextEFI()
 function _detectAtherosNIC()
 {
 	# Initialize variables
-	atherosNIC=$("$gRepo/tools/dspci" | grep "Ethernet controller" | grep "1969" | cut -d ':' -f 4 | cut -d ']' -f 1)
+	atherosNIC=$("$gRepo/tools/bdmesg" | grep 'LAN Controller' | awk '/1969:/ {print $5}' | cut -d ':' -f 2 | tr -d ']' | head -n 1)
 
 	# Gigabyte shipped different revisions of boards with different Atheros NICs
 	# AtherosL1cEthernet supports AR8151, while AtherosE2200Ethernet supports AR8161
@@ -150,10 +167,10 @@ function _detectAtherosNIC()
 	if [[ ! -z $atherosNIC ]]; then
 		case $atherosNIC in
 			1083) # Atheros AR8151 v2.0 GbE - use AtherosL1cEthernet
-				echo " - Atheros AR8151 v2.0 [1969:1083] detected, installing AtherosL1cEthernet.kext..."
+				echo " - Atheros AR8151 v2.0 GbE [1969:1083] detected, installing AtherosL1cEthernet.kext..."
 				_installKextEFI "$gRepo/kexts/lan/AtherosL1cEthernet.kext";;
 			1091) # Atheros AR8161 GbE - use AtherosE2200Ethernet
-				echo " - Atheros AR8161 [1969:1091] detected, installing AtherosE2200Ethernet.kext..."
+				echo " - Atheros AR8161 GbE [1969:1091] detected, installing AtherosE2200Ethernet.kext..."
 				_installKextEFI "$gRepo/kexts/lan/AtherosE2200Ethernet.kext";;
 		esac
 	fi
@@ -162,18 +179,18 @@ function _detectAtherosNIC()
 function _detectIntelNIC()
 {
 	# Initialize variables
-	intelNIC=$("$gRepo/tools/dspci" | grep "Ethernet controller" | grep "8086" | cut -d ':' -f 4 | cut -d ']' -f 1)
+	intelNIC=$("$gRepo/tools/bdmesg" | grep 'LAN Controller' | awk '/8086:/ {print $5}' | cut -d ':' -f 2 | tr -d ']' | head -n 1)
 
 	# Install IntelMausiEthernet.kext if an Intel NIC is detected
 	if [[ ! -z $intelNIC ]]; then
 		case $intelNIC in
 			1503) # Intel 82579V GbE
-				echo " - Intel 82579V [8086:1503] detected, installing IntelMausiEthernet.kext..."
+				echo " - Intel 82579V GbE [8086:1503] detected, installing IntelMausiEthernet.kext..."
 				_installKextEFI "$gRepo/kexts/lan/IntelMausiEthernet.kext"
 				case $gMotherboard in
 					"Z77X-UD5H" | "Z77X-UP7") # Motherboards that have dual NICs
 						/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/DualNIC_GLAN-ETH1.plist ':ACPI:DSDT:Patches'" "$gEFIMount/EFI/CLOVER/config.plist";;
-					*) Otherwise assume that the motherboard has a single Intel NIC
+					*) # Otherwise assume that the motherboard has a single Intel NIC
 						/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/SingleNIC_GLAN-GIGE.plist ':ACPI:DSDT:Patches'" "$gEFIMount/EFI/CLOVER/config.plist";;
 				esac;;
 		esac
@@ -183,13 +200,13 @@ function _detectIntelNIC()
 function _detectRealtekNIC()
 {
 	# Initialize variables
-	realtekNIC=$("$gRepo/tools/dspci" | grep "Ethernet controller" | grep "10ec" | cut -d ':' -f 4 | cut -d ']' -f 1)
+	realtekNIC=$("$gRepo/tools/bdmesg" | grep 'LAN Controller' | awk '/10EC:/ {print $5}' | cut -d ':' -f 2 | tr -d ']' | head -n 1)
 
 	# Install RealtekRTL8111.kext if a Realtek NIC is detected
 	if [[ ! -z $realtekNIC ]]; then
 		case $realtekNIC in
 			8168) # Realtek RTL8168/RTL8111 GbE
-				echo " - Realtek RTL8168/RTL8111 [10ec:8168] detected, installing RealtekRTL8111.kext..."
+				echo " - Realtek RTL8168/8111 GbE [10ec:8168] detected, installing RealtekRTL8111.kext..."
 				_installKextEFI "$gRepo/kexts/lan/RealtekRTL8111.kext";;
 		esac
 	fi
@@ -198,32 +215,37 @@ function _detectRealtekNIC()
 function _detectMarvellSATA()
 {
 	# Initialize variables
-	marvellSATA=$("$gRepo/tools/dspci" | grep "SATA controller" | grep "1b4b")
+	marvellSATA=$("$gRepo/tools/bdmesg" | grep "class=010601" | awk '/1B4B/ {print $7}' | head -n 1)
 
 	# Install AHCI_3rdParty_SATA if Marvell SATA controllers are detected
 	if [[ ! -z $marvellSATA ]]; then
-		echo " - Marvell SATA controller(s) detected, installing AHCI_3rdParty_SATA.kext..."
+		echo " - Marvell 88SE$marvellSATA SATA [1B4B:$marvellSATA] detected, installing AHCI_3rdParty_SATA.kext..."
 		_installKextEFI "$gRepo/kexts/sata/AHCI_3rdParty_SATA.kext"
 	fi
 }
 
-function _detectUSB()
+function _detectXHCI()
 {
 	# Initialize variables
 	plist="$gEFIMount/EFI/CLOVER/config.plist"
-	xhciList=$("$gRepo/tools/dspci" | grep "xHCI\|USB 3.0")
-	nonIntelXHCI=$(echo $xhciList | grep -Fv "8086")
+	nonIntelXHCIVID=$("$gRepo/tools/bdmesg" | grep 'class=0C0330' | grep -Fv '8086' | awk '{print $6}' | head -n 1)
 
 	# Add AppleUSBXHCI kext patches for non-Intel xHCI controllers to config.plist
 	## Make sure config.plist exists
 	if [ ! -f "$plist" ]; then
 		_printError "config.plist not found!"
-		exit 1
 	fi
-	## Add the kext patches to config.plist
-	if [[ ! -z $nonIntelXHCI ]]; then
-		echo " - Non-Intel xHCI contoller(s) detected, enabling AppleUSBXHCI kext patches..."
-		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/$osVersion-AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
+	## Add the kext patches to config.plist if non-Intel xHCI controllers are present
+	if [[ ! -z $nonIntelXHCIVID ]]; then
+		nonIntelXHCIDID=$("$gRepo/tools/bdmesg" | grep 'class=0C0330' | awk '/'$nonIntelXHCIVID'/ {print $7}' | head -n 1)
+		case $nonIntelXHCIVID in
+			'1106') xhciVendor="VIA";;
+			'1B6F') xhciVendor="Etron";;
+			*) xhciVendor="Non-Intel";;
+		esac
+
+		echo " - $xhciVendor xHCI [$nonIntelXHCIVID:$nonIntelXHCIDID] detected, enabling AppleUSBXHCI kext patches..."
+		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/$gOSXVersion-AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
 	fi
 }
 
@@ -234,6 +256,30 @@ function _detectPS2()
 			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
 			_installKextEFI "$gRepo/kexts/misc/VoodooPS2Controller.kext";;
 	esac
+}
+
+function _detectXCPM()
+{
+	# Initialize variables
+	plist="$gEFIMount/EFI/CLOVER/config.plist"
+	cpuBrandString=$(sysctl -n machdep.cpu.brand_string | tr -d '(TM)' | awk '{print $2, $3}')
+
+	# Check if CPU is Ivy Bridge (required for XCPM)
+	if [ $gCoreBridgeType -eq 3 ]; then ## Ivy Bridge (Core iX-3xxx)
+		## Install FVInjector.kext to suppress "X86PlatformPlugin: Failed to send stepper" warnings when using XCPM
+		echo " - Intel $cpuBrandString CPU (Ivy Bridge) detected, installing FVInjector.kext..."
+		sudo cp -R "$gRepo/kexts/misc/FVInjector.kext" /Library/Extensions
+		sudo chmod -R 755 /Library/Extensions/FVInjector.kext
+		sudo chown -R 0:0 /Library/Extensions/FVInjector.kext
+	fi
+
+	# Add "-xcpm" to boot arguments in config.plist to enable XCPM
+	## Make sure config.plist exists
+	if [ ! -f "$plist" ]; then
+		_printError "config.plist not found!"
+	fi
+	/usr/libexec/PlistBuddy -c "Set :Boot:Arguments 'kext-dev-mode=1 -xcpm'" "$gEFIMount/EFI/CLOVER/config.plist"
+
 }
 
 function _genSMBIOSData()
@@ -257,28 +303,36 @@ function _genSMBIOSData()
 	echo " - MLB Serial Number: $MLB"
 
 	# Copy the generated data to the plist
-	/usr/libexec/plistbuddy -c "Set :SMBIOS:ProductName '$gProductName'" "$plist"
-	/usr/libexec/plistbuddy -c "Set :SMBIOS:SerialNumber '$serialNumber'" "$plist"
-	/usr/libexec/plistbuddy -c "Set :RtVariables:MLB '$MLB'" "$plist"
-
-	printf "\n${STYLE_BOLD}Press enter to continue...${STYLE_RESET}\n" && read
+	/usr/libexec/PlistBuddy -c "Set :SMBIOS:ProductName '$gProductName'" "$plist"
+	/usr/libexec/PlistBuddy -c "Set :SMBIOS:SerialNumber '$serialNumber'" "$plist"
+	/usr/libexec/PlistBuddy -c "Set :RtVariables:MLB '$MLB'" "$plist"
 }
 
 function _generateSSDT_PR()
 {
 	# Initialize variables
-	printf "${STYLE_BOLD}Generating SSDT for power management${STYLE_RESET}:\n"
-	maxTurboFreq="$(bdmesg | grep Turbo: | cut -d '/' -f2)00"
+	useXCPM=$1
+	printf "${STYLE_BOLD}Generating SSDT for CPU power management${STYLE_RESET}:\n"
+	maxTurboFreq=$("$gRepo/tools/bdmesg" | awk '/Turbo:/ {print $4}' | tr / '\n' | awk 'NR==1 {max=$1} { if ($1>max) max=$1} END {printf "%d\n", max}')00
+	cpuBrandString=$(sysctl -n machdep.cpu.brand_string | tr -d '(TM)' | awk '{print $2, $3}')
 
 	# Download ssdtPRGen.sh & the CPU data
+	echo " - Downloading ssdtPRGen.sh Beta..."
 	rm -rf ~/Library/ssdtPRGen > /dev/null
-	curl -o ~/Library/ssdtPRGen.zip https://codeload.github.com/Piker-Alpha/ssdtPRGen.sh/zip/Beta
+	curl -o ~/Library/ssdtPRGen.zip -# https://codeload.github.com/Piker-Alpha/ssdtPRGen.sh/zip/Beta
 	unzip -qu ~/Library/ssdtPRGen.zip -d ~/Library/
 	mv ~/Library/ssdtPRGen.sh-Beta ~/Library/ssdtPRGen
 	rm ~/Library/ssdtPRGen.zip
 
-	# Generate an SSDT for power management
-	yes n | ~/Library/ssdtPRGen/ssdtPRGen.sh -turbo "$maxTurboFreq" -x 1
+	if [ $gCoreBridgeType -eq 2 ]; then # Sandy Bridge (iX-2xxx) doesn't support XCPM, so don't use it
+		echo " - Generating SSDT for Intel $cpuBrandString CPU (Sandy Bridge) @ $(bc <<< "scale = 2; $maxTurboFreq / 1000") GHz (max turbo)"
+	elif [ $gCoreBridgeType -eq 3 ]; then # Ivy Bridge (iX-3xxx) supports XCPM, so use it
+		echo " - Generating SSDT for Intel $cpuBrandString CPU (Ivy Bridge) @ $(bc <<< "scale = 2; $maxTurboFreq / 1000") GHz (max turbo)"
+	fi
+
+	# Generate the SSDT for power management
+	echo "$(yes n | ~/Library/ssdtPRGen/ssdtPRGen.sh -turbo $maxTurboFreq -x $useXCPM | tail -6)"
+	echo
 
 	# Copy the generated SSDT to the Clover ACPI/patched folder on the EFI partition
 	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT.aml"
@@ -355,22 +409,8 @@ function _installClover()
 	# Clear the output and print the header
 	_printHeader "${STYLE_BOLD}--install-clover: ${COLOR_GREEN}Installing Clover Bootloader${STYLE_RESET}"
 
-	# Find the BSD device name for the current OS disk
-	osVolume=$(df / | grep "/dev/disk" | cut -d ' ' -f1)
-
-	# Find the EFI partition of the disk
-	efiVolume=$(diskutil list "$osVolume" | grep EFI | cut -d 'B' -f2 | sed -e 's/^[ \t]*//')
-
-	# Check if the EFI partition is already mounted; if not, mount it
-	if [ -z "$(mount | grep $efiVolume | sed -e 's/^[ \t]*//')" ]; then
-		diskutil mount "$efiVolume" > /dev/null
-		mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
-		echo "EFI system partition ($efiVolume) mounted at $mountPoint."
-	else
-		mountPoint=$(diskutil info "$efiVolume" | grep "Mount Point" | cut -d ':' -f2 | sed -e 's/^[ \t]*//')
-		echo "EFI system partition ($efiVolume) is already mounted at $mountPoint."
-	fi
-	gEFIMount="$mountPoint"
+	# Mount the EFI system partition
+	_mountEFI
 
 	# Check if there is an existing bootloader install; if so, ask the user if it can be overwritten
 	if [ -d "$gEFIMount/EFI/CLOVER" ]; then
@@ -401,24 +441,29 @@ function _installClover()
 	cp -R "$gRepo/EFI/BOOT" "$gEFIMount/EFI"
 	cp -R "$gRepo/EFI/CLOVER" "$gEFIMount/EFI"
 
+	# Install bdmesg
+	sudo cp -R "$gRepo/tools/bdmesg" /usr/local/bin
+
 	# Install the required kexts
 	printf "${STYLE_BOLD}Installing required kexts${STYLE_RESET}:\n"
-	## Install FVInjector.kext
-	sudo cp -R "$gRepo/kexts/misc/FVInjector.kext" /Library/Extensions
-	sudo chmod -R 755  "/Library/Extensions/FVInjector.kext"
-	sudo chown -R 0:0 "/Library/Extensions/FVInjector.kext"
 	## Check what other kexts/patches are needed and install them
 	_detectAtherosNIC
 	_detectIntelNIC
 	_detectRealtekNIC
 	_detectMarvellSATA
+	_detectXHCI
 	_detectPS2
+	_detectXCPM
 
 	# Generate the SMBIOS data
 	_genSMBIOSData
 
 	# Generate an SSDT for power management using ssdtPRGen.sh
-	_generateSSDT_PR
+	if [ $gCoreBridgeType -eq 2 ]; then ## Sandy Bridge (Core iX-2xxx)
+		_generateSSDT_PR 0
+	elif [ $gCoreBridgeType -eq 3 ]; then ## Ivy Bridge (Core iX-3xxx)
+		_generateSSDT_PR 1
+	fi
 
 	# Clear the output and reprint the header
 	_printHeader "${STYLE_BOLD}--install-clover: ${COLOR_GREEN}Installing Clover Bootloader${STYLE_RESET}"

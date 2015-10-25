@@ -1,6 +1,6 @@
 # Gigabyte GA-Z77X DSDT Patch
 
-Support files for Gigabyte 7 Series motherboards running OS X 10.9+.
+Support files for running OS X 10.9+ on Gigabyte 7 Series motherboards.
 
 These support files can help you configure the post-installation process on Gigabyte 7 Series motherboards. The current repository uses custom SSDTs for each motherboard along with the GA-Z77X.sh post-installation script to create a working OS X installation.
 
@@ -19,10 +19,18 @@ Currently, the following motherboards are supported by the GA-Z77X.sh script and
 - GA-Z77X-UP7
 
 ### Changelog
+Version 1.8.4 (2015-10-24)
+- Optimized & rewrote many methods in the GA-Z77X.sh script & fixed various minor bugs
+- Removed `dspci` (no longer needed)
+- Updated Clover to r3302 (built with GCC 5)
+- Corrected max turbo frequency detection during CPU PM SSDT generation
+- Corrected XCPM configuration (added checking to only enable XCPM on Ivy Bridge CPUs)
+- Fixed EFI system partition mounting on Core Storage volumes (thanks to mickelsn on GitHub Issues for reporting!)
+
 Version 1.8.3 (2015-10-20)
 - Fixed GA-Z77X-UP5 TH SSDT (thanks to ch0w7 on GitHub Issues for reporting!)
 - Finally fixed PCIe GPU detection, kernel panics when using IGPU only are now fixed
-- Updated Clover to r3295 (built with Xcode 7.1 & clang)
+- Updated Clover to r3295 (built with GCC 5)
 
 Version 1.8.2 (2015-10-12)
 - Updated Clover to custom build of r3280: this version injects kexts from kexts/Other & kexts/10.11 at the same time
