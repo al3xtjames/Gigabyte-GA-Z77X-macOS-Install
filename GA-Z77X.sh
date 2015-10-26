@@ -83,7 +83,7 @@ function _checkOSVersion()
 {
 	gOSXVersion=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
 
-	case "$gOSXVersion" in
+	case $gOSXVersion in
 		10.9 | 10.10 | 10.11);; # Supported OS version detected, so do nothing
 		*) _printError "OS X Version $gOSXVersion is unsupported by this script!";;
 	esac
@@ -127,7 +127,8 @@ function _mountEFI()
 	# Make sure the EFI partition actually exists
 	if [ -z $efiVolume ]; then
 		## Check if the OS is installed on a Core Storage (CS) logical volume
-		if [ ! -z $(diskutil info "$osVolume" | grep "Core Storage") ]; then ## CS volume detected
+		csVolume=$(diskutil info "$osVolume" | grep "Core Storage")
+		if [ ! -z "$csVolume" ]; then ## CS volume detected
 			## We can find the recovery volume in the diskutil output, and then use that to find the EFI partition
 			recoveryVolume=$(diskutil info "$osVolume" | awk '/Recovery Disk:/ {print $3}')
 			efiVolume=$(diskutil list "$recoveryVolume" | awk '/EFI/ {print $6}')
