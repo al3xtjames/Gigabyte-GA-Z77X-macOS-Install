@@ -297,16 +297,19 @@ function _genSMBIOSData()
 
 	# TODO: Better error handling if simpleMLB.sh says the serial number is invalid
 	serialNumber=$(externals/simpleMacSerial.sh/simpleMacSerial.sh $gProductName)
-	MLB=$(externals/simpleMLB.sh/simpleMLB.sh $serialNumber)
+	mlb=$(externals/simpleMLB.sh/simpleMLB.sh $serialNumber)
+	smUUID=$(uuidgen)
 
 	echo " - Product Name: $gProductName"
 	echo " - Serial Number: $serialNumber"
-	echo " - MLB Serial Number: $MLB"
+	echo " - MLB Serial Number: $mlb"
+	echo " - System UUID: $smUUID"
 
 	# Copy the generated data to the plist
 	/usr/libexec/PlistBuddy -c "Set :SMBIOS:ProductName '$gProductName'" "$plist"
 	/usr/libexec/PlistBuddy -c "Set :SMBIOS:SerialNumber '$serialNumber'" "$plist"
-	/usr/libexec/PlistBuddy -c "Set :RtVariables:MLB '$MLB'" "$plist"
+	/usr/libexec/PlistBuddy -c "Set :RtVariables:MLB '$mlb'" "$plist"
+	/usr/libexec/PlistBuddy -c "Set :SMBIOS:SmUUID '$smUUID'" "$plist"
 }
 
 function _generateSSDT_PR()
