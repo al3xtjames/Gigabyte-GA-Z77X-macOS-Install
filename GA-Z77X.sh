@@ -1,5 +1,5 @@
 #!/bin/bash
-# Gigabyte GA-Z77X OS X Post-Install Script by theracermaster
+# GA-Z77X.sh - Gigabyte GA-Z77X OS X Post-Install Script by theracermaster
 # Supports various Gigabyte GA-Z77X motherboards
 # Gigabyte GA-Z77X DSDT Patch Repo - http://git.io/vIatr
 
@@ -246,7 +246,7 @@ function _detectXHCI()
 		esac
 
 		echo " - $xhciVendor xHCI [$nonIntelXHCIVID:$nonIntelXHCIDID] detected, enabling AppleUSBXHCI kext patches..."
-		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/$gOSXVersion-AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
+		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/NonIntel_AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
 	fi
 }
 

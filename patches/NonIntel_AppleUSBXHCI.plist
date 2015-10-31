@@ -4,9 +4,9 @@
 <array>
 	<dict>
 		<key>Comment</key>
-		<string>[10.9] Disable Intel &amp; Fresco Logic xHCI Controller Check</string>
+		<string>[10.9/10.10] Disable Intel &amp; Fresco Logic xHCI Controller Check</string>
 		<key>Find</key>
-		<data>9oDUAAAAgHU6</data>
+		<data>9oDUAAAAgHU0</data>
 		<key>Name</key>
 		<string>AppleUSBXHCI</string>
 		<key>Replace</key>
@@ -24,7 +24,17 @@
 	</dict>
 	<dict>
 		<key>Comment</key>
-		<string>[10.9] Patch xHCI MSI &amp; Pin Interrupts (1 of 2)</string>
+		<string>[10.10] Disable xHCI 1.0 Controller Check</string>
+		<key>Find</key>
+		<data>QbzHAgDgPQABAAA=</data>
+		<key>Name</key>
+		<string>AppleUSBXHCI</string>
+		<key>Replace</key>
+		<data>QbzHAgDgPQAAAAA=</data>
+	</dict>
+	<dict>
+		<key>Comment</key>
+		<string>[10.9/10.10] Patch xHCI MSI &amp; Pin Interrupts (1 of 2)</string>
 		<key>Find</key>
 		<data>gUkIAABAAA==</data>
 		<key>Name</key>
@@ -34,7 +44,7 @@
 	</dict>
 	<dict>
 		<key>Comment</key>
-		<string>[10.9] Patch xHCI MSI &amp; Pin Interrupts (2 of 2)</string>
+		<string>[10.9/10.10] Patch xHCI MSI &amp; Pin Interrupts (2 of 2)</string>
 		<key>Find</key>
 		<data>QcdHCAAAQAA=</data>
 		<key>Name</key>
@@ -44,7 +54,7 @@
 	</dict>
 	<dict>
 		<key>Comment</key>
-		<string>[10.9] Disable xHCI Controller Sleep Code</string>
+		<string>[10.9/10.10] Disable xHCI Controller Sleep Code</string>
 		<key>Find</key>
 		<data>xoDIAAAAAQ==</data>
 		<key>Name</key>
@@ -54,7 +64,7 @@
 	</dict>
 	<dict>
 		<key>Comment</key>
-		<string>[10.9] Enable PCI Power Management for xHCI Controller</string>
+		<string>[10.9/10.10] Enable PCI Power Management for xHCI Controller</string>
 		<key>Find</key>
 		<data>dU1Ii7voAQAA</data>
 		<key>Name</key>
