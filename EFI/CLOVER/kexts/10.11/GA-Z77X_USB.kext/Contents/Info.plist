@@ -9,7 +9,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleGetInfoString</key>
-	<string>1.0.1, Copyright © 2015 RehabMan &amp; TheRacerMaster. All Rights Reserved.</string>
+	<string>1.0.2, Copyright © 2015 RehabMan &amp; TheRacerMaster. All Rights Reserved.</string>
 	<key>CFBundleName</key>
 	<string>Gigabyte 7 Series USB Port Injector</string>
 	<key>CFBundlePackageType</key>
@@ -135,28 +135,28 @@
 					<key>PRT1</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>AQAAAA==</data>
 					</dict>
 					<key>PRT2</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>AgAAAA==</data>
 					</dict>
 					<key>PRT3</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>AwAAAA==</data>
 					</dict>
 					<key>PRT4</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>BAAAAA==</data>
 					</dict>
@@ -424,28 +424,28 @@
 					<key>PRT1</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>AQAAAA==</data>
 					</dict>
 					<key>PRT2</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>AgAAAA==</data>
 					</dict>
 					<key>PRT3</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>AwAAAA==</data>
 					</dict>
 					<key>PRT4</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>BAAAAA==</data>
 					</dict>
@@ -713,28 +713,28 @@
 					<key>PRT1</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>AQAAAA==</data>
 					</dict>
 					<key>PRT2</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>AgAAAA==</data>
 					</dict>
 					<key>PRT3</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>AwAAAA==</data>
 					</dict>
 					<key>PRT4</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>0</integer>
 						<key>port</key>
 						<data>BAAAAA==</data>
 					</dict>
