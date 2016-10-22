@@ -12,13 +12,14 @@ gRepo=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 ## The motherboard, will be properly initialized later
 gMotherboard="Unknown"
-## The CPU microarchitecture
-## 2 = Sandy Bridge, 3 = Ivy Bridge
+## The CPU microarchitecture, 2 = Sandy Bridge, 3 = Ivy Bridge
 gCoreBridgeType=$(sysctl -n machdep.cpu.brand_string | cut -d '-' -f 2 | cut -c 1)
 ## The HDEF layout ID
 gLayoutID=0
+## PS/2 support, 0 = no, 1 = yes
+gPS2=0
 
-## The default Mac model, can be changed (recommended: iMac13,1 or iMac13,2)
+## The default Mac model (recommended: iMac13,1 or iMac13,2)
 gProductName="iMac13,2"
 
 source "$gRepo/tools/common.sh"
@@ -45,14 +46,16 @@ function _identifyMotherboard()
 		#	gMotherboard="B75M-D3H"
 		#	gLayoutID=1
 		#	;;
-		#'Z77X-D3H')
-		#	gMotherboard="Z77X-D3H"
-		#	gLayoutID=5
-		#	;;
-		#'Z77X-UD3H')
-		#	gMotherboard="Z77X-UD3H"
-		#	gLayoutID=5
-		#	;;
+		'Z77X-D3H')
+			gMotherboard="Z77X-D3H"
+			gLayoutID=5
+			gPS2=1
+			;;
+		'Z77X-UD3H')
+			gMotherboard="Z77X-UD3H"
+			gLayoutID=5
+			gPS2=1
+			;;
 		#'Z77X-UD4H')
 		#	gMotherboard="Z77X-UD4H"
 		#	gLayoutID=1
@@ -154,21 +157,13 @@ function _detectMarvellSATA()
 
 function _detectXHCI()
 {
-	# Initialize variables
-	plist="$gEFIMount/EFI/CLOVER/config.plist"
-
-	# Add AppleUSBXHCI kext patches for non-Intel xHCI controllers to config.plist
-	## Make sure config.plist exists
-	if [ ! -f "$plist" ]; then
-		_printError "config.plist not found!"
-	fi
-	## Add the kext patches to config.plist if non-Intel xHCI controllers (VIA VL810/Etron EJ168) are present
+	# Add AppleUSBXHCIPCI injector for non-Intel xHCI controllers
 	if [ ! -z "$(_checkDevicePresence 1106 3432)" ]; then
-		echo " - VIA VL800 xHCI [1106:3432] detected, enabling AppleUSBXHCI kext patches..."
-		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/kext_AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" "$plist"
-	elif [ ! -z "$(_checkDevicePresence 1B6F 7023)" ]; then
-		echo " - Etron EJ168 xHCI [1B6F:7023] detected, enabling AppleUSBXHCI kext patches..."
-		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/kext_AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" "$plist"
+		echo " - VIA VL800 xHCI [1106:3432] detected, installing GenericUSBXHCIPCI.kext..."
+		_installKextEFI "$gRepo/drivers/kexts/GenericUSBXHCIPCI.kext"
+	#elif [ ! -z "$(_checkDevicePresence 1B6F 7023)" ]; then
+	#	echo " - Etron EJ168 xHCI [1B6F:7023] detected, installing GenericUSBXHCIPCI.kext..."
+	#	_installKextEFI "$gRepo/drivers/kexts/GenericUSBXHCIPCI.kext"
 	fi
 }
 
@@ -186,14 +181,23 @@ function _detectFireWire()
 	fi
 }
 
+function _detectThunderbolt()
+{
+	# Add SSDT to (potentially) fix some Thunderbolt issues
+	if [ ! -z "$(_checkDevicePresence 8086 1547)" ]; then
+		echo " - Compiling SSDT-TB.dsl..."
+		iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-TB.aml" "$gRepo/acpi/common/SSDT-TB.dsl" |& tail -n 1
+	fi
+
+	echo
+}
+
 function _detectPS2()
 {
-	case $gMotherboard in
-		"B75M-D3H" | "Z77X-D3H" | "Z77X-UD3H" | "Z77X-UD4H" | "Z77X-UP7") # Motherboards that have a PS/2 port
-			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
-			_installKextEFI "$gRepo/drivers/kexts/VoodooPS2Controller.kext"
-			;;
-	esac
+	if [ $gPS2 -eq 1 ]; then
+		echo " - PS/2 hardware present, installing VoodooPS2Controller..."
+		_installKextEFI "$gRepo/drivers/kexts/VoodooPS2Controller.kext"
+	fi
 }
 
 function _compileACPI()
@@ -285,9 +289,9 @@ function _install()
 	# Compile ACPI source files
 	printf "${STYLE_BOLD}Compiling SSDTs${STYLE_RESET}:\n"
 	_compileACPI
+	_detectThunderbolt
 
 	# We're done here, let's prompt the user to reboot
-	echo
 	printf "${STYLE_BOLD}Installation complete. Do you want to reboot now (y/n)?${STYLE_RESET} " && read choice
 	case "$choice" in
 		y|Y) # User said yes, so let's reboot

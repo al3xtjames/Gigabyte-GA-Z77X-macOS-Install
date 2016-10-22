@@ -7,7 +7,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>1.0.0 by theracermaster</string>
 	<key>CFBundleIdentifier</key>
-	<string>xyz.racermaster.GenericAHCIPort</string>
+	<string>xyz.racermaster.injector.GenericAHCIPort</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

@@ -72,7 +72,7 @@ DefinitionBlock ("SSDT-USB.aml", "SSDT", 1, "APPLE ", "UsbPpt", 0x00001000)
 				}
 
 				// Set AAPL,device-internal to Zero for XHC1
-				USBP [0x07] = Zero
+				USBP[0x07] = Zero
 				// Return pointer to USB device properties
 				Return (RefOf (USBP))
 			}
