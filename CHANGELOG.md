@@ -1,6 +1,6 @@
 # Gigabyte GA-Z77X-DSDT Patch Changelog
 
-Version 2.0.0 (2016-10-15)
+Version 2.0b1 (2016-10-15)
  - Added support for macOS 10.12 Sierra - removed support for 10.10 and lower
  - Refactored and rewrote parts of script
  - Refactored SSDTs into "generic" SSDTs & board-specific SSDTs
