@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleGetInfoString</key>
+	<string>1.0.0 by theracermaster</string>
+	<key>CFBundleIdentifier</key>
+	<string>xyz.racermaster.GenericAHCIPort</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>GenericAHCIPort</string>
+	<key>CFBundlePackageType</key>
+	<string>KEXT</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0.0</string>
+	<key>IOKitPersonalities</key>
+	<dict>
+		<key>AppleAHCIDiskDriver</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.iokit.IOAHCIBlockStorage</string>
+			<key>IOClass</key>
+			<string>AppleAHCIDiskDriver</string>
+			<key>IOProbeScore</key>
+			<integer>25000</integer>
+			<key>IOProviderClass</key>
+			<string>IOAHCIDevice</string>
+			<key>Protocol Characteristics</key>
+			<dict>
+				<key>Physical Interconnect</key>
+				<string>SATA</string>
+				<key>Physical Interconnect Location</key>
+				<string>Internal</string>
+			</dict>
+		</dict>
+		<key>IOAHCISerialATAPI</key>
+		<dict>
+			<key>ATAPI</key>
+			<true/>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.iokit.IOAHCISerialATAPI</string>
+			<key>IOClass</key>
+			<string>IOAHCISerialATAPI</string>
+			<key>IOProbeScore</key>
+			<integer>25000</integer>
+			<key>IOProviderClass</key>
+			<string>IOAHCIDevice</string>
+			<key>Protocol Characteristics</key>
+			<dict>
+				<key>Physical Interconnect</key>
+				<string>SATA</string>
+				<key>Physical Interconnect Location</key>
+				<string>Internal</string>
+			</dict>
+		</dict>
+		<key>ASMedia ASM1061</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>ASM1061</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x06111b21</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>ASMedia</string>
+		</dict>
+		<key>ASMedia ASM1062</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>ASM1062</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x06121b21</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>ASMedia</string>
+		</dict>
+		<key>JMicron JMB360</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>JMB360</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x2360197b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>11000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>JMicron</string>
+		</dict>
+		<key>JMicron JMB361</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>JMB361</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x2361197b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>11000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>JMicron</string>
+		</dict>
+		<key>JMicron JMB362</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>JMB362</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x2362197b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>11000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>JMicron</string>
+		</dict>
+		<key>JMicron JMB363</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>JMB363</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x2363197b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>11000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>JMicron</string>
+		</dict>
+		<key>JMicron JMB364</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>JMB364</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x2364197b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>11000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>JMicron</string>
+		</dict>
+		<key>JMicron JMB365</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>JMB365</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x2365197b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>11000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>JMicron</string>
+		</dict>
+		<key>JMicron JMB366</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>JMB366</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x2366197b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>11000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>JMicron</string>
+		</dict>
+		<key>JMicron JMB369</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>JMB369</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x2369197b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>11000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>JMicron</string>
+		</dict>
+		<key>Marvell 88SE9120</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9120</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91201b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9123</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9123</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91231b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9125</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9125</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91251b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9128</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9128</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x06401b4b 0x91281b4b 0x91301b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9170</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9170</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91781b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9172</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9172</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x91721b4b 0x917a1b4b 0x91921b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9220</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9220</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x92201b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9230</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9230</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x92301b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9235</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9235</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x92351b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9445</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9445</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x94451b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9480</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9480</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x94801b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+		<key>Marvell 88SE9485</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.apple.driver.AppleAHCIPort</string>
+			<key>Chipset Name</key>
+			<string>88SE9485</string>
+			<key>IOClass</key>
+			<string>AppleAHCI</string>
+			<key>IOPCIPrimaryMatch</key>
+			<string>0x94851b4b</string>
+			<key>IOPCIPauseCompatible</key>
+			<true/>
+			<key>IOPCITunnelCompatible</key>
+			<true/>
+			<key>IOProbeScore</key>
+			<integer>15000</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+			<key>Vendor Name</key>
+			<string>Marvell</string>
+		</dict>
+	</dict>
+	<key>OSBundleRequired</key>
+	<string>Local-Root</string>
+</dict>
+</plist>
