@@ -20,6 +20,8 @@ cd Gigabyte-GA-Z77X-DSDT-Patch
 
 ### Supported Motherboards
 Currently, the following motherboards are supported by the GA-Z77X.sh script:
+ - GA-Z77X-D3H
+ - GA-Z77X-UD3H
  - GA-Z77X-UD5H (-WB WIFI)
  - GA-Z77X-UP5 TH
 
