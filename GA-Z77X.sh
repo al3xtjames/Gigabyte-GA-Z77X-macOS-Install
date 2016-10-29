@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env zsh
 #
 # GA-Z77X.sh - Gigabyte GA-Z77X macOS Post-Install Script by theracermaster
 # Gigabyte GA-Z77X DSDT Patch Repo - https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch
@@ -186,7 +186,7 @@ function _detectThunderbolt()
 	# Add SSDT to (potentially) fix some Thunderbolt issues
 	if [ ! -z "$(_checkDevicePresence 8086 1547)" ]; then
 		echo " - Compiling SSDT-TB.dsl..."
-		iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-TB.aml" "$gRepo/acpi/common/SSDT-TB.dsl" |& tail -n 1
+		"$IASL" -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-TB.aml" "$gRepo/acpi/common/SSDT-TB.dsl" |& tail -n 1
 	fi
 
 	echo
@@ -203,20 +203,19 @@ function _detectPS2()
 function _compileACPI()
 {
 	# Initialize variables
-	iasl="$gRepo/tools/iasl"
 	ssdtCFG="SSDT-CFG-$boardSeries-$board.dsl"
 
 	# Compile ACPI source files and move output files to the ESP
 	echo " - Compiling $ssdtCFG:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-CFG.aml" "$gRepo/acpi/$ssdtCFG" |& tail -n 1
+	"$IASL" -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-CFG.aml" "$gRepo/acpi/$ssdtCFG" |& tail -n 1
 	echo " - Compiling SSDT-HDA.dsl:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-HDA.aml" "$gRepo/acpi/common/SSDT-HDA.dsl" |& tail -n 1
+	"$IASL" -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-HDA.aml" "$gRepo/acpi/common/SSDT-HDA.dsl" |& tail -n 1
 	echo " - Compiling SSDT-IGPU.dsl:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-IGPU.aml" "$gRepo/acpi/common/SSDT-IGPU.dsl" |& tail -n 1
+	"$IASL" -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-IGPU.aml" "$gRepo/acpi/common/SSDT-IGPU.dsl" |& tail -n 1
 	echo " - Compiling SSDT-PEG.dsl:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-PEG.aml" "$gRepo/acpi/common/SSDT-PEG.dsl" |& tail -n 1
+	"$IASL" -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-PEG.aml" "$gRepo/acpi/common/SSDT-PEG.dsl" |& tail -n 1
 	echo " - Compiling SSDT-USB.dsl:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-USB.aml" "$gRepo/acpi/common/SSDT-USB.dsl" |& tail -n 1
+	"$IASL" -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-USB.aml" "$gRepo/acpi/common/SSDT-USB.dsl" |& tail -n 1
 }
 
 function _install()

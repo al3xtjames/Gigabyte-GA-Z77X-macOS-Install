@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 #
 # common.sh - Common functions for macOS post-installation scripts
 # By theracermaster - https://github.com/theracermaster
@@ -11,6 +11,9 @@ gOSVersion=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
 
 ## The location where the EFI partition is mounted, will be properly initialized later
 gEFIMount="Unknown"
+
+## iasl binary
+IASL="$gRepo/tools/iasl"
 
 ## Styling
 STYLE_RESET="\e[0m"
