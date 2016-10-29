@@ -22,6 +22,8 @@ gPS2=0
 ## The default Mac model (recommended: iMac13,1 or iMac13,2)
 gProductName="iMac13,2"
 
+iasl="$gRepo/tools/iasl"
+
 source "$gRepo/tools/common.sh"
 
 function _gitUpdate()
@@ -203,20 +205,20 @@ function _detectPS2()
 function _compileACPI()
 {
 	# Initialize variables
-	iasl="$gRepo/tools/iasl"
+	#iasl="$gRepo/tools/iasl"
 	ssdtCFG="SSDT-CFG-$boardSeries-$board.dsl"
 
 	# Compile ACPI source files and move output files to the ESP
 	echo " - Compiling $ssdtCFG:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-CFG.aml" "$gRepo/acpi/$ssdtCFG" |& tail -n 1
+	$iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-CFG.aml" "$gRepo/acpi/$ssdtCFG" |& tail -n 1
 	echo " - Compiling SSDT-HDA.dsl:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-HDA.aml" "$gRepo/acpi/common/SSDT-HDA.dsl" |& tail -n 1
+	$iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-HDA.aml" "$gRepo/acpi/common/SSDT-HDA.dsl" |& tail -n 1
 	echo " - Compiling SSDT-IGPU.dsl:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-IGPU.aml" "$gRepo/acpi/common/SSDT-IGPU.dsl" |& tail -n 1
+	$iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-IGPU.aml" "$gRepo/acpi/common/SSDT-IGPU.dsl" |& tail -n 1
 	echo " - Compiling SSDT-PEG.dsl:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-PEG.aml" "$gRepo/acpi/common/SSDT-PEG.dsl" |& tail -n 1
+	$iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-PEG.aml" "$gRepo/acpi/common/SSDT-PEG.dsl" |& tail -n 1
 	echo " - Compiling SSDT-USB.dsl:"
-	iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-USB.aml" "$gRepo/acpi/common/SSDT-USB.dsl" |& tail -n 1
+	$iasl -p "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-USB.aml" "$gRepo/acpi/common/SSDT-USB.dsl" |& tail -n 1
 }
 
 function _install()
