@@ -1,9 +1,3 @@
-[submodule "externals/hdaInjector.sh"]
-	path = externals/hdaInjector.sh
-	url = https://github.com/theracermaster/hdaInjector.sh
-[submodule "externals/simpleMacSerial.sh"]
-	path = externals/simpleMacSerial.sh
-	url = https://gist.github.com/theracermaster/616dc7a9b8a632060e7c
-[submodule "externals/simpleMLB.sh"]
-	path = externals/simpleMLB.sh
-	url = https://gist.github.com/theracermaster/b6a9db46b14061d4c995
+[submodule "modules/MacGen"]
+	path = modules/MacGen
+	url = https://github.com/theracermaster/MacGen
