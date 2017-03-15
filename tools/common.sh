@@ -128,8 +128,14 @@ function _genSMBIOSData()
 		exit 1
 	fi
 
-	serialNumber=$("$gRepo/modules/MacGen/simpleMacSerial.sh" $gProductName)
-	MLB=$("$gRepo/modules/MacGen/simpleMLBSerial.sh" $gProductName $serialNumber)
+	serialNumber=$("$gRepo/modules/MacGen/mg-serial" $gProductName)
+	# shorten to last 12 characters in case of debug output
+	serialNumber=${serialNumber:(-12)}
+	
+	MLB=$("$gRepo/modules/MacGen/mg-mlb-serial" $gProductName $serialNumber)
+	# shorten to last 17 characters in case of debug output
+	MLB=${MLB:(-17)}
+	
 	smUUID=$(uuidgen)
 
 	echo " - Product Name: $gProductName"
