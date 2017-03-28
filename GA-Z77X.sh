@@ -5,7 +5,7 @@ set -e
 set -u
 
 # GA-Z77X.sh script version
-gScriptVersion="2.0.0"
+gScriptVersion="2.0.1"
 
 # Styles
 gStyleReset="\e[0m"
@@ -48,6 +48,23 @@ function usage()
 	exit 0
 }
 
+function print_header()
+{
+	# Initialize variables
+	local boardSeries=$(echo $gMotherboard | cut -d '-' -f 1)
+	local board=$(echo "${gMotherboard/$boardSeries-}")
+
+	clear
+
+	# Print the header & info
+	echo   "Gigabyte GA-Z77X Series Post-Install Script v$gScriptVersion by theracermaster"
+	printf "Updates & info: %bhttps://github.com/theracermaster/Gigabyte-GA-Z77X-macOS-Install%b\n" $gStyleUnderlined $gStyleReset
+	echo   "--------------------------------------------------------------------------------"
+	printf "Detected motherboard: Gigabyte %bGA-%s-%b%s%b\n" $gStyleBold $boardSeries $gColorCyan $board $gStyleReset
+	printf "Script arguments: ./GA-Z77X.sh $1\n"
+	echo   "--------------------------------------------------------------------------------"
+}
+
 function print_error()
 {
 	# Print the error text and exit
@@ -63,6 +80,17 @@ function git_update()
 	# Update the submodules
 	# git submodule update --init --recursive
 	# git submodule foreach git pull origin HEAD
+}
+
+function check_macos_version()
+{
+	case $gOSVersion in
+		10.12)
+			;; # Supported OS version detected, so do nothing
+		*)
+			print_error "macOS $gOSVersion is unsupported by this script!"
+			;;
+	esac
 }
 
 function check_motherboard()
@@ -92,15 +120,13 @@ function check_motherboard()
 	esac
 }
 
-function check_macos_version()
+function check_root()
 {
-	case $gOSVersion in
-		10.12)
-			;; # Supported OS version detected, so do nothing
-		*)
-			print_error "macOS $gOSVersion is unsupported by this script!"
-			;;
-	esac
+	if [ $(id -u) -ne 0 ]; then
+		# Re-run the script as root
+		printf "This part of the script %bneeds%b to be run as root.\n" $gStyleBold $gStyleReset
+		sudo clear
+	fi
 }
 
 function check_device_presence()
@@ -121,23 +147,6 @@ function replace_plist_dict()
 	/usr/libexec/PlistBuddy -c "Delete \"$1\"" "$gEFIMount/EFI/CLOVER/config.plist"
 	/usr/libexec/PlistBuddy -c "Add \"$1\" dict" "$gEFIMount/EFI/CLOVER/config.plist"
 	/usr/libexec/PlistBuddy -c "Merge /tmp/org_rehabman_node.plist \"$1\"" "$gEFIMount/EFI/CLOVER/config.plist"
-}
-
-function print_header()
-{
-	# Initialize variables
-	local boardSeries=$(echo $gMotherboard | cut -d '-' -f 1)
-	local board=$(echo "${gMotherboard/$boardSeries-}")
-
-	clear
-
-	# Print the header & info
-	echo   "Gigabyte GA-Z77X Series Post-Install Script v$gScriptVersion by theracermaster"
-	printf "Updates & info: %bhttps://github.com/theracermaster/Gigabyte-GA-Z77X-macOS-Install%b\n" $gStyleUnderlined $gStyleReset
-	echo   "--------------------------------------------------------------------------------"
-	printf "Detected motherboard: Gigabyte %bGA-%s-%b%s%b\n" $gStyleBold $boardSeries $gColorCyan $board $gStyleReset
-	printf "Script arguments: ./GA-Z77X.sh $1\n"
-	echo   "--------------------------------------------------------------------------------"
 }
 
 function detect_atheros_nic()
@@ -341,6 +350,11 @@ function install()
 	printf "%bGenerating SSDT for Intel $cpuBrandString CPU @ $(bc <<< "scale = 2; $maxTurboFreq / 1000") GHz (max turbo)%b:\n" $gStyleBold $gStyleReset
 	echo "$(yes n | "$gRepo/tools/ssdtPRGen.sh/ssdtPRGen.sh" -turbo $maxTurboFreq -x 1 | tail -n 1)"
 	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-PR.aml"
+	# Install X86PlatformPlugin frequency vector injector
+	sudo cp -R "$gRepo/kexts/1155PlatformPlugin.kext" /Library/Extensions
+	sudo chmod -R 755 /Library/Extensions/1155PlatformPlugin.kext
+	sudo chown -R 0:0 /Library/Extensions/1155PlatformPlugin.kext
+	sudo touch /System/Library/Extensions
 
 	# We're done here, let's prompt the user to reboot
 	if [ "$1" -eq 1 ]; then
@@ -368,12 +382,14 @@ if [ $# -eq 1 ]; then
 		--install)
 			check_macos_version
 			check_motherboard
+			check_root
 			install 0
 			;;
 		--update)
 			git_update > /dev/null
 			check_macos_version
 			check_motherboard
+			check_root
 			install 1
 			;;
 		*)
