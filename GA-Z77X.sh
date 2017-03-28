@@ -5,7 +5,7 @@ set -e
 set -u
 
 # GA-Z77X.sh script version
-gScriptVersion="2.0.3"
+gScriptVersion="2.0.4"
 
 # Styles
 gStyleReset="\e[0m"
@@ -345,6 +345,13 @@ function install()
 	detect_firewire
 	detect_thunderbolt
 
+	# Install X86PlatformPlugin frequency vector injector
+	echo " - XNU CPU Power Management enabled, installing 1155PlatformPlugin..."
+	sudo cp -R "$gRepo/kexts/1155PlatformPlugin.kext" /Library/Extensions
+	sudo chmod -R 755 /Library/Extensions/1155PlatformPlugin.kext
+	sudo chown -R 0:0 /Library/Extensions/1155PlatformPlugin.kext
+	sudo touch /System/Library/Extensions
+
 	printf "\n%bPress enter to continue...%b\n" $gStyleBold $gStyleReset && read
 	if [ "$1" -eq 1 ]; then
 		# Clear the output and print the header
@@ -365,11 +372,6 @@ function install()
 	printf "%bGenerating SSDT for Intel $cpuBrandString CPU @ $(bc <<< "scale = 2; $maxTurboFreq / 1000") GHz (max turbo)%b:\n" $gStyleBold $gStyleReset
 	echo "$(yes n | "$gRepo/tools/ssdtPRGen.sh/ssdtPRGen.sh" -turbo $maxTurboFreq -x 1 | tail -n 1)"
 	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-PR.aml"
-	# Install X86PlatformPlugin frequency vector injector
-	sudo cp -R "$gRepo/kexts/1155PlatformPlugin.kext" /Library/Extensions
-	sudo chmod -R 755 /Library/Extensions/1155PlatformPlugin.kext
-	sudo chown -R 0:0 /Library/Extensions/1155PlatformPlugin.kext
-	sudo touch /System/Library/Extensions
 
 	# We're done here, let's prompt the user to reboot
 	if [ "$1" -eq 1 ]; then
