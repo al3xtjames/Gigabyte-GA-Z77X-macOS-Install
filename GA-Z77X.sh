@@ -5,7 +5,7 @@ set -e
 set -u
 
 # GA-Z77X.sh script version
-gScriptVersion="2.0.2"
+gScriptVersion="2.0.3"
 
 # Styles
 gStyleReset="\e[0m"
@@ -233,10 +233,15 @@ function install()
 	# Mount the EFI system partition
 	gEFIMount=$("$gRepo/acpi/tools/mount_efi.sh")
 
+	local date="$(date '+%Y-%m-%d %Hh %Mm %Ss')"
 	# Check if we are upgrading a current install
 	if [ $1 -eq 1 ]; then
 		# Clear the output and print the header
 		print_header "${gStyleBold}--update: ${gColorGreen}Updating Clover & kexts${gStyleReset}"
+		# Back up the current EFI folder on the ESP
+		mkdir -p "$gRepo/backups/EFI ($date)"
+		cp -R "$gEFIMount/EFI/" "$gRepo/backups/EFI ($date)"
+		printf "%bCurrent EFI folder copied to:%b %bbackups/EFI ($date)%b\n" $gStyleBold $gStyleReset $gStyleUnderlined $gStyleReset
 	else
 		# Clear the output and print the header
 		print_header "${gStyleBold}--install: ${gColorGreen}Installing Clover & kexts${gStyleReset}"
@@ -252,7 +257,9 @@ function install()
 					;;
 				n|N)
 					echo "Backing up existing Clover bootloader install..."
-					mv "$gEFIMount/EFI" "$gEFIMount/EFI-backup"
+					# Back up the current EFI folder on the ESP
+					mkdir -p "$gRepo/backups/EFI ($date)"
+					cp -R "$gEFIMount/EFI/" "$gRepo/backups/EFI ($date)"
 					;;
 			esac
 			# Clear the output and print the header
