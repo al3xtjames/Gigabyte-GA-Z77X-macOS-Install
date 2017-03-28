@@ -9,8 +9,10 @@ Read [the wiki](https://github.com/theracermaster/Gigabyte-GA-Z77X-macOS-Install
 
 ### Supported Motherboards
 Currently, the following motherboards are supported:
+ - GA-Z77M-D3H
  - GA-Z77X-D3H
  - GA-Z77X-UD3H
+ - GA-Z77X-UP4 TH
  - GA-Z77X-UD5H (-WB WIFI)
  - GA-Z77X-UP5 TH
 

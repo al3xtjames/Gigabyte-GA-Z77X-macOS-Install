@@ -5,7 +5,7 @@ set -e
 set -u
 
 # GA-Z77X.sh script version
-gScriptVersion="2.0.1"
+gScriptVersion="2.0.2"
 
 # Styles
 gStyleReset="\e[0m"
@@ -98,6 +98,10 @@ function check_motherboard()
 	local motherboard=$(ioreg -k OEMBoard -p IODeviceTree | awk '/OEMBoard/ {print $4}' | tr -d '<"">')
 	# Identify the motherboard
 	case $motherboard in
+		'Z77M-D3H')
+			gMotherboard="Z77M-D3H"
+			gLayoutID=5
+			;;
 		'Z77X-D3H')
 			gMotherboard="Z77X-D3H"
 			gLayoutID=5
@@ -105,6 +109,10 @@ function check_motherboard()
 		'Z77X-UD3H')
 			gMotherboard="Z77X-UD3H"
 			gLayoutID=5
+			;;
+		'Z77X-UP4 TH')
+			gMotherboard="Z77X-UP4-TH"
+			gLayoutID=3
 			;;
 		'Z77X-UD5H')
 			gMotherboard="Z77X-UD5H"
