@@ -1,0 +1,2 @@
+# Ignore binaries built by ebuild.sh
+bdmesg.efi

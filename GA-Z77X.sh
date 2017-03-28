@@ -1,547 +1,386 @@
-#!/bin/bash
-# GA-Z77X.sh - Gigabyte GA-Z77X OS X Post-Install Script by theracermaster
-# Supports various Gigabyte GA-Z77X motherboards
-# Gigabyte GA-Z77X DSDT Patch Repo - http://git.io/vIatr
+#!/usr/bin/env bash
+# GA-Z77X.sh - GA-Z77X Series macOS Post-Installation Script
 
-# Initialize global variables
+set -e
+set -u
 
-## The script version
-gScriptVersion="1.8.4"
+# GA-Z77X.sh script version
+gScriptVersion="2.0.0"
 
-## The user ID
+# Styles
+gStyleReset="\e[0m"
+gStyleBold="\e[1m"
+gStyleUnderlined="\e[4m"
+# Colors
+gColorBlack="\e[1m"
+gColorRed="\e[1;31m"
+gColorGreen="\e[32m"
+gColorDarkYellow="\e[33m"
+gColorMagenta="\e[1;35m"
+gColorPurple="\e[35m"
+gColorCyan="\e[36m"
+gColorBlue="\e[1;34m"
+gColorOrange="\e[31m"
+gColorGrey="\e[37m"
+
+# The repo folder
+gRepo=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# The user ID
 gID=$(id -u)
-
-## The major version of OS X running
-gOSXVersion="10.0"
-
-## The motherboard, will be properly initialized later
-gMotherboard="Unknown"
-
-## The folder containing the repo
-gRepo=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-
-## The SMBIOS product name, can be changed (recommended: iMac13,1 or iMac13,2)
+# The major version of macOS
+gOSVersion=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
+# The CPU microarchitecture, 2 = Sandy Bridge, 3 = Ivy Bridge
+gCoreBridgeType=$(sysctl -n machdep.cpu.brand_string | cut -d '-' -f 2 | cut -c 1)
+# SMBIOS product name (Mac model)
 gProductName="iMac13,2"
 
-## The location where the EFI partition is mounted, will be properly initialized later
-gEFIMount="Unknown"
-
-## The CPU microarchitecture
-## 2 = Sandy Bridge, 3 = Ivy Bridge
-gCoreBridgeType=$(sysctl -n machdep.cpu.brand_string | cut -d '-' -f 2 | cut -c 1)
-
-## Styling stuff
-STYLE_RESET="\e[0m"
-STYLE_BOLD="\e[1m"
-STYLE_UNDERLINED="\e[4m"
-
-## Color stuff
-COLOR_BLACK="\e[1m"
-COLOR_RED="\e[1;31m"
-COLOR_GREEN="\e[32m"
-COLOR_DARK_YELLOW="\e[33m"
-COLOR_MAGENTA="\e[1;35m"
-COLOR_PURPLE="\e[35m"
-COLOR_CYAN="\e[36m"
-COLOR_BLUE="\e[1;34m"
-COLOR_ORANGE="\e[31m"
-COLOR_GREY="\e[37m"
-COLOR_END="\e[0m"
-
-#-------------------------------------------------------------------------------#
-function _printError()
+function usage()
 {
-	# Initialize variables
-	text="$1"
+	echo "GA-Z77X.sh v$gScriptVersion"
+	echo "Gigabyte GA-Z77X Series Post-Install Script by theracermaster"
+	echo
+	echo "Usage: ./GA-Z77X.sh <command>"
+	echo
+	echo "     --install               Install Clover/kexts/ACPI to the ESP"
+	echo "     --update                Update Clover/kexts/ACPI on the ESP"
+	echo "     --help (-h)             Help (this screen)"
+	echo
+	exit 0
+}
 
+function print_error()
+{
 	# Print the error text and exit
-	printf "${COLOR_RED}${STYLE_BOLD}ERROR: ${STYLE_RESET}${STYLE_BOLD}$text${STYLE_RESET} Exiting...\n"
+	printf "%b%bERROR: %b%s\n" $gColorRed $gStyleBold $gStyleReset "$1"
 	exit 1
 }
 
-function _identifyMotherboard()
+function git_update()
 {
-	# Initialize variables
-	motherboard=$(ioreg -lw0 -p IODeviceTree | awk '/OEMBoard/ {print $4}' | tr -d '<"">')
+	cd "$gRepo"
 
+	git pull
+	# Update the submodules
+	# git submodule update --init --recursive
+	# git submodule foreach git pull origin HEAD
+}
+
+function check_motherboard()
+{
+	local motherboard=$(ioreg -k OEMBoard -p IODeviceTree | awk '/OEMBoard/ {print $4}' | tr -d '<"">')
 	# Identify the motherboard
 	case $motherboard in
-		'B75M-D3H') gMotherboard="B75M-D3H";;
-		'Z77X-D3H') gMotherboard="Z77X-D3H";;
-		'Z77X-UD3H') gMotherboard="Z77X-UD3H";;
-		'Z77X-UD4H') gMotherboard="Z77X-UD4H";;
-		#'Z77X-UP4')
-		#	gMotherboard="UP4-TH" # Not sure about this one...
-		'Z77X-UD5H') gMotherboard="Z77X-UD5H";;
-		'Z77X-UP5') gMotherboard="Z77X-UP5-TH";;
-		'Z77X-UP7') gMotherboard="Z77X-UP7";;
-		*) _printError "$motherboard is unsupported by this script!";;
+		'Z77X-D3H')
+			gMotherboard="Z77X-D3H"
+			gLayoutID=5
+			;;
+		'Z77X-UD3H')
+			gMotherboard="Z77X-UD3H"
+			gLayoutID=5
+			;;
+		'Z77X-UD5H')
+			gMotherboard="Z77X-UD5H"
+			gLayoutID=3
+			;;
+		'Z77X-UP5')
+			gMotherboard="Z77X-UP5-TH"
+			gLayoutID=3
+			;;
+		*)
+			print_error "$motherboard is unsupported by this script!"
+			;;
 	esac
 }
 
-function _checkOSVersion()
+function check_macos_version()
 {
-	gOSXVersion=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
-
-	case $gOSXVersion in
-		10.9 | 10.10 | 10.11);; # Supported OS version detected, so do nothing
-		*) _printError "OS X Version $gOSXVersion is unsupported by this script!";;
+	case $gOSVersion in
+		10.12)
+			;; # Supported OS version detected, so do nothing
+		*)
+			print_error "macOS $gOSVersion is unsupported by this script!"
+			;;
 	esac
 }
 
-function _printHeader()
+function check_device_presence()
+{
+	# Look for a PCI device in bdmesg
+	"$gRepo/tools/bdmesg" | grep "$1 $2"
+}
+
+# Credit to RehabMan
+function replace_plist_dict()
+{
+	# $1 is path to replace
+	if [ $gCoreBridgeType -eq 3 ]; then
+		/usr/libexec/PlistBuddy -x -c "Print \"$1\"" "$gRepo/config/config_main_ivy.plist" > /tmp/org_rehabman_node.plist
+	else
+		/usr/libexec/PlistBuddy -x -c "Print \"$1\"" "$gRepo/config/config_main_sandy.plist" > /tmp/org_rehabman_node.plist
+	fi
+	/usr/libexec/PlistBuddy -c "Delete \"$1\"" "$gEFIMount/EFI/CLOVER/config.plist"
+	/usr/libexec/PlistBuddy -c "Add \"$1\" dict" "$gEFIMount/EFI/CLOVER/config.plist"
+	/usr/libexec/PlistBuddy -c "Merge /tmp/org_rehabman_node.plist \"$1\"" "$gEFIMount/EFI/CLOVER/config.plist"
+}
+
+function print_header()
 {
 	# Initialize variables
-	args="$1"
-	boardSeries=$(echo $gMotherboard | cut -d '-' -f 1)
-	board=$(echo "${gMotherboard/$boardSeries-}")
+	local boardSeries=$(echo $gMotherboard | cut -d '-' -f 1)
+	local board=$(echo "${gMotherboard/$boardSeries-}")
 
 	clear
 
 	# Print the header & info
-	echo "Gigabyte GA-Z77X.sh Post-Install Script v$gScriptVersion by theracermaster"
-	echo "Updates & Info: https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch"
-	echo "--------------------------------------------------------------------------------"
-	printf "Detected motherboard: Gigabyte ${STYLE_BOLD}GA-$boardSeries-${COLOR_CYAN}$board${STYLE_RESET}\n"
-	printf "Script arguments: ./GA-Z77X.sh $args\n"
-	echo "--------------------------------------------------------------------------------"
+	echo   "Gigabyte GA-Z77X Series Post-Install Script v$gScriptVersion by theracermaster"
+	printf "Updates & info: %bhttps://github.com/theracermaster/Gigabyte-GA-Z77X-macOS-Install%b\n" $gStyleUnderlined $gStyleReset
+	echo   "--------------------------------------------------------------------------------"
+	printf "Detected motherboard: Gigabyte %bGA-%s-%b%s%b\n" $gStyleBold $boardSeries $gColorCyan $board $gStyleReset
+	printf "Script arguments: ./GA-Z77X.sh $1\n"
+	echo   "--------------------------------------------------------------------------------"
 }
 
-function _checkRoot()
+function detect_atheros_nic()
 {
-	if [ $gID -ne 0 ]; then
-		# Re-run the script as root
-		printf "This part of the script ${STYLE_UNDERLINED}needs${STYLE_RESET} to be run as root.\n"
-		sudo clear
-	fi
-}
-
-function _mountEFI()
-{
-	# Find the BSD device name for the current OS disk
-	osVolume=$(df / | awk '/disk/ {print $1}')
-
-	# Find the EFI partition of the disk from the OS disk
-	efiVolume=$(diskutil list "$osVolume" | awk '/EFI/ {print $6}')
-
-	# Make sure the EFI partition actually exists
-	if [ -z $efiVolume ]; then
-		## Check if the OS is installed on a Core Storage (CS) logical volume
-		csVolume=$(diskutil info "$osVolume" | grep "Core Storage")
-		if [ ! -z "$csVolume" ]; then ## CS volume detected
-			## We can find the recovery volume in the diskutil output, and then use that to find the EFI partition
-			recoveryVolume=$(diskutil info "$osVolume" | awk '/Recovery Disk:/ {print $3}')
-			efiVolume=$(diskutil list "$recoveryVolume" | awk '/EFI/ {print $6}')
-		else ## No CS volume present, so assume no EFI partition
-			_printError "No EFI partition present on OS volume ($osVolume)!"
-		fi
-	fi
-
-	# Check if the EFI partition is already mounted; if not, mount it
-	if [ -z $(mount | awk '/'$efiVolume'/ {print $1}') ]; then
-		diskutil mount "$efiVolume" > /dev/null
-		gEFIMount=$(diskutil info "$efiVolume" | awk '/Mount Point/ {print $3}')
-		echo "EFI system partition ($efiVolume) mounted at $gEFIMount."
-	else
-		gEFIMount=$(diskutil info "$efiVolume" | awk '/Mount Point/ {print $3}')
-		echo "EFI system partition ($efiVolume) is already mounted at $gEFIMount."
-	fi
-}
-
-function _installKextEFI()
-{
-	# Initialize variables
-	kext="$1"
-
-	# Copy the kext to the Clover kexts folder on the EFI partition
-	cp -R "$kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
-}
-
-function _detectAtherosNIC()
-{
-	# Initialize variables
-	atherosNIC=$("$gRepo/tools/bdmesg" | grep 'LAN Controller' | awk '/1969:/ {print $5}' | cut -d ':' -f 2 | tr -d ']' | head -n 1)
-
 	# Gigabyte shipped different revisions of boards with different Atheros NICs
 	# AtherosL1cEthernet supports AR8151, while AtherosE2200Ethernet supports AR8161
 	# Install the correct Atheros kext if an Atheros NIC is detected
-	if [[ ! -z $atherosNIC ]]; then
-		case $atherosNIC in
-			1083) # Atheros AR8151 v2.0 GbE - use AtherosL1cEthernet
-				echo " - Atheros AR8151 v2.0 GbE [1969:1083] detected, installing AtherosL1cEthernet.kext..."
-				_installKextEFI "$gRepo/kexts/lan/AtherosL1cEthernet.kext";;
-			1091) # Atheros AR8161 GbE - use AtherosE2200Ethernet
-				echo " - Atheros AR8161 GbE [1969:1091] detected, installing AtherosE2200Ethernet.kext..."
-				_installKextEFI "$gRepo/kexts/lan/AtherosE2200Ethernet.kext";;
-		esac
+	if [ ! -z "$(check_device_presence 1969 1083)" ]; then
+ 		# Atheros AR8151 v2.0 GbE - use AtherosL1cEthernet
+		echo " - Atheros AR8151 v2.0 GbE [1969:1083] detected, installing AtherosL1cEthernet..."
+		cp -R "$gRepo/kexts/AtherosL1cEthernet.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	elif [ ! -z "$(check_device_presence 1969 1091)" ]; then
+		echo " - Atheros AR8161 GbE [1969:1091] detected, installing AtherosE2200Ethernet..."
+		cp -R "$gRepo/kexts/AtherosE2200Ethernet.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	fi
 }
 
-function _detectIntelNIC()
+function detect_intel_nic()
 {
-	# Initialize variables
-	intelNIC=$("$gRepo/tools/bdmesg" | grep 'LAN Controller' | awk '/8086:/ {print $5}' | cut -d ':' -f 2 | tr -d ']' | head -n 1)
-
-	# Install IntelMausiEthernet.kext if an Intel NIC is detected
-	if [[ ! -z $intelNIC ]]; then
-		case $intelNIC in
-			1503) # Intel 82579V GbE
-				echo " - Intel 82579V GbE [8086:1503] detected, installing IntelMausiEthernet.kext..."
-				_installKextEFI "$gRepo/kexts/lan/IntelMausiEthernet.kext"
-				case $gMotherboard in
-					"Z77X-UD5H" | "Z77X-UP7") # Motherboards that have dual NICs
-						/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/DualNIC_GLAN-ETH1.plist ':ACPI:DSDT:Patches'" "$gEFIMount/EFI/CLOVER/config.plist";;
-					*) # Otherwise assume that the motherboard has a single Intel NIC
-						/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/SingleNIC_GLAN-GIGE.plist ':ACPI:DSDT:Patches'" "$gEFIMount/EFI/CLOVER/config.plist";;
-				esac;;
-		esac
+	if [ ! -z "$(check_device_presence 8086 1503)" ]; then
+ 		# Intel 82579V GbE - use IntelMausiEthernet
+		echo " - Intel 82579V GbE [8086:1503] detected, installing IntelMausiEthernet..."
+		cp -R "$gRepo/kexts/IntelMausiEthernet.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	fi
 }
 
-function _detectRealtekNIC()
+function detect_realtek_nic()
 {
-	# Initialize variables
-	realtekNIC=$("$gRepo/tools/bdmesg" | grep 'LAN Controller' | awk '/10EC:/ {print $5}' | cut -d ':' -f 2 | tr -d ']' | head -n 1)
-
-	# Install RealtekRTL8111.kext if a Realtek NIC is detected
-	if [[ ! -z $realtekNIC ]]; then
-		case $realtekNIC in
-			8168) # Realtek RTL8168/RTL8111 GbE
-				echo " - Realtek RTL8168/8111 GbE [10ec:8168] detected, installing RealtekRTL8111.kext..."
-				_installKextEFI "$gRepo/kexts/lan/RealtekRTL8111.kext";;
-		esac
+	if [ ! -z "$(check_device_presence 10EC 8168)" ]; then
+ 		# Realtek RTL8168/RTL8111 GbE - use RealtekRTL8111
+		echo " - Realtek RTL8168/RTL8111 GbE [10EC:8168] detected, installing RealtekRTL8111..."
+		cp -R "$gRepo/kexts/RealtekRTL8111.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	fi
 }
 
-function _detectMarvellSATA()
+function detect_marvell_sata()
 {
-	# Initialize variables
-	marvellSATA=$("$gRepo/tools/bdmesg" | grep "class=010601" | awk '/1B4B/ {print $7}' | head -n 1)
-
-	# Install AHCI_3rdParty_SATA if Marvell SATA controllers are detected
-	if [[ ! -z $marvellSATA ]]; then
-		echo " - Marvell 88SE$marvellSATA SATA [1B4B:$marvellSATA] detected, installing AHCI_3rdParty_SATA.kext..."
-		_installKextEFI "$gRepo/kexts/sata/AHCI_3rdParty_SATA.kext"
+	if [ ! -z "$(check_device_presence 1B4B 9172)" ]; then
+		# Marvell 88SE9172 SATA - use GenericAHCIPort injector
+		echo " - Marvell 88SE9172 SATA [1B4B:9172] detected, installing GenericAHCIPort..."
+		cp -R "$gRepo/kexts/GenericAHCIPort.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	fi
 }
 
-function _detectXHCI()
+function detect_generic_xhci()
 {
-	# Initialize variables
-	plist="$gEFIMount/EFI/CLOVER/config.plist"
-	nonIntelXHCIVID=$("$gRepo/tools/bdmesg" | grep 'class=0C0330' | grep -Fv '8086' | awk '{print $6}' | head -n 1)
-
-	# Add AppleUSBXHCI kext patches for non-Intel xHCI controllers to config.plist
-	## Make sure config.plist exists
-	if [ ! -f "$plist" ]; then
-		_printError "config.plist not found!"
-	fi
-	## Add the kext patches to config.plist if non-Intel xHCI controllers are present
-	if [[ ! -z $nonIntelXHCIVID ]]; then
-		nonIntelXHCIDID=$("$gRepo/tools/bdmesg" | grep 'class=0C0330' | awk '/'$nonIntelXHCIVID'/ {print $7}' | head -n 1)
-		case $nonIntelXHCIVID in
-			'1106') xhciVendor="VIA";;
-			'1B6F') xhciVendor="Etron";;
-			*) xhciVendor="Non-Intel";;
-		esac
-
-		echo " - $xhciVendor xHCI [$nonIntelXHCIVID:$nonIntelXHCIDID] detected, enabling AppleUSBXHCI kext patches..."
-		/usr/libexec/PlistBuddy -c "Merge $gRepo/patches/NonIntel_AppleUSBXHCI.plist ':KernelAndKextPatches:KextsToPatch'" $plist
+	if [ ! -z "$(check_device_presence 1106 3432)" ]; then
+		# Add GenericUSBXHCI for non-Intel xHCI controllers
+		echo " - VIA VL800 xHCI [1106:3432] detected, installing GenericUSBXHCI.kext..."
+		cp -R "$gRepo/kexts/GenericUSBXHCI.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	fi
 }
 
-function _detectPS2()
+function detect_firewire()
 {
-	case $gMotherboard in
-		"B75M-D3H" | "Z77X-D3H" | "Z77X-UD3H" | "Z77X-UD4H" | "Z77X-UP7") # Motherboards that have a PS/2 port
-			echo " - PS/2 hardware present, installing VoodooPS2Controller..."
-			_installKextEFI "$gRepo/kexts/misc/VoodooPS2Controller.kext";;
-	esac
-}
-
-function _detectXCPM()
-{
-	# Initialize variables
-	plist="$gEFIMount/EFI/CLOVER/config.plist"
-	cpuBrandString=$(sysctl -n machdep.cpu.brand_string | tr -d '(TM)' | awk '{print $2, $3}')
-
-	# Check if CPU is Ivy Bridge (required for XCPM)
-	if [ $gCoreBridgeType -eq 3 ]; then ## Ivy Bridge (Core iX-3xxx)
-		## Install FVInjector.kext to suppress "X86PlatformPlugin: Failed to send stepper" warnings when using XCPM
-		echo " - Intel $cpuBrandString CPU (Ivy Bridge) detected, installing FVInjector.kext..."
-		sudo cp -R "$gRepo/kexts/misc/FVInjector.kext" /Library/Extensions
-		sudo chmod -R 755 /Library/Extensions/FVInjector.kext
-		sudo chown -R 0:0 /Library/Extensions/FVInjector.kext
+	# Add Apple EFI drivers to fix GUID issues/inject device properties for FireWire
+	if [ ! -z "$(check_device_presence 1106 3044)" ]; then
+		echo " - VIA VT6308 FireWire OHCI [1106:3044] detected, installing EFI drivers..."
+		cp "$gRepo/efi/drivers/FireWireDevice.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+		cp "$gRepo/efi/drivers/FireWireOhci.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	fi
+}
 
-	# Add "-xcpm" to boot arguments in config.plist to enable XCPM
-	## Make sure config.plist exists
-	if [ ! -f "$plist" ]; then
-		_printError "config.plist not found!"
+function detect_thunderbolt()
+{
+	# Add Apple EFI drivers to inject device properties for Thunderbolt
+	if [ ! -z "$(check_device_presence 8086 1547)" ]; then
+		echo " - Intel DSL3510 Thunderbolt [8086:1547] detected, installing EFI drivers..."
+		cp "$gRepo/efi/drivers/ThunderboltNhi.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+		cp "$gRepo/efi/drivers/ThunderboltXDomainDevice.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	fi
-	/usr/libexec/PlistBuddy -c "Set :Boot:Arguments 'kext-dev-mode=1 -xcpm'" "$gEFIMount/EFI/CLOVER/config.plist"
-
 }
 
-function _genSMBIOSData()
+function install()
 {
-	# Initialize variables
-	printf "${STYLE_BOLD}Generating SMBIOS data${STYLE_RESET}:\n"
-	plist="$gEFIMount/EFI/CLOVER/config.plist"
-
-	# Make sure config.plist exists
-	if [ ! -f "$plist" ]; then
-		_printError "config.plist not found!"
-		exit 1
-	fi
-
-	# TODO: Better error handling if simpleMLB.sh says the serial number is invalid
-	serialNumber=$(externals/simpleMacSerial.sh/simpleMacSerial.sh $gProductName)
-	mlb=$(externals/simpleMLB.sh/simpleMLB.sh $serialNumber)
-	smUUID=$(uuidgen)
-
-	echo " - Product Name: $gProductName"
-	echo " - Serial Number: $serialNumber"
-	echo " - MLB Serial Number: $mlb"
-	echo " - System UUID: $smUUID"
-
-	# Copy the generated data to the plist
-	/usr/libexec/PlistBuddy -c "Set :SMBIOS:ProductName '$gProductName'" "$plist"
-	/usr/libexec/PlistBuddy -c "Set :SMBIOS:SerialNumber '$serialNumber'" "$plist"
-	/usr/libexec/PlistBuddy -c "Set :RtVariables:MLB '$mlb'" "$plist"
-	/usr/libexec/PlistBuddy -c "Set :SMBIOS:SmUUID '$smUUID'" "$plist"
-}
-
-function _generateSSDT_PR()
-{
-	# Initialize variables
-	useXCPM=$1
-	printf "${STYLE_BOLD}Generating SSDT for CPU power management${STYLE_RESET}:\n"
-	maxTurboFreq=$("$gRepo/tools/bdmesg" | awk '/Turbo:/ {print $4}' | tr / '\n' | awk 'NR==1 {max=$1} { if ($1>max) max=$1} END {printf "%d\n", max}')00
-	cpuBrandString=$(sysctl -n machdep.cpu.brand_string | tr -d '(TM)' | awk '{print $2, $3}')
-
-	# Download ssdtPRGen.sh & the CPU data
-	echo " - Downloading ssdtPRGen.sh Beta..."
-	rm -rf ~/Library/ssdtPRGen > /dev/null
-	curl -o ~/Library/ssdtPRGen.zip -# https://codeload.github.com/Piker-Alpha/ssdtPRGen.sh/zip/Beta
-	unzip -qu ~/Library/ssdtPRGen.zip -d ~/Library/
-	mv ~/Library/ssdtPRGen.sh-Beta ~/Library/ssdtPRGen
-	rm ~/Library/ssdtPRGen.zip
-
-	if [ $gCoreBridgeType -eq 2 ]; then # Sandy Bridge (iX-2xxx) doesn't support XCPM, so don't use it
-		echo " - Generating SSDT for Intel $cpuBrandString CPU (Sandy Bridge) @ $(bc <<< "scale = 2; $maxTurboFreq / 1000") GHz (max turbo)"
-	elif [ $gCoreBridgeType -eq 3 ]; then # Ivy Bridge (iX-3xxx) supports XCPM, so use it
-		echo " - Generating SSDT for Intel $cpuBrandString CPU (Ivy Bridge) @ $(bc <<< "scale = 2; $maxTurboFreq / 1000") GHz (max turbo)"
-	fi
-
-	# Generate the SSDT for power management
-	echo "$(yes n | ~/Library/ssdtPRGen/ssdtPRGen.sh -turbo $maxTurboFreq -x $useXCPM | tail -6)"
-	echo
-
-	# Copy the generated SSDT to the Clover ACPI/patched folder on the EFI partition
-	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT.aml"
-
-	printf "${STYLE_BOLD}Press enter to continue...${STYLE_RESET}\n" && read
-}
-#-------------------------------------------------------------------------------#
-
-
-
-#-------------------------------------------------------------------------------#
-function _gitUpdate()
-{
-	# Make sure we're in the repo folder
-	cd "$gRepo"
-
-	# Update the repo files
-	echo "Updating local data to latest version"
-	echo "Updating to latest Gigabyte-GA-Z77X-DSDT-Patch git master"
-	git pull
-
-	# Update the external repos
-	echo "Initializing external repos"
-	git submodule update --init --recursive
-	echo "Updating external repos"
-	git submodule foreach git pull origin master
-}
-
-function _compileSSDT()
-{
-	# Clear the output and print the header
-	_printHeader "${STYLE_BOLD}--install-ssdt: ${COLOR_BLUE}Compiling Custom SSDT${STYLE_RESET}"
-
-	# Mount the EFI partition
-	_mountEFI
-
-	# Initialize variables
-	fileName="SSDT-GA-$gMotherboard.dsl"
-	url="https://raw.githubusercontent.com/theracermaster/DSDT/master/$fileName"
-
-	# Download the file
-	printf "${STYLE_BOLD}Downloading $fileName${STYLE_RESET}:\n"
-	curl --output "/tmp/$fileName" --progress-bar --location "$url"
-
-	# Compile the SSDT and move it to the right directory
-	printf "${STYLE_BOLD}Compiling $fileName${STYLE_RESET}:\n"
-	"$gRepo/tools/iasl" "/tmp/$fileName"
-	mv "/tmp/SSDT-GA-$gMotherboard.aml" "$gRepo/EFI/CLOVER/ACPI/patched/SSDT-HACK.aml"
-
-	printf "\n${STYLE_BOLD}SSDT compilation complete.${STYLE_RESET} Exiting...\n"
-	exit 0
-}
-
-function _injectHDA()
-{
-	# Initialize variables
-	plist="$gRepo/EFI/CLOVER/config.plist"
-
-	# Load AppleHDA.kext so we can ID the codec
-	sudo kextload "/System/Library/Extensions/AppleHDA.kext" > /dev/null
-
-	# Run the HDA injector script
-	sudo "$gRepo/externals/hdaInjector.sh/hdaInjector.sh"
-
-	# Copy config.plist and add the kext patches to it
-	cp "$gRepo/config-generic.plist" "$plist"
-	/usr/libexec/PlistBuddy -c "Merge /tmp/ktp.plist ':KernelAndKextPatches:KextsToPatch'" $plist
-
-	exit 0
-}
-
-function _installClover()
-{
-	# Clear the output and print the header
-	_printHeader "${STYLE_BOLD}--install-clover: ${COLOR_GREEN}Installing Clover Bootloader${STYLE_RESET}"
-
 	# Mount the EFI system partition
-	_mountEFI
+	gEFIMount=$("$gRepo/acpi/tools/mount_efi.sh")
 
-	# Check if there is an existing bootloader install; if so, ask the user if it can be overwritten
-	if [ -d "$gEFIMount/EFI/CLOVER" ]; then
-		echo "An existing installation of Clover UEFI was found on the EFI system partition."
-		printf "${STYLE_BOLD}Do you want to overwrite it (y/n)?${STYLE_RESET} "
-		read choice
-		case "$choice" in
-			y|Y)
-				echo "Removing existing Clover UEFI bootloader install..."
-				rm -rf "$gEFIMount/EFI";;
-			n|N)
-				echo "Backing up existing Clover UEFI bootloader install..."
-				mv "$gEFIMount/EFI/BOOT" "$gEFIMount/BOOTbackup"
-				mv "$gEFIMount/EFI/CLOVER" "$gEFIMount/CLOVERbackup";;
-		esac
+	# Check if we are upgrading a current install
+	if [ $1 -eq 1 ]; then
+		# Clear the output and print the header
+		print_header "${gStyleBold}--update: ${gColorGreen}Updating Clover & kexts${gStyleReset}"
+	else
+		# Clear the output and print the header
+		print_header "${gStyleBold}--install: ${gColorGreen}Installing Clover & kexts${gStyleReset}"
+		# Check if there is an existing bootloader install; if so, ask the user if it can be overwritten
+		if [ -d "$gEFIMount/EFI/CLOVER" ]; then
+			echo "An existing installation of Clover was found on the EFI system partition."
+			printf "%bDo you want to overwrite it (y/n)?%b " $gStyleBold $gStyleReset
+			read choice
+			case "$choice" in
+				y|Y)
+					echo "Removing existing Clover bootloader install..."
+					rm -rf "$gEFIMount/EFI/CLOVER"
+					;;
+				n|N)
+					echo "Backing up existing Clover bootloader install..."
+					mv "$gEFIMount/EFI" "$gEFIMount/EFI-backup"
+					;;
+			esac
+			# Clear the output and print the header
+			print_header "${gStyleBold}--install: ${gColorGreen}Installing Clover & kexts${gStyleReset}"
+		fi
 	fi
 
-	# Clear the output and reprint the header
-	_printHeader "${STYLE_BOLD}--install-clover: ${COLOR_GREEN}Installing Clover Bootloader${STYLE_RESET}"
-
-	# Copy the config.plist if wasn't automatically copied during HDA injection
-	if [ ! -f "$gRepo/EFI/CLOVER/config.plist" ]; then
-		cp "$gRepo/config-generic.plist" "$gRepo/EFI/CLOVER/config.plist"
-	fi
-
-	# Copy the directories to the EFI partition & create the kext directory
+	# Copy Clover files/folders to the ESP
 	mkdir -p "$gEFIMount/EFI/BOOT"
-	cp -R "$gRepo/EFI/BOOT" "$gEFIMount/EFI"
-	cp -R "$gRepo/EFI/CLOVER" "$gEFIMount/EFI"
+	mkdir -p "$gEFIMount/EFI/CLOVER/themes"
+	cp "$gRepo/efi/CLOVERX64.efi" "$gEFIMount/EFI/BOOT/BOOTX64.efi"
+	cp -R "$gRepo/efi/themes" "$gEFIMount/EFI/CLOVER"
+	cp -R "$gRepo/efi/tools" "$gEFIMount/EFI/CLOVER"
+
+	if [ $1 -eq 1 ]; then
+		# Update config.plist
+		replace_plist_dict ":ACPI"
+		replace_plist_dict ":Boot"
+		replace_plist_dict ":Devices"
+		replace_plist_dict ":KernelAndKextPatches"
+		replace_plist_dict ":SystemParameters"
+	else
+		# Generate config.plist
+		if [ $gCoreBridgeType -eq 3 ]; then
+			cp "$gRepo/config/config_main_ivy.plist" "$gEFIMount/EFI/CLOVER/config.plist"
+		else
+			cp "$gRepo/config/config_main_sandy.plist" "$gEFIMount/EFI/CLOVER/config.plist"
+		fi
+		# Set the HDA layout ID
+		/usr/libexec/PlistBuddy -c "Set ':Devices:Audio:Inject' $gLayoutID" "$gEFIMount/EFI/CLOVER/config.plist"
+		# Generate the SMBIOS data
+		printf "%bGenerating SMBIOS data%b:\n" $gStyleBold $gStyleReset
+		export MG_DEBUG=0
+		local serialNumber=$("$gRepo/tools/MacGen/mg-serial" $gProductName)
+		local mlbSerialNumber=$("$gRepo/tools/MacGen/mg-mlb-serial" $gProductName $serialNumber)
+		local smUUID=$(uuidgen)
+		echo " - Product Name: $gProductName"
+		echo " - Serial Number: $serialNumber"
+		echo " - MLB Serial Number: $mlbSerialNumber"
+		echo " - System UUID: $smUUID"
+		/usr/libexec/PlistBuddy -c "Set :SMBIOS:ProductName '$gProductName'" "$gEFIMount/EFI/CLOVER/config.plist"
+		/usr/libexec/PlistBuddy -c "Set :SMBIOS:SerialNumber '$serialNumber'" "$gEFIMount/EFI/CLOVER/config.plist"
+		/usr/libexec/PlistBuddy -c "Set :RtVariables:MLB '$mlbSerialNumber'" "$gEFIMount/EFI/CLOVER/config.plist"
+		/usr/libexec/PlistBuddy -c "Set :SMBIOS:SmUUID '$smUUID'" "$gEFIMount/EFI/CLOVER/config.plist"
+	fi
 
 	# Install bdmesg
-	sudo cp -R "$gRepo/tools/bdmesg" /usr/local/bin
+	cp "$gRepo/tools/bdmesg" /usr/local/bin
 
-	# Install the required kexts
-	printf "${STYLE_BOLD}Installing required kexts${STYLE_RESET}:\n"
-	## Check what other kexts/patches are needed and install them
-	_detectAtherosNIC
-	_detectIntelNIC
-	_detectRealtekNIC
-	_detectMarvellSATA
-	_detectXHCI
-	_detectPS2
-	_detectXCPM
+	# Install mandatory EFI drivers
+	mkdir -p "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/AppleImageCodec.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/AppleKeyMapAggregator.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/AptioFix2.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/AptioHashServiceFix.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/EfiDevicePathPropertyDatabase.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/HfsPlus.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/UsbKbDxe.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 
-	# Generate the SMBIOS data
-	_genSMBIOSData
+	# Install mandatory kexts
+	mkdir -p "$gEFIMount/EFI/CLOVER/kexts/Other"
+	if [ "$1" -eq 1 ]; then
+		printf "%bUpdating kexts%b:\n" $gStyleBold $gStyleReset
+	else
+		printf "%bInstalling kexts%b:\n" $gStyleBold $gStyleReset
+	fi
+	cp -R "$gRepo/kexts/AppleALC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/CoreDisplayFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/CPUSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/FakeSMC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/GPUSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/IntelGraphicsFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/Lilu.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/LPCSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/Shiki.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 
-	# Generate an SSDT for power management using ssdtPRGen.sh
-	if [ $gCoreBridgeType -eq 2 ]; then ## Sandy Bridge (Core iX-2xxx)
-		_generateSSDT_PR 0
-	elif [ $gCoreBridgeType -eq 3 ]; then ## Ivy Bridge (Core iX-3xxx)
-		_generateSSDT_PR 1
+	# Install kexts/EFI drivers for detected hardware
+	detect_atheros_nic
+	detect_intel_nic
+	detect_realtek_nic
+	detect_marvell_sata
+	detect_generic_xhci
+	detect_firewire
+	detect_thunderbolt
+
+	printf "\n%bPress enter to continue...%b\n" $gStyleBold $gStyleReset && read
+	if [ "$1" -eq 1 ]; then
+		# Clear the output and print the header
+		print_header "${gStyleBold}--update: ${gColorGreen}Updating Clover & kexts${gStyleReset}"
+	else
+		# Clear the output and reprint the header
+		print_header "${gStyleBold}--install: ${gColorGreen}Installing Clover & kexts${gStyleReset}"
 	fi
 
-	# Clear the output and reprint the header
-	_printHeader "${STYLE_BOLD}--install-clover: ${COLOR_GREEN}Installing Clover Bootloader${STYLE_RESET}"
-
-	# Rebuld kext caches
-	printf "${STYLE_BOLD}Rebuilding kext caches${STYLE_RESET}:\n"
-	sudo kextcache -system-prelinked-kernel
-	sudo kextcache -system-caches
+	# Compile/copy DSDT
+	mkdir -p "$gEFIMount/EFI/CLOVER/ACPI/origin"
+	mkdir -p "$gEFIMount/EFI/CLOVER/ACPI/patched"
+	printf "%bCompiling and copying DSDT%b:\n" $gStyleBold $gStyleReset
+	BOARD="Gigabyte/GA-$gMotherboard" make install -C "$gRepo/acpi" | tail -n 2 | head -n 1
+	# Generate SSDT for CPU PM
+	local maxTurboFreq=$("$gRepo/tools/bdmesg" | awk '/Turbo:/ {print $4}' | tr / '\n' | awk 'NR==1 {max=$1} { if ($1>max) max=$1} END {printf "%d\n", max}')00
+	local cpuBrandString=$(sysctl -n machdep.cpu.brand_string | tr -d '(TM)' | awk '{print $2, $3}')
+	printf "%bGenerating SSDT for Intel $cpuBrandString CPU @ $(bc <<< "scale = 2; $maxTurboFreq / 1000") GHz (max turbo)%b:\n" $gStyleBold $gStyleReset
+	echo "$(yes n | "$gRepo/tools/ssdtPRGen.sh/ssdtPRGen.sh" -turbo $maxTurboFreq -x 1 | tail -n 1)"
+	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-PR.aml"
 
 	# We're done here, let's prompt the user to reboot
-	printf "\n${STYLE_BOLD}Clover installation complete. Do you want to reboot now (y/n)?${STYLE_RESET} "
+	if [ "$1" -eq 1 ]; then
+		printf "\n%bUpdate complete. Do you want to reboot now (y/n)?%b " $gStyleBold $gStyleReset
+	else
+		printf "\n%bInstallation complete. Do you want to reboot now (y/n)?%b " $gStyleBold $gStyleReset
+	fi
 	read choice
 	case "$choice" in
-		y|Y) # User said yes, so let's reboot
+		y|Y)
 			echo "Rebooting..."
-			sudo reboot;;
-		*) # Anything else, let's just quit
+			sudo reboot
+			;;
+		*)
 			echo "Exiting..."
-			exit 0;;
+			exit 0
+			;;
 	esac
 }
 
-function _cleanup()
-{
-	_printHeader "${STYLE_BOLD}--cleanup: ${COLOR_RED}Deleting Generated Repo Files${STYLE_RESET}"
-
-	# Make sure we're in the repo folder
-	cd "$gRepo"
-
-	# Delete the generated files
-	printf "${STYLE_BOLD}Deleting generated files in repo folders${STYLE_RESET}:\n"
-	sudo rm -rf *.kext
-	rm -f EFI/CLOVER/ACPI/patched/*.aml
-	rm -f EFI/CLOVER/config.plist
-	rm -f /tmp/*.aml
-	rm -f /tmp/*.dsl
-	sudo rm -rf /tmp/*.plist
-
-	# Exit once it's done
-	printf "\n${STYLE_BOLD}Cleanup complete.${STYLE_RESET} Exiting...\n"
-	exit 0
-}
-#-------------------------------------------------------------------------------#
-
-_identifyMotherboard
-_checkOSVersion
-
-case "$1" in
-	--git-update)
-		_gitUpdate;;
-	--compile-ssdt)
-		_compileSSDT;;
-	--inject-hda)
-		_checkRoot
-		_injectHDA;;
-	--install-clover)
-		_checkRoot
-		_installClover;;
-	--cleanup)
-		_checkRoot
-		_cleanup;;
-	*)
-		echo "Gigabyte GA-Z77X.sh Post-Install Script v$gScriptVersion by theracermaster"
-		echo "Supports various Gigabye GA-Z77X motherboards running OS X 10.9+"
-		echo
-		echo "Usage: ./GA-Z77X.sh <command>, where <command> is one of the following:"
-		echo
-		echo "     --git-update         Update the repo & helper files to the latest version"
-		echo "     --compile-ssdt       Download & compile the SSDT for your motherboard"
-		echo "     --inject-hda         Install the injector kext for your audio codec"
-		echo "     --install-clover     Install Clover UEFI to your EFI system partition"
-		echo "     --cleanup            Delete files generated by this script in repo folders"
-		echo
-		echo "Updates & Info: https://github.com/theracermaster/Gigabyte-GA-Z77X-DSDT-Patch"
-esac
-
-exit 0
+# How many arguments were supplied?
+if [ $# -eq 1 ]; then
+	# One. Parse it
+	case "$1" in
+		--install)
+			check_macos_version
+			check_motherboard
+			install 0
+			;;
+		--update)
+			git_update > /dev/null
+			check_macos_version
+			check_motherboard
+			install 1
+			;;
+		*)
+			usage
+			;;
+	esac
+else
+	# Not the right amount. Show help
+	help
+fi

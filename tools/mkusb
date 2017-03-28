@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+set -e
+set -u
+
+gRepo=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/..
+
+function usage()
+{
+	echo "Usage: tools/mkusb <installer>"
+	echo
+	echo "     <installer>       The path to the macOS installer USB"
+	echo
+	exit 0
+}
+
+function find_esp()
+{
+	# Find the BSD device name for the installer USB (passed as an argument)
+	local usbVolume=$(df | grep "$1" | awk '/disk/ {print $1}')
+	if [ -z "$usbVolume" ]; then
+		echo "Invalid/unmounted disk ($1). Exiting..."
+		exit 1
+	fi
+
+	gUSBPath="$1"
+
+	# Find the EFI partition of the disk from the USB disk
+	local efiVolume=$(diskutil list "$usbVolume" | awk '/EFI/ {print $6}')
+
+	# Make sure the EFI partition actually exists
+	if [ -z "$efiVolume" ]; then
+		echo "No EFI partition present on USB disk ($usbVolume). Exiting..."
+		exit 1
+	fi
+
+	# Check if the EFI partition is already mounted; if not, mount it
+	if [ -z "$(mount | awk '/'"$efiVolume"'/ {print $1}')" ]; then
+		diskutil mount "$efiVolume" > /dev/null
+		gEFIMount=$(diskutil info "$efiVolume" | grep 'Mount Point' | sed -e 's/   Mount Point:              //g')
+	else
+		gEFIMount=$(diskutil info "$efiVolume" | grep 'Mount Point' | sed -e 's/   Mount Point:              //g')
+	fi
+
+	echo "macOS installer ESP mounted at $gEFIMount."
+}
+
+function install()
+{
+	printf "Installing Clover to $gEFIMount..."
+
+	# Install Clover
+	mkdir -p "$gEFIMount/EFI/BOOT"
+	mkdir -p "$gEFIMount/EFI/CLOVER/themes"
+	cp "$gRepo/efi/CLOVERX64.efi" "$gEFIMount/EFI/BOOT/BOOTX64.efi"
+	cp -R "$gRepo/efi/themes" "$gEFIMount/EFI/CLOVER"
+	cp -R "$gRepo/efi/tools" "$gEFIMount/EFI/CLOVER"
+
+	cp "$gRepo/config/config_install.plist" "$gEFIMount/EFI/CLOVER/config.plist"
+
+	# Install mandatory EFI drivers
+	mkdir -p "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/AptioFix2.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/HfsPlus.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+
+	# Install mandatory kexts
+	mkdir -p "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/AtherosE2200Ethernet.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/FakeSMC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/GenericUSBXHCI.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/IntelMausiEthernet.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/RealtekRTL8111.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+
+	# Copy SSDT
+	mkdir -p "$gEFIMount/EFI/CLOVER/ACPI/origin"
+	mkdir -p "$gEFIMount/EFI/CLOVER/ACPI/patched"
+	cp "$gRepo/efi/usb/SSDT-HACK.aml" "$gEFIMount/EFI/CLOVER/ACPI/patched"
+
+	echo "complete."
+
+	# Copy the repo files to the USB
+	printf "Copying repo files to $gUSBPath..."
+	cp -R "$gRepo" "$gUSBPath/Gigabyte-GA-Z77X-macOS-Install"
+	echo "complete."
+
+	echo
+	echo "Your macOS installer should now be bootable."
+}
+
+if [ $# -eq 1 ]; then
+	find_esp "$1"
+	install
+else
+	usage
+fi
