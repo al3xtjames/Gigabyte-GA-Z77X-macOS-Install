@@ -1,4 +1,4 @@
-# Gigabyte GA-Z77X DSDT Patch
+# Gigabyte GA-Z77X macOS Install
 
 Support files for running macOS 10.12+ on Gigabyte 7 Series motherboards.
 
