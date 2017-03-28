@@ -1,6 +1,6 @@
 **System information**
  - macOS 10.12.4
- - GA-Z77X-macOS-Install v2.0.3
+ - GA-Z77X macOS Install v2.0.3
  - GA-Z77X-UD5H
  - Intel Core i7-3770K
  - NVIDIA GeForce GTX 980 Ti
