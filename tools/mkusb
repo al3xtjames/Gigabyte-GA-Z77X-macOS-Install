@@ -65,6 +65,7 @@ function install()
 	# Install mandatory kexts
 	mkdir -p "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/AtherosE2200Ethernet.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/AtherosL1cEthernet.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/FakeSMC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/GenericUSBXHCI.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/IntelMausiEthernet.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
