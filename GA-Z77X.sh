@@ -110,7 +110,7 @@ function check_motherboard()
 			gMotherboard="Z77X-UD3H"
 			gLayoutID=5
 			;;
-		'Z77X-UP4 TH')
+		'Z77X-UP4')
 			gMotherboard="Z77X-UP4-TH"
 			gLayoutID=3
 			;;
