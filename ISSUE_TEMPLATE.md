@@ -1,9 +1,9 @@
 **System information**
- - macOS 10.12.4
- - GA-Z77X macOS Install v2.0.3
- - GA-Z77X-UD5H
- - Intel Core i7-3770K
- - NVIDIA GeForce GTX 980 Ti
+ - macOS 10.12.x
+ - GA-Z77X macOS Install v2.0.x
+ - GA-Z77X-XXXX
+ - Intel Core iX-XXXXK
+ - NVIDIA GeForce GTX XXX
  - Clover boot log (`bdmesg > log.txt`): https://transfer.sh/xxxxx/bdmesg.txt
  - [IORegistryExplorer](https://github.com/toleda/audio_ALCInjection/blob/master/IORegistryExplorer_v2.1.zip?raw=true) dump (File > Save As): https://transfer.sh/xxxxx/ioreg_dump.ioreg
 

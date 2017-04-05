@@ -46,6 +46,9 @@ function find_esp()
 
 function install()
 {
+	# Prevent Spotlight from indexing the ESP
+	touch "$gEFIMount/.metadata_never_index"
+
 	printf "Installing Clover to $gEFIMount..."
 
 	# Install Clover

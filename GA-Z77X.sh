@@ -5,7 +5,7 @@ set -e
 set -u
 
 # GA-Z77X.sh script version
-gScriptVersion="2.0.4"
+gScriptVersion="2.0.5"
 
 # Styles
 gStyleReset="\e[0m"
@@ -267,6 +267,9 @@ function install()
 		fi
 	fi
 
+	# Prevent Spotlight from indexing the ESP
+	touch "$gEFIMount/.metadata_never_index"
+
 	# Copy Clover files/folders to the ESP
 	mkdir -p "$gEFIMount/EFI/BOOT"
 	mkdir -p "$gEFIMount/EFI/CLOVER/themes"
@@ -310,13 +313,16 @@ function install()
 	cp "$gRepo/tools/bdmesg" /usr/local/bin
 
 	# Install mandatory EFI drivers
+	if [ $1 -eq 1 ]; then
+		rm -rf "$gEFIMount/EFI/CLOVER/drivers64uefi" > /dev/null
+	fi
 	mkdir -p "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	cp "$gRepo/efi/drivers/AppleImageCodec.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	cp "$gRepo/efi/drivers/AppleKeyMapAggregator.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
-	cp "$gRepo/efi/drivers/AptioFix2.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
-	cp "$gRepo/efi/drivers/AptioHashServiceFix.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	cp "$gRepo/efi/drivers/EfiDevicePathPropertyDatabase.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/HashServiceFix.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	cp "$gRepo/efi/drivers/HfsPlus.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/OsxAptioFix2Drv.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	cp "$gRepo/efi/drivers/UsbKbDxe.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 
 	# Install mandatory kexts
@@ -328,12 +334,9 @@ function install()
 	fi
 	cp -R "$gRepo/kexts/AppleALC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/CoreDisplayFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
-	cp -R "$gRepo/kexts/CPUSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/FakeSMC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
-	cp -R "$gRepo/kexts/GPUSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/IntelGraphicsFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/Lilu.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
-	cp -R "$gRepo/kexts/LPCSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/Shiki.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 
 	# Install kexts/EFI drivers for detected hardware
