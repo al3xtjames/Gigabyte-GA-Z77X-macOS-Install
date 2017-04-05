@@ -221,18 +221,6 @@
 				<key>Replace</key>
 				<data>vgcAAAAx0pCQkJCQ</data>
 			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>XCPM Performance Fix (credit: okrasit)</string>
-				<key>Disabled</key>
-				<false/>
-				<key>MatchOS</key>
-				<string>10.12.x</string>
-				<key>Find</key>
-				<data>idjB4Ai5mQE=</data>
-				<key>Replace</key>
-				<data>uAD/AAC5mQE=</data>
-			</dict>
 		</array>
 	</dict>
 	<key>RtVariables</key>
