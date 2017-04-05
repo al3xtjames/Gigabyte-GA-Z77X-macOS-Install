@@ -62,7 +62,7 @@ function install()
 
 	# Install mandatory EFI drivers
 	mkdir -p "$gEFIMount/EFI/CLOVER/drivers64uefi"
-	cp "$gRepo/efi/drivers/AptioFix2.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
+	cp "$gRepo/efi/drivers/OsxAptioFix2Drv.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	cp "$gRepo/efi/drivers/HfsPlus.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
 
 	# Install mandatory kexts
