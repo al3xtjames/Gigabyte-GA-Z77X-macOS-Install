@@ -310,7 +310,8 @@ function install()
 	fi
 
 	# Install bdmesg
-	cp "$gRepo/tools/bdmesg" /usr/local/bin
+	mkdir -p /usr/local/bin
+	cp "$gRepo/tools/bdmesg" /usr/local/bin/bdmesg
 
 	# Install mandatory EFI drivers
 	if [ $1 -eq 1 ]; then
