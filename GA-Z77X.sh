@@ -5,7 +5,7 @@ set -e
 set -u
 
 # GA-Z77X.sh script version
-gScriptVersion="2.0.5"
+gScriptVersion="2.0.6"
 
 # Styles
 gStyleReset="\e[0m"
