@@ -21,9 +21,9 @@ If you run into an issue while running the GA-Z77X.sh post-installation script, 
 
 ### Credits
 Thanks to:
- - [lvs1974](https://sourceforge.net/u/lvs1974/profile) - [IntelGraphicsFixup](https://sourceforge.net/projects/intelgraphicsfixup)
+ - [lvs1974](https://sourceforge.net/u/lvs1974/profile) - [IntelGraphicsFixup](https://sourceforge.net/projects/intelgraphicsfixup) & [HibernationFixup](https://sourceforge.net/projects/hibernationfixup)
  - maolj & [Shailua](http://www.insanelymac.com/forum/user/933246-shailua) - [AtherosL1cEthernet](http://www.insanelymac.com/forum/topic/283086-updated-atheros-ar8131325152-driver-for-107108/)
- - [Mieze](https://github.com/Mieze) - [AtherosE2200Ethernet](https://github.com/Mieze/AtherosE2200Ethernet), [IntelMausiEthernet](https://github.com/Mieze/IntelMausiEthernet), and [RealtekRTL8111](https://github.com/Mieze/RTL8111_driver_for_OS_X)
+ - [Mieze](https://github.com/Mieze) - [AtherosE2200Ethernet](https://github.com/Mieze/AtherosE2200Ethernet), [IntelMausiEthernet](https://github.com/Mieze/IntelMausiEthernet) & [RealtekRTL8111](https://github.com/Mieze/RTL8111_driver_for_OS_X)
  - [netkas](http://netkas.org) & [kozlek](https://github.com/kozlek) - [FakeSMC+HWSensors](https://github.com/theracermaster/FakeSMC)
  - [Pike R. Alpha](https://github.com/Piker-Alpha) - [ACPI table examples](https://github.com/Piker-Alpha/DSDT), [ssdtPRGen.sh](https://github.com/Piker-Alpha/ssdtPRGen.sh) & [XCPM fixes](https://pikeralpha.wordpress.com/2016/07/26/xcpm-for-unsupported-processor/)
  - [PMHeart](https://github.com/PMHeart) - [CoreDisplayFixup](http://www.insanelymac.com/forum/topic/319764-guide-dell-xps-15-9550-sierra-10122-quick-installation/?p=2391927)

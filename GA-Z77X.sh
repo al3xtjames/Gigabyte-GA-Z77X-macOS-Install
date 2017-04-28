@@ -231,7 +231,7 @@ function detect_thunderbolt()
 function install()
 {
 	# Mount the EFI system partition
-	gEFIMount=$("$gRepo/acpi/tools/mount_efi.sh")
+	gEFIMount=$("$gRepo/acpi/build/tools/mount_efi.sh")
 
 	local date="$(date '+%Y-%m-%d %Hh %Mm %Ss')"
 	# Check if we are upgrading a current install
