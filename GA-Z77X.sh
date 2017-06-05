@@ -5,7 +5,7 @@ set -e
 set -u
 
 # GA-Z77X.sh script version
-gScriptVersion="2.0.7"
+gScriptVersion="2.0.8"
 
 # Styles
 gStyleReset="\e[0m"
@@ -231,7 +231,7 @@ function detect_thunderbolt()
 function install()
 {
 	# Mount the EFI system partition
-	gEFIMount=$("$gRepo/acpi/build/tools/mount_efi.sh")
+	gEFIMount=$("$gRepo/acpi/build/tools/mount_efi")
 
 	local date="$(date '+%Y-%m-%d %Hh %Mm %Ss')"
 	# Check if we are upgrading a current install
@@ -333,12 +333,16 @@ function install()
 	else
 		printf "%bInstalling kexts%b:\n" $gStyleBold $gStyleReset
 	fi
+
 	cp -R "$gRepo/kexts/AppleALC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/AppleEmulator.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/CoreDisplayFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
-	cp -R "$gRepo/kexts/FakeSMC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/CPUSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/GPUSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/HibernationFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/IntelGraphicsFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/Lilu.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/LPCSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/Shiki.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 
 	# Install kexts/EFI drivers for detected hardware
@@ -371,12 +375,6 @@ function install()
 	mkdir -p "$gEFIMount/EFI/CLOVER/ACPI/patched"
 	printf "%bCompiling and copying DSDT%b:\n" $gStyleBold $gStyleReset
 	BOARD="Gigabyte/GA-$gMotherboard" make install -C "$gRepo/acpi" | tail -n 2 | head -n 1
-	# Generate SSDT for CPU PM
-	local maxTurboFreq=$("$gRepo/tools/bdmesg" | awk '/Turbo:/ {print $4}' | tr / '\n' | awk 'NR==1 {max=$1} { if ($1>max) max=$1} END {printf "%d\n", max}')00
-	local cpuBrandString=$(sysctl -n machdep.cpu.brand_string | tr -d '(TM)' | awk '{print $2, $3}')
-	printf "%bGenerating SSDT for Intel $cpuBrandString CPU @ $(bc <<< "scale = 2; $maxTurboFreq / 1000") GHz (max turbo)%b:\n" $gStyleBold $gStyleReset
-	echo "$(yes n | "$gRepo/tools/ssdtPRGen.sh/ssdtPRGen.sh" -turbo $maxTurboFreq -x 1 | tail -n 1)"
-	cp ~/Library/ssdtPRGen/ssdt.aml "$gEFIMount/EFI/CLOVER/ACPI/patched/SSDT-PR.aml"
 
 	# We're done here, let's prompt the user to reboot
 	if [ "$1" -eq 1 ]; then

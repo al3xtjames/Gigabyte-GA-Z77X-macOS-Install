@@ -4,6 +4,6 @@
 [submodule "tools/MacGen"]
 	path = tools/MacGen
 	url = https://github.com/theracermaster/MacGen
-[submodule "tools/ssdtPRGen.sh"]
-	path = tools/ssdtPRGen.sh
-	url = https://github.com/Piker-Alpha/ssdtPRGen.sh
+[submodule "efi/themes/OSS"]
+	path = efi/themes/OSS
+	url = https://github.com/theracermaster/clover-theme-oss

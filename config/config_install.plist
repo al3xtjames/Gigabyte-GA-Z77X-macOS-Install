@@ -21,27 +21,19 @@
 			<array>
 				<dict>
 					<key>Comment</key>
+					<string>Rename _OSI to XOSI</string>
+					<key>Find</key>
+					<data>X09TSQ==</data>
+					<key>Replace</key>
+					<data>WE9TSQ==</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
 					<string>Rename COPR to MATH</string>
 					<key>Find</key>
 					<data>Q09QUg==</data>
 					<key>Replace</key>
 					<data>TUFUSA==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename EHC1 to EH01</string>
-					<key>Find</key>
-					<data>RUhDMQ==</data>
-					<key>Replace</key>
-					<data>RUgwMQ==</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename EHC2 to EH02</string>
-					<key>Find</key>
-					<data>RUhDMg==</data>
-					<key>Replace</key>
-					<data>RUgwMg==</data>
 				</dict>
 				<dict>
 					<key>Comment</key>
@@ -61,35 +53,11 @@
 				</dict>
 				<dict>
 					<key>Comment</key>
-					<string>Rename SPTn to PRTn</string>
+					<string>Rename XHC to XHC1</string>
 					<key>Find</key>
-					<data>U1BU</data>
+					<data>WEhDXw==</data>
 					<key>Replace</key>
-					<data>UFJU</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename _SB.PCI0.XHC_ to _SB.PCI0.XHC1</string>
-					<key>Find</key>
-					<data>X1NCX1BDSTBYSENf</data>
-					<key>Replace</key>
-					<data>X1NCX1BDSTBYSEMx</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename _SB.PCI0.EH01 to _SB.PCI0.EHC1</string>
-					<key>Find</key>
-					<data>X1NCX1BDSTBFSDAx</data>
-					<key>Replace</key>
-					<data>X1NCX1BDSTBFSEMx</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
-					<string>Rename _SB.PCI0.EH02 to _SB.PCI0.EHC2</string>
-					<key>Find</key>
-					<data>X1NCX1BDSTBFSDAy</data>
-					<key>Replace</key>
-					<data>X1NCX1BDSTBFSEMy</data>
+					<data>WEhDMQ==</data>
 				</dict>
 			</array>
 		</dict>
@@ -145,11 +113,8 @@
 	<dict>
 		<key>Language</key>
 		<string>en:0</string>
-		<key>Mouse</key>
-		<dict>
-			<key>Enabled</key>
-			<true/>
-		</dict>
+		<key>Theme</key>
+		<string>OSS</string>
 		<key>Scan</key>
 		<dict>
 			<key>Entries</key>
@@ -159,8 +124,6 @@
 			<key>Tool</key>
 			<true/>
 		</dict>
-		<key>Theme</key>
-		<string>OSS</string>
 	</dict>
 	<key>Graphics</key>
 	<dict>
@@ -176,14 +139,46 @@
 	</dict>
 	<key>KernelAndKextPatches</key>
 	<dict>
-		<key>ForceKextsToLoad</key>
-		<array>
-			<string>\System\Library\Extensions\IOUSBHostFamily.kext</string>
-			<string>\System\Library\Extensions\IOUSBHostFamily.kext\Contents\PlugIns\AppleUSBHub.kext</string>
-			<string>\System\Library\Extensions\IOUSBHostFamily.kext\Contents\PlugIns\AppleUSBXHCIPCI.kext</string>
-		</array>
 		<key>KextsToPatch</key>
 		<array>
+			<dict>
+				<key>Comment</key>
+				<string>Replace iMac12,2 with iMac13,2</string>
+				<key>Disabled</key>
+				<false/>
+				<key>Name</key>
+				<string>com.apple.driver.AirPort.Atheros40</string>
+				<key>Find</key>
+				<data>aU1hYzEyLDIK</data>
+				<key>Replace</key>
+				<data>aU1hYzEzLDIK</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Change regdomain to US-FCC (1 of 2)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>MatchOS</key>
+				<string>10.12.x</string>
+				<key>Name</key>
+				<string>com.apple.driver.AirPort.Atheros40</string>
+				<key>Find</key>
+				<data>g7sgCAAABnRk</data>
+				<key>Replace</key>
+				<data>g7sgCAAABus2</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Change regdomain to US-FCC (2 of 2)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>Name</key>
+				<string>com.apple.driver.AirPort.Atheros40</string>
+				<key>Find</key>
+				<data>ZseDFgkAAEMAZrhDAA==</data>
+				<key>Replace</key>
+				<data>ZseDFgkAAAAAZrgAAA==</data>
+			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>Disable default hub port injectors</string>

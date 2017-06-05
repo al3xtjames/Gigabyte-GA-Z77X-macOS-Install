@@ -83,11 +83,8 @@
 	<dict>
 		<key>Language</key>
 		<string>en:0</string>
-		<key>Mouse</key>
-		<dict>
-			<key>Enabled</key>
-			<true/>
-		</dict>
+		<key>Theme</key>
+		<string>OSS</string>
 		<key>Scan</key>
 		<dict>
 			<key>Entries</key>
@@ -97,8 +94,6 @@
 			<key>Tool</key>
 			<true/>
 		</dict>
-		<key>Theme</key>
-		<string>OSS</string>
 	</dict>
 	<key>Graphics</key>
 	<dict>
