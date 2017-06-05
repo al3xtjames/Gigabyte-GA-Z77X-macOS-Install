@@ -1,9 +1,9 @@
 [submodule "acpi"]
 	path = acpi
 	url = https://github.com/theracermaster/hack-acpi
-[submodule "tools/MacGen"]
-	path = tools/MacGen
-	url = https://github.com/theracermaster/MacGen
 [submodule "efi/themes/OSS"]
 	path = efi/themes/OSS
 	url = https://github.com/theracermaster/clover-theme-oss
+[submodule "tools/MacGen"]
+	path = tools/MacGen
+	url = https://github.com/theracermaster/MacGen
