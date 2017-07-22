@@ -36,16 +36,34 @@
 			<key>Generate</key>
 			<dict>
 				<key>CStates</key>
-				<false/>
+				<true/>
 				<key>PStates</key>
-				<false/>
+				<true/>
 			</dict>
+			<key>PluginType</key>
+			<integer>0</integer>
 		</dict>
 		<key>DropTables</key>
 		<array>
 			<dict>
 				<key>Signature</key>
 				<string>DMAR</string>
+			</dict>
+			<dict>
+				<key>Signature</key>
+				<string>MATS</string>
+			</dict>
+			<dict>
+				<key>Signature</key>
+				<string>SSDT</string>
+				<key>TableId</key>
+				<string>Cpu0Ist</string>
+			</dict>
+			<dict>
+				<key>Signature</key>
+				<string>SSDT</string>
+				<key>TableId</key>
+				<string>CpuPm</string>
 			</dict>
 		</array>
 	</dict>
@@ -129,7 +147,7 @@
 				<key>Disabled</key>
 				<false/>
 				<key>MatchOS</key>
-				<string>10.12.x</string>
+				<string>10.12.x,10.13.x</string>
 				<key>Name</key>
 				<string>com.apple.driver.AirPort.Atheros40</string>
 				<key>Find</key>
@@ -155,7 +173,7 @@
 				<key>Disabled</key>
 				<false/>
 				<key>MatchOS</key>
-				<string>10.11.x,10.12.x</string>
+				<string>10.12.x,10.13.x</string>
 				<key>Name</key>
 				<string>com.apple.driver.usb.AppleUSBHub</string>
 				<key>Find</key>
@@ -169,7 +187,7 @@
 				<key>Disabled</key>
 				<false/>
 				<key>MatchOS</key>
-				<string>10.11.x,10.12.x</string>
+				<string>10.12.x,10.13.x</string>
 				<key>Name</key>
 				<string>com.apple.driver.usb.AppleUSBXHCIPCI</string>
 				<key>Find</key>
@@ -188,33 +206,6 @@
 				<data>QVBQTEUgU1NE</data>
 				<key>Replace</key>
 				<data>AAAAAAAAAAAA</data>
-			</dict>
-		</array>
-		<key>KernelToPatch</key>
-		<array>
-			<dict>
-				<key>Comment</key>
-				<string>Enable Sandy Bridge XCPM (credit: Pike R. Alpha)</string>
-				<key>Disabled</key>
-				<false/>
-				<key>MatchOS</key>
-				<string>10.12.x</string>
-				<key>Find</key>
-				<data>g8PEg/si</data>
-				<key>Replace</key>
-				<data>g8PWg/si</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>Disable XCPM PKG Scope MSRs (credit: Pike R. Alpha)</string>
-				<key>Disabled</key>
-				<false/>
-				<key>MatchOS</key>
-				<string>10.12.x</string>
-				<key>Find</key>
-				<data>vgcAAAAx0uiU/P//</data>
-				<key>Replace</key>
-				<data>vgcAAAAx0pCQkJCQ</data>
 			</dict>
 		</array>
 	</dict>

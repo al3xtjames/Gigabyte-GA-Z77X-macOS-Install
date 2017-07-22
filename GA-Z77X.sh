@@ -5,7 +5,7 @@ set -e
 set -u
 
 # GA-Z77X.sh script version
-gScriptVersion="2.0.8"
+gScriptVersion="2.0.9"
 
 # Styles
 gStyleReset="\e[0m"
@@ -85,7 +85,7 @@ function git_update()
 function check_macos_version()
 {
 	case $gOSVersion in
-		10.12)
+		10.12|10.13)
 			;; # Supported OS version detected, so do nothing
 		*)
 			print_error "macOS $gOSVersion is unsupported by this script!"
@@ -139,22 +139,10 @@ function check_root()
 
 function check_device_presence()
 {
+	# $1 is the vendor ID
+	# $2 is the device ID
 	# Look for a PCI device in bdmesg
 	"$gRepo/tools/bdmesg" | grep "$1 $2"
-}
-
-# Credit to RehabMan
-function replace_plist_dict()
-{
-	# $1 is path to replace
-	if [ $gCoreBridgeType -eq 3 ]; then
-		/usr/libexec/PlistBuddy -x -c "Print \"$1\"" "$gRepo/config/config_main_ivy.plist" > /tmp/org_rehabman_node.plist
-	else
-		/usr/libexec/PlistBuddy -x -c "Print \"$1\"" "$gRepo/config/config_main_sandy.plist" > /tmp/org_rehabman_node.plist
-	fi
-	/usr/libexec/PlistBuddy -c "Delete \"$1\"" "$gEFIMount/EFI/CLOVER/config.plist"
-	/usr/libexec/PlistBuddy -c "Add \"$1\" dict" "$gEFIMount/EFI/CLOVER/config.plist"
-	/usr/libexec/PlistBuddy -c "Merge /tmp/org_rehabman_node.plist \"$1\"" "$gEFIMount/EFI/CLOVER/config.plist"
 }
 
 function detect_atheros_nic()
@@ -228,6 +216,32 @@ function detect_thunderbolt()
 	fi
 }
 
+function gen_clover_config()
+{
+	# $1 is the output path
+	cp "$gRepo/config/config_main.plist" "$1"
+
+	if [ $gCoreBridgeType -eq 3 ]; then
+		/usr/libexec/PlistBuddy -c "Set ':ACPI:SSDT:PluginType' 1" "$1"
+		/usr/libexec/PlistBuddy -c "Merge $gRepo/config/config_patches_ivy.plist :KernelAndKextPatches" "$1"
+	fi
+}
+
+# Credit to RehabMan
+function update_clover_config_dict()
+{
+	# $1 is the dict to replace
+	# $2 is the output path
+	tmpConfig=$(mktemp)
+	gen_clover_config "$tmpConfig"
+
+	/usr/libexec/PlistBuddy -c "Delete \"$1\"" "$2"
+	/usr/libexec/PlistBuddy -c "Add \"$1\" dict" "$2"
+	/usr/libexec/PlistBuddy -c "Merge $tmpConfig \"$1\"" "$2"
+
+	rm -rf "$tmpConfig"
+}
+
 function install()
 {
 	# Mount the EFI system partition
@@ -278,26 +292,27 @@ function install()
 	cp -R "$gRepo/efi/tools" "$gEFIMount/EFI/CLOVER"
 
 	if [ $1 -eq 1 ]; then
-		# Update config.plist
-		replace_plist_dict ":ACPI"
-		replace_plist_dict ":Boot"
-		replace_plist_dict ":Devices"
-		replace_plist_dict ":KernelAndKextPatches"
-		replace_plist_dict ":SystemParameters"
+		# Update the current config.plist
+		printf "%bUpdating config.plist%b:\n" $gStyleBold $gStyleReset
+		update_clover_config_dict ":ACPI" "$gEFIMount/EFI/CLOVER/config.plist"
+		echo " - Replaced config.plist:ACPI"
+		update_clover_config_dict ":Boot" "$gEFIMount/EFI/CLOVER/config.plist"
+		echo " - Replaced config.plist:Boot"
+		update_clover_config_dict ":Devices" "$gEFIMount/EFI/CLOVER/config.plist"
+		echo " - Replaced config.plist:Devices"
+		update_clover_config_dict ":KernelAndKextPatches" "$gEFIMount/EFI/CLOVER/config.plist"
+		echo " - Replaced config.plist:KernelAndKextPatches"
+		update_clover_config_dict ":SystemParameters" "$gEFIMount/EFI/CLOVER/config.plist"
+		echo " - Replaced config.plist:SystemParameters"
 	else
-		# Generate config.plist
-		if [ $gCoreBridgeType -eq 3 ]; then
-			cp "$gRepo/config/config_main_ivy.plist" "$gEFIMount/EFI/CLOVER/config.plist"
-		else
-			cp "$gRepo/config/config_main_sandy.plist" "$gEFIMount/EFI/CLOVER/config.plist"
-		fi
+		# Generate a new config.plist
+		gen_clover_config "$gEFIMount/EFI/CLOVER/config.plist"
 		# Set the HDA layout ID
 		/usr/libexec/PlistBuddy -c "Set ':Devices:Audio:Inject' $gLayoutID" "$gEFIMount/EFI/CLOVER/config.plist"
 		# Generate the SMBIOS data
 		printf "%bGenerating SMBIOS data%b:\n" $gStyleBold $gStyleReset
-		export MG_DEBUG=0
-		local serialNumber=$("$gRepo/tools/MacGen/mg-serial" $gProductName)
-		local mlbSerialNumber=$("$gRepo/tools/MacGen/mg-mlb-serial" $gProductName $serialNumber)
+		local serialNumber=$(MG_DEBUG=0 "$gRepo/tools/MacGen/mg-serial" $gProductName)
+		local mlbSerialNumber=$(MG_DEBUG=0 "$gRepo/tools/MacGen/mg-mlb-serial" $gProductName $serialNumber)
 		local smUUID=$(uuidgen)
 		echo " - Product Name: $gProductName"
 		echo " - Serial Number: $serialNumber"
@@ -315,7 +330,7 @@ function install()
 
 	# Install mandatory EFI drivers
 	if [ $1 -eq 1 ]; then
-		rm -rf "$gEFIMount/EFI/CLOVER/drivers64uefi" > /dev/null
+		rm -rf "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	fi
 	mkdir -p "$gEFIMount/EFI/CLOVER/drivers64uefi"
 	cp "$gRepo/efi/drivers/AppleImageCodec.efi" "$gEFIMount/EFI/CLOVER/drivers64uefi"
@@ -335,8 +350,8 @@ function install()
 	fi
 
 	cp -R "$gRepo/kexts/AppleALC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
-	cp -R "$gRepo/kexts/AppleEmulator.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/CoreDisplayFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/FakeSMC.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/CPUSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/GPUSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/HibernationFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
@@ -355,11 +370,13 @@ function install()
 	detect_thunderbolt
 
 	# Install X86PlatformPlugin frequency vector injector
-	echo " - XNU CPU Power Management enabled, installing 1155PlatformPlugin..."
-	sudo cp -R "$gRepo/kexts/1155PlatformPlugin.kext" /Library/Extensions
-	sudo chmod -R 755 /Library/Extensions/1155PlatformPlugin.kext
-	sudo chown -R 0:0 /Library/Extensions/1155PlatformPlugin.kext
-	sudo touch /System/Library/Extensions
+	if [ $gCoreBridgeType -eq 3 ]; then
+		echo " - XNU CPU Power Management enabled, installing IvyPlatformPlugin..."
+		sudo cp -R "$gRepo/kexts/IvyPlatformPlugin.kext" /Library/Extensions
+		sudo chmod -R 755 /Library/Extensions/IvyPlatformPlugin.kext
+		sudo chown -R 0:0 /Library/Extensions/IvyPlatformPlugin.kext
+		sudo touch /System/Library/Extensions
+	fi
 
 	printf "\n%bPress enter to continue...%b\n" $gStyleBold $gStyleReset && read
 	if [ "$1" -eq 1 ]; then

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>KernelAndKextPatches</key>
+	<dict>
+		<key>KernelToPatch</key>
+		<array>
+			<dict>
+				<key>Comment</key>
+				<string>Enable Ivy Bridge XCPM (credit: Pike R. Alpha)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>MatchOS</key>
+				<string>10.12.x</string>
+				<key>Find</key>
+				<data>g8PEg/si</data>
+				<key>Replace</key>
+				<data>g8PGg/si</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Enable Ivy Bridge XCPM (credit: Pike R. Alpha &amp; Sherlocks)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>MatchOS</key>
+				<string>10.12.6</string>
+				<key>Find</key>
+				<data>jUPEg/gi</data>
+				<key>Replace</key>
+				<data>jUPGg/gi</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Enable Ivy Bridge XCPM (credit: Pike R. Alpha, PMheart)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>MatchOS</key>
+				<string>10.13.x</string>
+				<key>Find</key>
+				<data>idgExDwidyI=</data>
+				<key>Replace</key>
+				<data>idgExjwidyI=</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Disable XCPM PKG Scope MSRs (credit: Pike R. Alpha)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>MatchOS</key>
+				<string>10.12.x</string>
+				<key>Find</key>
+				<data>vgcAAAAx0uiU/P//</data>
+				<key>Replace</key>
+				<data>vgcAAAAx0pCQkJCQ</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Disable XCPM PKG Scope MSRs (credit: Pike R. Alpha)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>MatchOS</key>
+				<string>10.13.x</string>
+				<key>Find</key>
+				<data>vgcAAAAx0uiP/P//</data>
+				<key>Replace</key>
+				<data>vgcAAAAx0pCQkJCQ</data>
+			</dict>
+		</array>
+	</dict>
+</dict>
+</plist>
