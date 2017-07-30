@@ -5,7 +5,7 @@ set -e
 set -u
 
 # GA-Z77X.sh script version
-gScriptVersion="2.0.9"
+gScriptVersion="2.1.0"
 
 # Styles
 gStyleReset="\e[0m"
@@ -222,8 +222,15 @@ function gen_clover_config()
 	cp "$gRepo/config/config_main.plist" "$1"
 
 	if [ $gCoreBridgeType -eq 3 ]; then
+		# Inject plugin-type to load X86PlatformPlugin on Ivy Bridge CPUs
 		/usr/libexec/PlistBuddy -c "Set ':ACPI:SSDT:PluginType' 1" "$1"
-		/usr/libexec/PlistBuddy -c "Merge $gRepo/config/config_patches_ivy.plist :KernelAndKextPatches" "$1"
+		# Enable kernel patches to enable XCPM on Ivy Bridge CPUs
+		/usr/libexec/PlistBuddy -c "Set ':KernelAndKextPatches:KernelToPatch:0:Disabled' bool false" "$1"
+		/usr/libexec/PlistBuddy -c "Set ':KernelAndKextPatches:KernelToPatch:1:Disabled' bool false" "$1"
+		/usr/libexec/PlistBuddy -c "Set ':KernelAndKextPatches:KernelToPatch:2:Disabled' bool false" "$1"
+		/usr/libexec/PlistBuddy -c "Set ':KernelAndKextPatches:KernelToPatch:3:Disabled' bool false" "$1"
+		/usr/libexec/PlistBuddy -c "Set ':KernelAndKextPatches:KernelToPatch:4:Disabled' bool false" "$1"
+
 	fi
 }
 
@@ -358,7 +365,9 @@ function install()
 	cp -R "$gRepo/kexts/IntelGraphicsFixup.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/Lilu.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/LPCSensors.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/NVWebDriverLibValFix.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 	cp -R "$gRepo/kexts/Shiki.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
+	cp -R "$gRepo/kexts/WhateverGreen.kext" "$gEFIMount/EFI/CLOVER/kexts/Other"
 
 	# Install kexts/EFI drivers for detected hardware
 	detect_atheros_nic

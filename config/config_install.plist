@@ -64,12 +64,7 @@
 		<key>SSDT</key>
 		<dict>
 			<key>Generate</key>
-			<dict>
-				<key>CStates</key>
-				<false/>
-				<key>PStates</key>
-				<false/>
-			</dict>
+			<false/>
 		</dict>
 		<key>DropTables</key>
 		<array>
@@ -238,8 +233,6 @@
 	<dict>
 		<key>ProductName</key>
 		<string>iMac13,2</string>
-		<key>PlatformFeature</key>
-		<integer>1</integer>
 		<key>Trust</key>
 		<true/>
 	</dict>

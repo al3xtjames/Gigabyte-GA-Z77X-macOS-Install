@@ -34,12 +34,7 @@
 		<key>SSDT</key>
 		<dict>
 			<key>Generate</key>
-			<dict>
-				<key>CStates</key>
-				<true/>
-				<key>PStates</key>
-				<true/>
-			</dict>
+			<true/>
 			<key>PluginType</key>
 			<integer>0</integer>
 		</dict>
@@ -127,6 +122,69 @@
 	</dict>
 	<key>KernelAndKextPatches</key>
 	<dict>
+		<key>KernelToPatch</key>
+		<array>
+			<dict>
+				<key>Comment</key>
+				<string>Enable Ivy Bridge XCPM (credit: Pike R. Alpha)</string>
+				<key>Disabled</key>
+				<true/>
+				<key>Find</key>
+				<data>g8PEg/si</data>
+				<key>MatchOS</key>
+				<string>10.12.x</string>
+				<key>Replace</key>
+				<data>g8PGg/si</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Enable Ivy Bridge XCPM (credit: Pike R. Alpha &amp; Sherlocks)</string>
+				<key>Disabled</key>
+				<true/>
+				<key>Find</key>
+				<data>jUPEg/gi</data>
+				<key>MatchOS</key>
+				<string>10.12.6</string>
+				<key>Replace</key>
+				<data>jUPGg/gi</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Enable Ivy Bridge XCPM (credit: Pike R. Alpha &amp; PMheart)</string>
+				<key>Disabled</key>
+				<true/>
+				<key>Find</key>
+				<data>idgExDwidyI=</data>
+				<key>MatchOS</key>
+				<string>10.13.x</string>
+				<key>Replace</key>
+				<data>idgExjwidyI=</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Disable XCPM PKG Scope MSRs (credit: Pike R. Alpha)</string>
+				<key>Disabled</key>
+				<true/>
+				<key>Find</key>
+				<data>vgcAAAAx0uiU/P//</data>
+				<key>MatchOS</key>
+				<string>10.12.x</string>
+				<key>Replace</key>
+				<data>vgcAAAAx0pCQkJCQ</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Disable XCPM PKG Scope MSRs (credit: Pike R. Alpha)</string>
+				<key>Disabled</key>
+				<true/>
+				<key>Find</key>
+				<data>vgcAAAAx0uiP/P//</data>
+				<key>MatchOS</key>
+				<string>10.13.x</string>
+				<key>Replace</key>
+				<data>vgcAAAAx0pCQkJCQ</data>
+			</dict>
+		</array>
 		<key>KextsToPatch</key>
 		<array>
 			<dict>
@@ -220,8 +278,6 @@
 	<dict>
 		<key>ProductName</key>
 		<string>iMac13,2</string>
-		<key>PlatformFeature</key>
-		<integer>1</integer>
 		<key>SerialNumber</key>
 		<string></string>
 		<key>SmUUID</key>
